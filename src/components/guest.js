@@ -1,5 +1,6 @@
 import React from 'react'
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom'
+import Settings from '../guest page/mesSettings/settings'
 import NavGuest from '../guest page/navGuest'
 import AddRéclamation from '../guest page/Réclamations/addRéclamation'
 import EditRéclamation from '../guest page/Réclamations/editRéclamation'
@@ -17,6 +18,8 @@ function Guest() {
                 <div style={{paddingTop : "5%"}}>
                     <Switch>
                         <Route exact path="/réclamation" component={Réclamations} />
+
+                        <Route exact path="/Setting" component={Settings} />
 
 
                         <Route exact path="/add-réclamation" component={AddRéclamation} />

@@ -2,8 +2,8 @@ import React from 'react'
 
 function ListeRéclamation() {
     return (
-        <div style={{top : "90px"}}>
-            <h1 style={{marginLeft : "200px"}}>Lister Les Réclamations de la Résidence </h1><br/><br/><br/>
+        <div style={{top : "90px", paddingTop : "120px"}}>
+            <h1 style={{marginLeft : "200px"}}>Lister Les Réclamations de la Résidence </h1><br/><br/>
             <div className="container col-md-8 col-md-offset-2"><br/><br/>
                 <div className="container col-md-10 col-md-offset-1">
                     <div className="row">

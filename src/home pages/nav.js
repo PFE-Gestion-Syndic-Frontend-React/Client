@@ -1,41 +1,71 @@
-import React from 'react'
-import {Link} from 'react-router-dom'
+import React, { useState } from 'react'
+import {Link, useHistory, withRouter} from 'react-router-dom'
+
+
+import { makeStyles } from '@material-ui/core/styles';
+import { AppBar, Tab, Tabs, Paper, MenuItem, Menu, Button, Avatar } from '@material-ui/core';
+
+const useStyles = makeStyles({
+    root: {
+      flexGrow: 1,
+      maxWidth: 1600,
+    },
+  });
 
 function Nav() {
+    const classes = useStyles();
+    const [value, setValue] = React.useState(0);
+    const [anchorEl, setAnchorEl] = useState(null)
+    let Name = localStorage.getItem('Name')
+    let photo = localStorage.getItem('photo')
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
+
+    /*const logout = () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('id')
+    }*/
+
+    const handleClick = (e) => {
+        setAnchorEl(e.currentTarget);
+    }
+
+    const handleClose = () => {
+        setAnchorEl(null)
+    }
+
+    const history = useHistory()
+    const logout = () => {
+        setAnchorEl(null)
+
+        localStorage.clear()
+        history.push('/')
+    }
+
     return (
-        <div>
-            <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                <div className="container-fluid">
-                    <p className="navbar-brand" >GSC</p>
-                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span className="navbar-toggler-icon"></span>
-                    </button>
-                    <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li className="nav-item">
-                                <Link className="nav-link active" aria-current="page" to="/dépenses">Dépenses</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/cotisations">Cotisations</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/annonces">Annonces</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/réclamations">Réclamations</Link>
-                            </li>
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/comptes">Comptes</Link>
-                            </li>
-                            <li className="nav-item float-end">
-                                <Link className="nav-link " to="/settings">Mon Compte</Link>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
+        <div> 
+            <Paper square className={classes.root}>
+                <AppBar color="transparent">
+                    <Tabs value={value} onChange={handleChange} variant="fullWidth" indicatorColor="primary" textColor="primary">
+                        <Tab label="GSC" component={Link} to="/home" />
+                        <Tab label="Dépense" component={Link} to="/dépenses" />
+                        <Tab label="Cotisation" component={Link} to="/cotisations" />
+                        <Tab label="Annonce" component={Link} to="/annonces" />
+                        <Tab label="Réclamation" component={Link} to="/réclamations" />
+                        <Tab label="Comptes" component={Link} to="/comptes" />
+                        <Tab label="Logement" component={Link} to="/logement" />
+                        <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>{photo && <Avatar alt="" src={`/public/profile img/${photo}`} style={{width : "35px"}} />} { Name && Name } </Button>
+                        <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose} >
+                            <MenuItem onClick={handleClose}>Profile</MenuItem>
+                            <MenuItem onClick={handleClose} component={Link} to="/settings"> Mon Compte</MenuItem>
+                            <MenuItem onClick={logout} >Logout</MenuItem>
+                        </Menu>
+                    </Tabs>
+                </AppBar>
+            </Paper>  
         </div>
     )
 }
 
-export default Nav
+export default withRouter(Nav) 

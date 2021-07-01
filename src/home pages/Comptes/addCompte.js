@@ -1,66 +1,78 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import {Link} from 'react-router-dom'
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+
+const useStyles = makeStyles((theme) => ({
+    
+    textField: {
+      marginLeft: theme.spacing(1),
+      marginRight: theme.spacing(1),
+      marginTop : theme.spacing(1),
+      textAlign : 'center',
+      width: "95%",
+    },
+    root : {
+        '& > *': {
+            margin: theme.spacing(1),
+            width: 325,
+        },
+    },
+    formControl: {
+        margin: theme.spacing(1),
+        width: 320,
+    },
+  }));
+
 
 function AddCompte(props) {
-
+    const classes = useStyles()
     const [nom, setNom] = useState('')
     const [prenom, setPrenom] = useState('')
     const [email, setEmail] = useState('')
     const [tele, setTele] = useState('')
-    const [role, setRole] = useState('Copropriétaire')
+    const [role, setRole] = useState('')
     const [fonc, setFonc] = useState('')
-    const [file, setFile] = useState('')
-    const [fileName, setFileName] = useState('')
-    //  const [up, setup] = useState({})
     const [msg, setMsg] = useState('')
 
-    const change = e => { 
-        setFile(e.target.files[0])
-        setFileName(e.target.files[0].name)
-    }
-
+    useEffect(() => {
+        if(email){
+            axios.get("http://localhost:5001/users/byEmail/" + email)
+            .then((response) => {
+                if(response.length > 0){
+                    console.log("coool")
+                    console.log(response)
+                    if(response === "Déjà Utilisé !"){
+                        setMsg("E-mail est déjà utilisé !!!")
+                    }
+                    else if(response === "Cooool"){
+                        setMsg("")
+                    }
+                }
+            })
+            .catch(() => {
+                console.log("err")
+            })
+        }
+    }, [email]) 
+    
+    
     const createAccount =  () => {
-
-        /*const data = new FormData()
-        data.append("file", photo)
-        try{
-            const res = await axios.post("http://localhost:5001/up", data, { headers : { 'Content-Type' : 'multipart/form-data' } })
-            const {fileName, filePath} = res.data
-            setup({fileName, filePath})
-        }
-        catch(err){
-            if(err.response.status === 500){
-                console.log("Prob")
+        const datasend = {nom : nom, prenom : prenom, email : email, tele : tele, role : role, fonc : fonc}
+        axios.post("http://localhost:5001/users/new", datasend)
+        .then((resolve) => {
+            if(resolve.data.message === "Inserted"){
+                setMsg("Le Compte est enregistré avec Success")
+                props.history.push('/comptes')
             }
-            else{
-                console.log(err.response.data.msg)
+            else if(resolve.data.messageErr === "E-mail Already Used !"){
+                setMsg("E-mail est déjà utilisé !!!")
             }
-        }
-
-        if(up !== null && up !== "")
-        {*/
-            if(nom !== "" && prenom !=="" && email !== "" && tele !== "" && role !== "" && fonc !== ""){
-                const datasend = {nom : nom, prenom : prenom, email : email, tele : tele, role : role, fonc : fonc}
-                axios.post("http://localhost:5001/users/new", datasend)
-                .then((resolve) => {
-                    if(resolve.data.message === "Inserted"){
-                        setMsg("Le Compte est enregistré avec Success")
-                        props.history.push('/all/comptes')
-                    }
-                    else if(resolve.data.messageErr === "E-mail Already Used !"){
-                        setMsg("E-mail est déjà utilisé !!")
-                    }
-                })
-                .catch((err) => console.log(err))
-            }
-            else{
-                setMsg("Champs Obligatoires !")
-            }
-            console.log(file)
-            console.log(fileName)
-        //}
+        })
+        .catch((err) => console.log(err))
     }
+
 
     return (
         <div className="container col-md-6 col-md-offset-3" style={{paddingTop : "90px"}}>
@@ -74,7 +86,7 @@ function AddCompte(props) {
                     </div>
                     <div>
                         {
-                            msg === "E-mail est déjà utilisé !!" && <div className="alert alert-danger text-center">{msg}</div>
+                            msg === "E-mail est déjà utilisé !!!" && <div className="alert alert-danger text-center">{msg}</div>
                         }
                     </div>
                     <div>
@@ -84,42 +96,44 @@ function AddCompte(props) {
                     </div>
                     <div className="row">
                         <div className="col-md-6">
-                            <input type="text" className="form-control" placeholder="Votre Nom" onChange={(e) => setNom(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Nom"  maxLength="30" className={classes.root} required onChange={e => setNom(e.target.value)} />
                         </div>
                         <div className="col-md-6">
-                            <input type="text" className="form-control" placeholder="Votre Prénom" onChange={(e) => setPrenom(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Prénom"  maxLength="30" className={classes.root} required onChange={e => setPrenom(e.target.value)} />
                         </div>
                     </div><br/>
-                    <div className="row">
+                    <div className="row ">
                         <div className="col-md-6">
-                            <input type="email" className="form-control" placeholder="Votre E-mail" onChange={e => setEmail(e.target.value)}  />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Adresse E-mail"  maxLength="50" className={classes.root} required onChange={e => setEmail(e.target.value)} />
                         </div>
                         <div className="col-md-6">
-                            <input type="text" className="form-control" placeholder="Votre Téléphone" onChange={e => setTele(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Numéro de Téléphone"  maxLength="10" className={classes.root} required onChange={e => setTele(e.target.value)} />
                         </div>
                     </div><br/>
-                    <div className="row">
-                        <div className="col-md-2">
-                            <label style={{fontSize : "20px"}}>Role : </label>
-                        </div>
-                        <div className="col-md-4">
-                           <select className="form-control" onChange={e=> setRole(e.target.value)}>
-                               <option value="Copropriétaire" >Copropriétaire</option>
-                               <option value="Administrateur">Administrateur</option>
-                           </select>
-                        </div>
-                        <div className="col-md-6">
-                        <input type="text" className="form-control" placeholder="Votre Fonction au sein du Syndicat..." onChange={e => setFonc(e.target.value)} />
-                        </div>
+                    <div className="row container">
+                        <div className="col-md-4"><label style={{fontSize : "15px"}}>Role : </label></div>
+                        <div className="col-md-4"><input type="radio" name="role" value="Administrateur"  onChange={e => setRole(e.target.value)} />  Administrateur</div>
+                        <div className="col-md-4"><input type="radio" name="role" value="Copropriétaire"  onChange={e => setRole(e.target.value)} />  Copropriétaire</div>
                     </div><br/>
-                    <div className="row">
-                        <div className="col-md-6">
-                            <label style={{fontSize : "20px"}}>Sélectionner Votre Avatare : </label>
+                    {
+                        role === "Copropriétaire" && 
+                        <div className="row container">
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Fonction au sein du Syndicat"  maxLength="30" className={classes.root} defaultValue={role} required onChange={e => setFonc(e.target.value)} />
                         </div>
-                        <div className="col-md-6">
-                            <input type="file" accept=".png" className="form-control" onChange={change} />
+                    }
+                    {
+                        role === "Administrateur" &&
+                        <div className="row container">
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Fonction au sein du Syndicat"  maxLength="30" className={classes.root} required onChange={e => setFonc(e.target.value)} />
                         </div>
-                    </div><br /><br/>
+                    }
+                    {
+                        role === "" &&
+                        <div className="row container">
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Fonction au sein du Syndicat"  maxLength="30" className={classes.root} required onChange={e => setFonc(e.target.value)} />
+                        </div>
+                    }
+                    <br/>
                     <div className="row">
                         <div className="col-md-6">
                             <Link to="/comptes" className="btn btn-outline-danger form-control">Annuler</Link>

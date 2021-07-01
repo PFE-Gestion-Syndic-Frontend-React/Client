@@ -1,6 +1,53 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import axios from 'axios';
+
+
+const useStyles = makeStyles((theme) => ({
+    container: {
+      display: 'flex',
+      flexWrap: 'wrap',
+    },
+    textField: {
+      
+      marginTop : theme.spacing(1),
+      width: 700,
+    },
+    root : {
+        '& > *': {
+            margin: theme.spacing(1),
+            width: 320,
+        },
+    },
+  }));
+
 
 function Settings() {
+    const classes = useStyles()
+    const [compte, setCompte] = useState('')
+    const [msg, setMsg] = useState('')
+
+    const id = localStorage.getItem('id')
+    useEffect(() => {
+        if(id !== ""){
+            axios.get(`http://localhost:5001/users/user/${id}`)
+            .then((response) => {
+                if(response.data[0]){
+                    console.log(response.data[0])
+                    setCompte(response.data[0])
+                    setMsg("ok")
+                }
+            })
+            .catch(() => {
+
+            })
+        }
+    }, [id])
+
+    const updateMonCompte = () => {
+        
+    }
     return (
         <div className="container col-md-6 col-md-offset-3" style={{paddingTop : "90px"}}>
             <div className="card">
@@ -8,40 +55,26 @@ function Settings() {
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-6">
-                            <input type="text" className="form-control" placeholder="Votre Nom" />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Nom" multiline={true} className={classes.root} defaultValue={compte.NomCompte} required maxLength="30"  />
                         </div>
                         <div className="col-md-6">
-                            <input type="text" className="form-control" placeholder="Votre Prénom" />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Prénom" multiline={true} className={classes.root} defaultValue={compte.PrenomCompte} required  maxLength="30" />
                         </div>
                     </div><br/>
                     <div className="row">
                         <div className="col-md-6">
-                            <input type="email" className="form-control" placeholder="Votre E-mail"  />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Adresse E-mail" multiline={true} className={classes.root} defaultValue={compte.EmailCompte} required type="email" maxLength="50" />
                         </div>
                         <div className="col-md-6">
-                            <input type="text" className="form-control" placeholder="Votre Téléphone" />
-                        </div>
-                    </div><br/>
-                    <div className="row">
-                        <div className="col-md-2">
-                            <label style={{fontSize : "15px", marginLeft : "5px"}}>Role : </label>
-                        </div>
-                        <div className="col-md-4">
-                           <select className="form-control" >
-                               <option value="Copropriétaire" >Copropriétaire</option>
-                               <option value="Administrateur">Administrateur</option>
-                           </select>
-                        </div>
-                        <div className="col-md-6">
-                        <input type="text" className="form-control" placeholder="Votre Fonction au sein du Syndicat..."  />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Numéro de Téléphone" multiline={true} className={classes.root} defaultValue={compte.telephone} required maxLength="10" />
                         </div>
                     </div><br/>
                     <div className="row">
                         <div className="col-md-6">
-                            <input type="password" placeholder="Ancien Password" className="form-control" />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Ancien Mot de Passe" className={classes.root} type="password" />
                         </div>
                         <div className="col-md-6">
-                            <input type="password" placeholder="Nouveau Password" className="form-control" />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Ancien Mot de Passe" className={classes.root} type="password" maxLength="20" />
                         </div>
                     </div><br />
                     <div className="row">
@@ -54,7 +87,7 @@ function Settings() {
                     </div><br /><br/>
                     <div className="row">
                         <div className="">
-                            <input type="submit" value="Enregistrer" className="form-control btn btn-primary" />
+                            <input type="submit" value="Enregistrer" onClick={updateMonCompte} className="form-control btn btn-primary" />
                         </div>
                     </div>
                 </div>

@@ -2,94 +2,107 @@ import React, {useState} from 'react'
 import {Link} from 'react-router-dom'
 import axios from 'axios'
 
+import Button from '@material-ui/core/Button';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import TextField from '@material-ui/core/TextField';
+import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container';
+import Alert from '@material-ui/lab/Alert';
 
+const useStyles = makeStyles((theme) => ({
+    alert :{
+        width : "100%",
+        '& > *': {
+            marginTop: theme.spacing(2),
+            marginBottom : theme.spacing(5),
+        },
+    },
+    root : {
+        '& > *': {
+            margin: theme.spacing(1),
+            width: '100%',
+        },
+    },
+    paper: {
+      marginTop: theme.spacing(8),
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+    avatar: {
+      margin: theme.spacing(1),
+      backgroundColor: theme.palette.secondary.main,
+    },
+    form: {
+      width: '100%', // Fix IE 11 issue.
+      marginTop: theme.spacing(1),
+    },
+    submit: {
+      margin: theme.spacing(3, 0, 2),
+    },
+  }));
 
 function Login(props) {
-
+    const classes = useStyles()
     const [email, setEmail] = useState('')
     const [pwd, setPassword] = useState('')
     const [msg, setMsg] = useState('')
 
     const connect = () => {
-        axios.post("http://localhost:5001/",  { withCredentials : true , email : email, pwd : pwd })
-        .then((resolve)=> {
-            if(email !== "" && pwd !== ""){
-                if(resolve){
-                    //console.log(resolve)
-                    if(resolve.data.msgErr){
-                        console.log(resolve.data.msgErr)
-                        setMsg("Password or Email is incorrect !")
-                    }
-                    console.log(resolve.data)
-                    if(resolve.data.data[0]){
-                        if(resolve.data.data[0].Role === "Administrateur"){
-                            localStorage.getItem(resolve.data.token)
-                            props.history.push('/home')
+        if(email !== "" && pwd !== ""){
+            axios.post("http://localhost:5001/",  { withCredentials : true , email : email, pwd : pwd })
+            .then((resolve)=> {
+                    if(resolve){
+                        if(resolve.data.msgErr){
+                            setMsg("Password or Email is incorrect !")
                         }
-                        else if(resolve.data.data[0].Role === "Copropriétaire"){
-                            localStorage.getItem(resolve.data.token)
-                            props.history.push('/acceuil')
+                        if(resolve.data.data[0] && resolve.data.token){
+                            localStorage.setItem("token",resolve.data.token)
+                            localStorage.setItem('id', resolve.data.data[0].NumCompte)
+                            localStorage.setItem('Name', resolve.data.data[0].NomCompte)
+                            localStorage.setItem('photo', resolve.data.data[0].photo)
+                            if(resolve.data.data[0].Role === "Administrateur" && localStorage.getItem("token")){
+                                props.history.push('/Home', {data : resolve.data.data[0]})
+                            }
+                            else if(resolve.data.data[0].Role === "Copropriétaire" && localStorage.getItem("token")){
+                                props.history.push('/acceuil', {data : resolve.data.data[0]})
+                            }
+                            else{
+                                props.history.push('/')
+                            }
                         }
                     }
-                }
-                else{
-                    setMsg("User does not Existe")
-                    console.log("User does not Existe")
-                }
-            }
-            else{
-                setMsg("All Field Required")
-                console.log("All Field Required")
-            }
-        })
-        .catch((err) => console.log(err))
+                    else{
+                        setMsg("User does not Existe")
+                    }
+                })
+            .catch((err) => console.log(err))
+        }
+        else{
+            setMsg("All Field Required")
+        }
     }
     return (
-        <div>
-            <div className="container col-md-4 col-md-offset-4" style={{paddingTop : '10%'}}>
-                <div className=" align-items-center" >
-                    <div className="card">
-                        <div>
-                            {msg === "Password or Email is incorrect !" && <div className="alert alert-danger text-center"><strong>Password ou l'E-mail est Incorrect !</strong> </div>}
-                        </div>
-                        <div>
-                        {msg === "All Field Required" && <div className="alert alert-danger text-center"><strong>Tous Les Champs Obligatoires</strong> </div>}
-                        </div>
-                        <div>
-                            {msg === "Authenticated" && <div className="alert alert-success text-center">Authenticated with Success</div>}
-                        </div>
-                        <div>
-                            {msg === "User does not Existe" && <div className="alert alert-danger text-center">{msg}</div>}
-                        </div>
-                        <div className="card-body">
-                            <h2 className="text-center">Authentication</h2><br/><br/>
-                            <div className="row">
-                                <div className="col-md-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" className="bi bi-envelope-fill" viewBox="0 0 16 16"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z"/></svg>
-                                </div>
-                                <div className="col-md-9">
-                                    <input type="email" placeholder="Tapez Votre E-mail" className="form-control"  required="required" value={email} onChange={(e) => setEmail(e.target.value)} />
-                                </div>
-                                <div className="col-ld-1"></div>
-                            </div><br />
-                            <div className="row">
-                                <div className="col-md-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" className="bi bi-shield-lock-fill" viewBox="0 0 16 16"><path fillRule="evenodd" d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.465 9.99a11.777 11.777 0 0 0 2.517 2.453c.386.273.744.482 1.048.625.28.132.581.24.829.24s.548-.108.829-.24a7.159 7.159 0 0 0 1.048-.625 11.775 11.775 0 0 0 2.517-2.453c1.678-2.195 3.061-5.513 2.465-9.99a1.541 1.541 0 0 0-1.044-1.263 62.467 62.467 0 0 0-2.887-.87C9.843.266 8.69 0 8 0zm0 5a1.5 1.5 0 0 1 .5 2.915l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99A1.5 1.5 0 0 1 8 5z"/></svg>                          </div>
-                                <div className="col-md-9">
-                                    <input type="password" className="form-control" placeholder="Votre Mot de Passe" required="required" value={pwd} onChange={(e) => setPassword(e.target.value)} />
-                                </div>
-                                <div className="col-md-1"></div>
-                            </div><br/><br/>
-                            <div>
-                                <input type="button" className="form-control btn btn-primary" onClick={connect} value="Login"  />
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <Link style={{textDecoration : "none", textAlign : "center", paddingLeft : "120px"}} to="/reset-password">Avez-Vous oublié votre mot de passe ?</Link>
+        <div style={{paddingTop : "10%"}}>
+            <Container component="main" maxWidth="xs">
+                <CssBaseline />
+                <div className={classes.paper}>
+                <div>{msg === "Password or Email is incorrect !" && <div className={classes.alert}><Alert severity="error">Password ou l'E-mail est Incorrect !</Alert></div>}</div>
+                <div>{msg === "All Field Required" && <div className={classes.alert}><Alert security="error"> Les Champs Obligatoires</Alert> </div>}</div>
+                <div>{msg === "User does not Existe" && <div className="alert alert-danger text-center" >{msg}</div>}</div>
+                    <div className={classes.root} noValidate>
+                        <TextField InputLabelProps={{ shrink: true,}} margin="normal" required fullWidth id="standard-basic" label="Email Address" name="email" autoComplete="email" autoFocus onChange={(e) => setEmail(e.target.value)} />
+                        <TextField InputLabelProps={{ shrink: true,}} margin="normal" required fullWidth name="password" label="Password" type="password" id="standard-basic" autoComplete="current-password" onChange={(e) => setPassword(e.target.value)} />
+                        <Button type="submit" fullWidth variant="contained" color="inherit" onClick={connect} className={classes.submit}> Login </Button>
+                        <Grid container style={{textAlign : "center"}}>
+                            <Grid item xs>
+                                <Link to="/reset-password" style={{textDecoration : "none"}} variant="body2"> Avez-Vous oublié votre mot de passe ? </Link>
+                            </Grid>
+                        </Grid>
                     </div>
                 </div>
-            </div>
+            </Container>                    
         </div>
     )
 }
