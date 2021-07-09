@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import {Link} from 'react-router-dom'
 import axios from 'axios'
-import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
+import { InputLabel, makeStyles, TextField, FormControl, Select, MenuItem } from '@material-ui/core';
+import { toast } from 'react-toastify';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -34,37 +31,38 @@ const useStyles = makeStyles((theme) => ({
 
 function AddLogement(props) {
     const classes = useStyles()
-    const [log, setLog] = useState('imm')
+    const [log, setLog] = useState('')
     const [ty, setTy] =useState('')
-    const [email, setEmail] = useState('')
+    const [num, setNum] = useState('')
     const [compte, setCompte] = useState([])
     const [msg, setMsg] = useState('')
     const [adr, setadr] = useState('')
 
+    console.log(msg)
     useEffect(() => {
-        if(email !== ""){
-            axios.get("http://localhost:5001/logements/byEmail/" + email)
-            .then((response) => {
-                //console.log(response)
-                if(response.data.length > 0){
-                    setCompte(response.data[0])
-                    //console.log(compte)
-                    setMsg("Founded")
-                }
-                else {
-                    setMsg("No Users")
-                    setCompte(response.data.msggg)
-                    //console.log("No User")
-                }
-            })
-            .catch(() => {
-                console.log("err")
-            })
-        }
-    }, [email])
+        axios.get("http://localhost:5001/logements/Coproprietaire/byEmail")
+        .then((response) => {
+            console.log(response)
+            if(response.data.length > 0){
+                setCompte(response.data)
+                //console.log(compte)
+                setMsg("Founded")
+            }
+            else {
+                setMsg("No Users")
+                setCompte(response.data.msggg)
+                console.log("No User")
+                toast.warn("Aucune Information !")
+            }
+        })
+        .catch(() => {
+            console.log("err")
+        })
+    }, [])
+
 
     const loger = () => {
-        const coproprietaire = compte.NumCompte
+        const coproprietaire = num
         if(adr !== "" && coproprietaire !== ""){
             if(log === "imm" && ty !== ""){
                 const refLog = log + " " + ty + " " + adr
@@ -74,13 +72,18 @@ function AddLogement(props) {
                         if(resolve.data.message === "Inserted"){
                             setMsg("Le Compte est enregistré avec Success")
                             props.history.push('/logement')
+                            toast.success("Le Logement est enregistré avec Succès")
                         }
-                        else if(resolve.data.messageErr === "E-mail Already Used !"){
-                            setMsg("E-mail est déjà utilisé !!")
+                        else if(resolve.data.messageErr === "le Logement est Déjà Inseré !"){
+                            setMsg("le Logement est Déjà existe !")
+                            toast.error("Le Logement est déjà Existe !")
                         }
                     })
-                    .catch(() => {
-
+                    .catch((err) => {
+                        if(err.mssg === "le Logement est Déjà Inseré !"){
+                            setMsg("le Logement est Déjà existe !")
+                            toast.error("Le Logement est déjà Existe !")
+                        }
                     })
             }
             else{
@@ -88,15 +91,31 @@ function AddLogement(props) {
                 const type = log
                 axios.post("http://localhost:5001/logements/new", {refLog : refLog, type : type, user : coproprietaire})
                     .then((resolve) => {
-
+                        if(resolve.data.message === "Inserted"){
+                            setMsg("Le Compte est enregistré avec Success")
+                            props.history.push('/logement')
+                            toast.success("Le Logement est enregistré avec Succès")
+                        }
+                        else if(resolve.data.messageErr === "le Logement est Déjà Inseré !"){
+                            setMsg("le Logement est Déjà existe !")
+                            toast.error("Le Logement est déjà Existe !")
+                        }
                     })
-                    .catch(() => {
-
+                    .catch((err) => {
+                        if(err.mssg === "le Logement est Déjà Inseré !"){
+                            setMsg("le Logement est Déjà existe !")
+                            toast.error("Le Logement est déjà Existe !")
+                        }
                     })
             }
             
         }
+        else{
+            setMsg("Champs Obligatoires")
+        }
     }
+
+
     return (
         <div className="container col-md-6 col-md-offset-3" style={{paddingTop : "90px"}}>
             <div className="card">
@@ -105,11 +124,11 @@ function AddLogement(props) {
                     <div className="row">
                         <div className="">
                             <FormControl className={classes.textField} style={{width : "100%"}} >
+                                <InputLabel shrink id="demo-simple-select-placeholder-label-label">Type de Logement</InputLabel>
                                 <Select onChange={e => setLog(e.target.value)} displayEmpty className={classes.textField} inputProps={{ 'aria-label': 'Without label' }} >
-                                    <MenuItem value="" disabled> Type du Logement </MenuItem>
-                                    <MenuItem value={"imm"}>Immeuble</MenuItem>
-                                    <MenuItem value={"M"}>Maison</MenuItem>
-                                    <MenuItem value={"V"}>Villa</MenuItem>
+                                    <MenuItem value="imm"> Immeuble </MenuItem>
+                                    <MenuItem value="M"> Maison </MenuItem>
+                                    <MenuItem value="V"> Villa </MenuItem>
                                 </Select>
                             </FormControl>
                         </div>
@@ -129,7 +148,18 @@ function AddLogement(props) {
                     </div><br/>
                     <div className="row">
                         <div>
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="l'Adresse E-mail du Copropriétaire" required className={classes.textField} onChange={e => setEmail(e.target.value)} />
+                            <FormControl required InputLabelProps={{ shrink: true,}}  id="standard-basic" label="l'Adresse E-mail du Copropriétaire" className={classes.textField} style={{width : "100%"}} >
+                                <InputLabel shrink id="demo-simple-select-placeholder-label-label">Le Copropriétaire</InputLabel>
+                                <Select onChange={e => setNum(e.target.value)} className={classes.textField}  >
+                                    {
+                                        compte.map((co) => {
+                                            return(
+                                                <MenuItem value={co.NumCompte}> {co.NomCompte} {co.PrenomCompte} </MenuItem>
+                                            )
+                                        })
+                                    }
+                                </Select>
+                            </FormControl>
                         </div>
                     </div><br/>
                 </div>
@@ -144,20 +174,6 @@ function AddLogement(props) {
                     </div>
                 </div>
             </div><br/>
-            {
-                msg === "Founded" && 
-                <div className="container col-md-8 col-md-offset-2">
-                    <div className="card bg-primary" key={compte.NumCompte} style={{borderRadius : "15px"}}>
-                        <div className="card-body">
-                            <div className="row">
-                                <h5> Nom & Prénom : <strong>{compte.NomCompte} {compte.PrenomCompte} </strong></h5>
-                                <h5> Téléphone : <strong>{compte.telephone} </strong></h5>
-                                <h5> E-mail : <strong>{compte.EmailCompte} </strong></h5>
-                            </div>
-                        </div>
-                    </div>     
-                </div>
-            }
         </div>
     )
 }

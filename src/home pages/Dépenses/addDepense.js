@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import {Link} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import axios from 'axios';
-import { Button } from '@material-ui/core';
+import { Button, MenuItem, Select, FormControl, TextField } from '@material-ui/core';
+import { toast } from 'react-toastify';
+
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -35,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
-function AddDepense() {
+function AddDepense(props) {
     const classes = useStyles();
     const [selectedDate, setSelectedDate] = useState('');
     const [typeDep, setTypeDep] = useState('')
@@ -45,7 +43,8 @@ function AddDepense() {
     const [categorie, setCategorie] = useState()
     const [mc, setMC] = useState('')
     const [msg, setMsg] = useState('')
-
+    const id = localStorage.getItem('id')
+    console.log(msg)
     useEffect(() => {
         axios.get("http://localhost:5001/depenses/categorie/all")
         .then((resolve) => {
@@ -58,40 +57,46 @@ function AddDepense() {
         })
     }, [])
 
-    const idstorage = localStorage.getItem('id')
     const EnregistrerDepense = () => {
-        const id = parseInt(idstorage)
-        if(id !== null){
+        if(id !== null && id !== undefined){
             if(typeDep !== "" && montant !== "" && fact !== "" && detail !== ""){
                 if(selectedDate !== ''){
-                    axios.post("http://localhost:5001/depenses/new", [id, typeDep, selectedDate, montant, fact, detail])
+                    const datasend = {id : id, typeDepense : typeDep, date : selectedDate, montant : montant, fact : fact, detail : detail}
+                    axios.post("http://localhost:5001/depenses/new", datasend)
                     .then((resolve) => {
                         if(resolve.data.message === "Inserted"){
                             setMsg("La dépense est enregistré avec Success")
-                            //props.history.push('/annonces')
+                            props.history.push('/dépenses')
+                            toast.success("La Dépense est Enregistrée avec Succès")
                         }
                         else if(resolve.data.messageErr === "bad"){
                             setMsg("Really Bad")
+                            toast.error("La Dépense est échouée ! Réssayez-vous une autre fois.")
                         }
                     })
                     .catch((err) => {
 
                     })
+                    console.log(datasend)
                 }
                 else{
-                    axios.post("http://localhost:5001/depenses/new", [id, typeDep, montant, fact, detail])
+                    const datasend = {id : id, typeDepense : typeDep, montant : montant, fact : fact, detail : detail}
+                    axios.post("http://localhost:5001/depenses/new", datasend)
                     .then((resolve) => {
                         if(resolve.data.message === "Inserted"){
                             setMsg("La dépense est enregistré avec Success")
-                            //props.history.push('/annonces')
+                            props.history.push('/dépenses')
+                            toast.success("La Dépense est Enregistrée avec Succès")
                         }
                         else if(resolve.data.messageErr === "bad"){
                             setMsg("Really Bad")
+                            toast.warn("Aucune Dépense pour l'instant !")
                         }
                     })
                     .catch((err) => {
                         console.log(err)
                     })
+                    console.log(datasend)
                 }
             }
         }

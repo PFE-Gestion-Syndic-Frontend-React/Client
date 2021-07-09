@@ -2,7 +2,8 @@ import axios from 'axios'
 import React, {useEffect, useState} from 'react'
 import {Link} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
+import {TextField, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@material-ui/core';
+import { toast } from 'react-toastify';
 
 const useStyles = makeStyles((theme) => ({
     
@@ -27,15 +28,21 @@ const useStyles = makeStyles((theme) => ({
 
 
 function EditCompte(props) {
+    const [open, setOpen] = useState(false);
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+    const handleClickOpen = () => {
+        setOpen(true) 
+    };
+  
     const classes = useStyles()
     const [user, setUser] = useState({})
     const [nom, setNom] = useState('')
     const [prenom, setPrenom] = useState('')
     const [tele, setTele] = useState('')
-    const [role, setRole] = useState('')
-    const [fonc, setFonc] = useState('')
     const [msg, setMsg] = useState('')
-
     
     const id = props.match.params.id
     useEffect(() => {
@@ -53,13 +60,13 @@ function EditCompte(props) {
             })
             .catch(() => console.log("Cannot Read Data"))
         }
-    }, [])
+    }, [id])
 
 
     const UpdateAccount = () => {
         //console.log("clicked")
-        if(nom !== "" && prenom !== "" && tele !== "" && fonc !== ""){
-            const dataUpdated = {nom : nom, prenom : prenom, fon : fonc, tele : tele, role : role}
+        if(nom !== "" && prenom !== "" && tele !== ""){
+            const dataUpdated = {nom : nom, prenom : prenom, tele : tele }
             console.log(dataUpdated)
             if(id !== ""){
                 axios.put(`http://localhost:5001/users/edit/${id}`, dataUpdated)
@@ -69,6 +76,7 @@ function EditCompte(props) {
                         setMsg(response.data.message)
                         //console.log(msg)
                         props.history.push('/comptes')
+                        toast.success("La Modification du Compte est effectué avec Succès")
                     }
                     else{
                         //console.log("okkk")
@@ -77,6 +85,28 @@ function EditCompte(props) {
                 .catch(() => console.log("Bad"))
             }
         }
+        else if(nom === "" && prenom === "" && tele === ""){
+            toast.success("Le Compte a été modifié avec Succès")
+            props.history.push('/comptes')
+        }
+        else{
+            toast.warn("Les Champs qui ont (*) sont Obligatoires")
+        }
+    }
+
+    const reset = (Num, Nom, Prenom) => {
+        if(Nom !== "" && Prenom !== ""){
+            const datasend = {nom : Nom, prenom : Prenom}
+            axios.put(`http://localhost:5001/users/reset/password/${Num}`, datasend)
+            .then((resolve) => {
+                if(resolve.data === "Updated"){
+                    toast.success("Le Mot de Passe est Réintialisé avec Succès")
+                    props.history.push('/comptes')
+                }
+            })
+            .catch((err) => {console.log(err)})
+        }
+        setOpen(false)
     }
 
     return (
@@ -84,11 +114,6 @@ function EditCompte(props) {
             <div className="card">
                 <div className="card-header"><h4 style={{textAlign : "center"}}><i className="bi bi-person-circle"></i> Mettre à Jour Le Compte</h4></div>
                 <div className="card-body">
-                    <div>
-                        {
-                            msg === "Updated Successfully" && <div className="alert alert-success text-center">{msg}</div>
-                        }
-                    </div>
                     <div className="row">
                         <div className="col-md-6">
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Nom"  maxLength="30" className={classes.root} multiline={true} defaultValue={user.NomCompte} required onChange={e => setNom(e.target.value)} />
@@ -104,29 +129,7 @@ function EditCompte(props) {
                         <div className="col-md-6">
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Numéro de Téléphone"  maxLength="10" className={classes.root} multiline={true} defaultValue={user.telephone} required onChange={e => setTele(e.target.value)} />
                         </div>
-                    </div><br/>
-                    <div className="">
-                        {
-                            user.Role === "Administrateur" && 
-                            <div className="row">
-                                <div className="col-md-4"><label style={{fontSize : "15px"}}>Role : </label></div>
-                                <div className="col-md-4"><input type="radio" name="role" value="Administrateur" checked={true} onChange={e => setRole(e.target.value)} />  Administrateur</div>
-                                <div className="col-md-4"><input type="radio" name="role" value="Copropriétaire" checked={false}  onChange={e => setRole(e.target.value)} />  Copropriétaire</div>
-                            </div>
-                        }
-                        {
-                            user.Role === "Copropriétaire" && 
-                            <div className="row">
-                                <div className="col-md-4"><label style={{fontSize : "15px"}}>Role : </label></div>
-                                <div className="col-md-4"><input type="radio" name="role" value="Administrateur" checked={false} onChange={e => setRole(e.target.value)} />  Administrateur</div>
-                                <div className="col-md-4"><input type="radio" name="role" value="Copropriétaire" checked={true}  onChange={e => setRole(e.target.value)} />  Copropriétaire</div>
-                            </div>
-                        }
-                    </div><br/>
-                    <div className="row">
-                        <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Fonction au sein le Syndicat"  maxLength="30" className={classes.root} multiline={true} defaultValue={user.fonc}  required onChange={e => setFonc(e.target.value)} />
-                    </div><br/>
-                    
+                    </div><br/><br/>
                     <div className="row">
                         <div className="col-md-6">
                             <Link to="/comptes" className="btn btn-outline-danger form-control">Annuler</Link>
@@ -136,7 +139,26 @@ function EditCompte(props) {
                         </div>
                     </div>
                 </div>
-            </div><br/><br/><br/><br/>
+            </div><br/><br/>
+            <div className="row">
+                <div className="col-md-3"></div>
+                <div className="col-md-6">
+                    <Button variant="outlined" color="secondary" onClick={handleClickOpen}>Reset Password for the User</Button>
+                    <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                        <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de Réinitialisation du Mot de Passe ?"}</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="alert-dialog-description">
+                                Est ce que Voulez-Vous de Réintialiser le Mot de Passe de Cet Utilisateur ?
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleClose} color="primary">Cancel</Button>
+                            <Button onClick={reset.bind(this, user.NumCompte, user.NomCompte, user.PrenomCompte)} color="secondary" autoFocus>Oui, J'accepte !</Button>
+                        </DialogActions>
+                    </Dialog>
+                </div>
+                <div className="col-md-3"></div>
+            </div><br/>
         </div>
     )
 }

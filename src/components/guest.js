@@ -1,14 +1,47 @@
-import React from 'react'
-import {BrowserRouter as Router, Switch, Route} from 'react-router-dom'
+import React, {useEffect} from 'react'
+import {BrowserRouter as Router, Switch, Route, useHistory} from 'react-router-dom'
+import ListerAnnonces from '../guest page/Annonces/listerAnnonces'
+import ListerDepenses from '../guest page/Depenses/listerDepenses'
 import Settings from '../guest page/mesSettings/settings'
 import NavGuest from '../guest page/navGuest'
-import AddRéclamation from '../guest page/Réclamations/addRéclamation'
-import EditRéclamation from '../guest page/Réclamations/editRéclamation'
-import ListeRéclamation from '../guest page/Réclamations/listeRéclamation'
-import MesRéclamations from '../guest page/Réclamations/mesRéclamations'
-import Réclamations from '../guest page/Réclamations/réclamations'
+import ListerMesPaiements from '../guest page/Paiements/listerMesPaiements'
+import AddReclamation from '../guest page/Réclamations/addReclamation'
+import EditReclamation from '../guest page/Réclamations/editReclamation'
+import ListeReclamation from '../guest page/Réclamations/listeReclamation'
+import MesReclamations from '../guest page/Réclamations/mesReclamations'
+import Reclamations from '../guest page/Réclamations/reclamations'
+import Statistique from '../guest page/Statistique/statistique'
+import Login from './login'
+import axios from 'axios'
 
-function Guest() {
+function Guest(props) {
+    const history = useHistory()
+    useEffect(() => {
+        axios.get("http://localhost:5001/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                history.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                history.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                history.push('/')
+            }
+        })
+        .catch(() => {
+
+        })
+    })
+
+
     return (
         <div>
             <Router>
@@ -17,15 +50,20 @@ function Guest() {
                 </div>
                 <div style={{paddingTop : "5%"}}>
                     <Switch>
-                        <Route exact path="/réclamation" component={Réclamations} />
+                        <Route exact path="/" component={Login} />
+                        <Route exact path="/Acceuil" component={Statistique} />
+                        <Route exact path="/Annonces" component={ListerAnnonces} />
+                        <Route exact path="/Dépenses" component={ListerDepenses} />
+                        <Route exact path="/Settings" component={Settings} />
+                        <Route exact path="/Cotisations" component={ListerMesPaiements} />
+                        <Route exact path="/Réclamation" component={Reclamations} />
 
-                        <Route exact path="/Setting" component={Settings} />
 
 
-                        <Route exact path="/add-réclamation" component={AddRéclamation} />
-                        <Route exact path="/réclamation/edit/:num" component={EditRéclamation}  />
-                        <Route exact path="/all/réclamations" component={ListeRéclamation} />
-                        <Route exact path="/mes-réclamations" component={MesRéclamations} />
+                        <Route exact path="/add-réclamation" component={AddReclamation} />
+                        <Route exact path="/réclamation/edit/:num" component={EditReclamation}  />
+                        <Route exact path="/all/réclamations" component={ListeReclamation} />
+                        <Route exact path="/mes-réclamations" component={MesReclamations} />
                     </Switch>
                 </div>
             </Router>

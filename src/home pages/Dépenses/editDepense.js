@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {Link} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -22,11 +24,54 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
-function EditDepense() {
+function EditDepense(props) {
     const classes = useStyles()
     const [montant, setMontant] = useState('')
     const [fac, setFac] = useState('')
     const [desc, setDesc] = useState('')
+    const [dep, setDep] = useState({})
+    const [msg, setMsg] = useState('')
+    console.log(msg)
+    const refDepense = props.match.params.refDepense
+    useEffect(() => {
+        if(refDepense){
+            axios.get(`http://localhost:5001/depenses/depense/${refDepense}`)
+            .then(res => 
+                {
+                    if(res.data.msgErr === "Not Found"){
+                        setDep({})
+                        toast.warn("Aucune Dépense pour cette Recherche !")
+                    }
+                    else if(res.data.length > 0){
+                        setDep(res.data[0])
+                    }
+                })
+                .catch(() => console.log("Cannot Read Data"))
+        }
+    },[refDepense])
+
+    const updateDepense = () => {
+        if(montant !== "" && fac !== "" && desc !== ""){
+            const datasend = {montant : montant, fac : fac, desc : desc}
+            console.log(datasend)
+            axios.put(`http://localhost:5001/depenses/edit/${refDepense}`, datasend)
+            .then((resolve) => {
+                if(resolve.data.message === "Updated Successfully"){
+                    setMsg("Updated Successfully")
+                    props.history.push('/dépenses')
+                    toast.success("La Dépense est modifiée avec Succès")
+                }
+            })
+            .catch(() => {
+                 
+            })
+        }
+        else{
+            setMsg("Champs Obligatoires")
+            toast.warn("Les Champs qui ont (*) sont Obligatoires")
+        }
+    }
+
 
     return (
         <div className="container col-md-6 col-md-offset-3" style={{paddingTop : "90px"}}>
@@ -35,28 +80,28 @@ function EditDepense() {
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-6">
-                            <label>Nom et Prénom : <strong> Benfarhi Zakaria </strong></label>
+                            <label>Nom et Prénom : <strong> {dep.NomCompte} {dep.PrenomCompte} </strong></label>
                         </div>
                         <div className="col-md-6">
-                            <label>Fonction : <strong> Trésorier</strong></label>
+                            <label>Fonction : <strong> {dep.fonc} </strong></label>
                         </div>
                     </div><br/>
                     <div className="row">
                         <div className="col-md-12">
-                            <label>Catégorie : <strong> Jardinage</strong></label>
+                            <label>Catégorie : <strong> {dep.NomCategorie} </strong></label>
                         </div>
                     </div><br/>
                     <div className="row">
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Montant du Dépense (en MAD)" className={classes.container} defaultValue={"878"} onChange={e => setMontant(e.target.value)}></TextField>
+                            <TextField multiline={true} InputLabelProps={{ shrink: true,}} id="standard-basic" label="Montant du Dépense (en MAD)" className={classes.container} defaultValue={dep.MontantDepense} onChange={e => setMontant(e.target.value)}></TextField>
                         </div>
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Facture ou Bon du Dépense" className={classes.container} defaultValue={"N°688H87JJH"} onChange={e => setFac(e.target.value)} />
+                            <TextField multiline={true} InputLabelProps={{ shrink: true,}} id="standard-basic" label="Facture ou Bon du Dépense" className={classes.container} defaultValue={dep.facture} onChange={e => setFac(e.target.value)} />
                         </div>
                     </div><br/><br />
                     <div className="row">
                         <div className="col-md-12">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Description de la Dépense" multiline={true} className={classes.textField} defaultValue={"sjkdnk skld,l skdlks, dksjdojefoz"} onChange={e => setDesc(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Description de la Dépense" multiline={true} className={classes.textField} defaultValue={dep.descriptionDepense} onChange={e => setDesc(e.target.value)} />
                         </div>
                     </div><br/>
                 </div>
@@ -66,7 +111,7 @@ function EditDepense() {
                             <Link to="/dépenses" className="btn btn-outline-danger form-control">Annuler</Link>
                         </div>
                         <div className="col-md-6">
-                            <input type="submit" value="Partager" className="btn btn-primary form-control" />
+                            <input type="submit" value="Partager" onClick={updateDepense} className="btn btn-primary form-control" />
                         </div>
                     </div>
                 </div>

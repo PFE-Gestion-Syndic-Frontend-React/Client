@@ -1,10 +1,8 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import {Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardHeader, CardContent, CardActions, IconButton} from '@material-ui/core'
-import { UpdateOutlined, DeleteOutlined } from '@material-ui/icons'
+import {Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardContent, CardActions } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { makeStyles } from '@material-ui/styles'
-import { useHistory } from 'react-router'
 import {toast} from 'react-toastify'
 
 axios.interceptors.request.use(
@@ -33,10 +31,11 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-function ListerDepense(props) {
+function ListerDepenses() {
     const classes = useStyles()
     const [depense, setDepense] = useState() 
     const [msg, setMsg] = useState('')
+
     useEffect(() => {
         axios.get("http://localhost:5001/depenses/all")
             .then((resolve) => {
@@ -54,27 +53,6 @@ function ListerDepense(props) {
 
             })
     })
-
-    const deleteDepense = (RefDepense) => {
-        if(window.confirm("La Dépense sera supprimé permanante !")){
-            axios.delete(`http://localhost:5001/depenses/delete/${RefDepense}`)
-            .then((resolve) => {
-                History.push('/dépenses')
-                props.history.push('/dépenses')
-                toast.info("La Dépense a été Supprimée avec Succès")
-            })
-            .catch(() => {
-    
-            })
-        }
-    }
-
-    const history = useHistory()
-    const updateDepense = (RefDepense) => {
-        return(
-            history.push(`/dépense/edit/${RefDepense}`)
-        )
-    }
 
 
     return (
@@ -103,7 +81,6 @@ function ListerDepense(props) {
                                         <AccordionDetails>
                                             <Typography spacing={3}>
                                                 <Card className={classes.root}>
-                                                    <CardHeader action={ <div> <IconButton onClick={ updateDepense.bind(this, d.RefDepense)} ><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton><IconButton onClick={deleteDepense.bind(this, d.RefDepense)}><DeleteOutlined style={{color : "red", fontSize : "30px"}} /></IconButton></div> } />
                                                     <CardContent>
                                                         <div className="row">
                                                             <div className="col-md-6">
@@ -137,4 +114,4 @@ function ListerDepense(props) {
     )
 }
 
-export default ListerDepense
+export default ListerDepenses

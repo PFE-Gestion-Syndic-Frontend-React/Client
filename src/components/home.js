@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import {BrowserRouter as Router, Switch, Route, Redirect} from 'react-router-dom'
+import {BrowserRouter as Router, Switch, Route, useHistory} from 'react-router-dom'
 import AddAnnonce from '../home pages/Annonces/addAnnonce'
 import Annonce from '../home pages/Annonces/annonce'
 import AddCompte from '../home pages/Comptes/addCompte'
@@ -24,30 +24,46 @@ import FilterDepense from '../home pages/Dépenses/filterDepense'
 import Login from './login'
 import Statistique from '../home pages/Statistique/statistique'
 import Logement from '../home pages/Logement/logement'
-
 import EditLogement from '../home pages/Logement/editLogement'
 import ListerLogement from '../home pages/Logement/listerLogement'
 import AddLogement from '../home pages/Logement/addLogement'
+import axios from 'axios'
+import InfoLogement from '../home pages/Logement/infoLogement'
 
-import verifyToken from '../Utils/util'
-
-function Home({handleLogged}) {
+function Home(props) {
+    const history = useHistory()
     useEffect(() => {
-        if(!verifyToken(localStorage.getItem('token'))){
-            console.log("Not Authenticated")
-            return (
-                <Redirect to="/" />
-            )
-        }
-        else{
-            console.log("OK !")
-        }
+        axios.get("http://localhost:5001/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    history.push('/')
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    history.push('/')
+                }// added
+            }
+            else{
+                localStorage.clear()
+                history.push('/')
+            }
+        })
+        .catch(() => {
+
+        })
     })
+
     return (
         <div>
             <Router>
                 <div className="fixed-top">
-                    <Nav isLogged={handleLogged}  />
+                    <Nav /> 
                 </div>
                 <div style={{paddingTop : '5%'}}>
                     <Switch>
@@ -84,6 +100,7 @@ function Home({handleLogged}) {
                         <Route exact path="/add-logement" component={AddLogement} />
                         <Route exact path="/logement/edit/:refLogement" component={EditLogement} />
                         <Route exact path="/all/logements" component={ListerLogement} />
+                        <Route exact path="/logement/info/:refLogement" component={InfoLogement} />
                     </Switch>
                 </div>
             </Router>

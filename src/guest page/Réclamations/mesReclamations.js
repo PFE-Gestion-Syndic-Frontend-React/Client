@@ -1,6 +1,6 @@
 import React from 'react'
 
-function MesRéclamations() {
+function MesReclamations() {
     return (
         <div>
             Mes Réclamations
@@ -8,4 +8,4 @@ function MesRéclamations() {
     )
 }
 
-export default MesRéclamations
+export default MesReclamations

@@ -1,9 +1,37 @@
 import React, { useEffect, useState } from 'react'
-import {Link} from 'react-router-dom'
+import { useHistory} from 'react-router-dom'
 import axios from 'axios'
+import {  Accordion, AccordionSummary, AccordionDetails, makeStyles, IconButton} from '@material-ui/core'
+import { UpdateOutlined, InfoOutlined }from '@material-ui/icons';
+import {toast} from 'react-toastify'
+
+
+
+axios.interceptors.request.use(
+    config => {
+        config.headers.authorization = `Bearer ${localStorage.getItem("token")}`
+        return config
+    },
+    err => {
+        return Promise.reject(err)
+    }
+)
+
+
+const useStyle = makeStyles((theme) => ({
+    alert :{
+        width : "100%",
+        '& > *': {
+            marginTop: theme.spacing(2),
+            marginBottom : theme.spacing(5),
+        },
+    },
+}))
+
+
 
 function ListerLogement() {
-
+    const classes = useStyle()
     const [search, setSearch] = useState('')
     const [logement, setLogement] = useState()
     const [msg, setMsg] = useState('')
@@ -19,6 +47,7 @@ function ListerLogement() {
                 else {
                     setMsg("No Logements")
                     setLogement(response.data.msggg)
+                    toast.warn("Aucun Logemenet pour cette Recherche !")
                 }
                 
             })
@@ -36,7 +65,22 @@ function ListerLogement() {
             })
             .catch(() => console.log("No Logements"))
         }
-    })
+    }, [search])
+
+
+    const history = useHistory()
+    const handleUpdateLog = (RefLog) => {
+        return(
+            history.push('/logement/edit/' + RefLog)
+        )
+    }
+
+    const handleInfo = (RefLog) => {
+        return (
+            history.push('/logement/info/' + RefLog)
+        )
+    }
+    
 
     return (
         <div>
@@ -54,7 +98,7 @@ function ListerLogement() {
                 <div className="container col-md-8 col-md-offset-4">
                     {
                         msg === "founded" && 
-                        <table className="table table-hover">
+                        <table className="table">
                             <thead>
                                 <tr className="thead-light">
                                     <th>Nom et Prénom du Copropriétaire</th>
@@ -63,21 +107,19 @@ function ListerLogement() {
                                     <th>Logement</th>
                                     <th></th>
                                     <th></th>
-                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {
                                     logement.map((l) => {
                                         return (
-                                            <tr key={l.NumCompte}>
+                                            <tr key={l.RefLogement}>
                                                 <td> {l.NomCompte} {l.PrenomCompte} </td>
                                                 <td> {l.EmailCompte} </td>
                                                 <td> {l.telephone} </td>
                                                 <td> {l.RefLogement} </td>
-                                                <td><Link to={`/logement/info/1`}><i className="bi bi-info-circle btn btn-outline-primary"></i></Link></td>
-                                                <td><Link to={`/logement/edit/1`}><i className="bi bi-pencil-square btn btn-success"></i></Link></td>
-                                                <td><i className="bi bi-trash btn btn-danger"></i></td>
+                                                <td><IconButton onClick={handleUpdateLog.bind(this, l.RefLogement)}><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton></td>
+                                                <td><IconButton onClick={handleInfo.bind(this, l.RefLogement)}><InfoOutlined style={{color : "blue", fontSize : "30px"}} /></IconButton></td>
                                             </tr>
                                         )
                                     })
@@ -85,14 +127,8 @@ function ListerLogement() {
                             </tbody>
                         </table>
                     }
-                    {
-                        msg === "No Logements" &&
-                        <div className="alert alert-danger center">
-                            Aucune Résultat pour cette Recherche {search}
-                        </div>
-                    }
-                </div>
-            </div>
+                </div><br/><br/>
+            </div><br /><br/>
         </div>
     )
 }

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import {Link} from 'react-router-dom'
-import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
+import { makeStyles, TextField } from '@material-ui/core';
+import { toast } from 'react-toastify';
+
 
 const useStyles = makeStyles((theme) => ({
     
@@ -35,21 +36,24 @@ function AddCompte(props) {
     const [role, setRole] = useState('')
     const [fonc, setFonc] = useState('')
     const [msg, setMsg] = useState('')
+    console.log(msg)
 
     useEffect(() => {
         if(email){
             axios.get("http://localhost:5001/users/byEmail/" + email)
             .then((response) => {
-                if(response.length > 0){
-                    console.log("coool")
+                if(response){
+                    //console.log("coool")
                     console.log(response)
-                    if(response === "Déjà Utilisé !"){
+                    if(response.data.msg === "Déjà Utilisé !"){
                         setMsg("E-mail est déjà utilisé !!!")
+                        toast.error("Cette Adresse E-mail est déjà Utilisée !")
                     }
-                    else if(response === "Cooool"){
+                    else if(response.data.msg === "Cooool"){
                         setMsg("")
                     }
                 }
+                //console.log(msg)
             })
             .catch(() => {
                 console.log("err")
@@ -59,18 +63,25 @@ function AddCompte(props) {
     
     
     const createAccount =  () => {
-        const datasend = {nom : nom, prenom : prenom, email : email, tele : tele, role : role, fonc : fonc}
-        axios.post("http://localhost:5001/users/new", datasend)
-        .then((resolve) => {
-            if(resolve.data.message === "Inserted"){
-                setMsg("Le Compte est enregistré avec Success")
-                props.history.push('/comptes')
-            }
-            else if(resolve.data.messageErr === "E-mail Already Used !"){
-                setMsg("E-mail est déjà utilisé !!!")
-            }
-        })
-        .catch((err) => console.log(err))
+        if(nom !== "" && prenom !== "" && email !== "" && tele !== "" && role !== "" && fonc !== ""){
+            const datasend = {nom : nom, prenom : prenom, email : email, tele : tele, role : role, fonc : fonc}
+            axios.post("http://localhost:5001/users/new", datasend)
+            .then((resolve) => {
+                if(resolve.data.message === "Inserted"){
+                    setMsg("Le Compte est enregistré avec Success")
+                    props.history.push('/comptes')
+                    toast.success("La Création du Compte est effectuée avec Succès")
+                }
+                else if(resolve.data.messageErr === "E-mail Already Used !"){
+                    setMsg("E-mail est déjà utilisé !!!")
+                    toast.error("E-mail est déjà Utilisé !")
+                }
+            })
+            .catch((err) => console.log(err))
+        }
+        else{
+            toast.warn("Les Champs qui ont (*) sont Obligatoires")
+        }
     }
 
 
@@ -79,21 +90,6 @@ function AddCompte(props) {
             <div className="card">
                 <div className="card-header"><h4 style={{textAlign : "center"}}><i className="bi bi-person-circle"></i> Création d'un Compte</h4></div>
                 <div className="card-body">
-                    <div>
-                        {
-                            msg === "Le Compte est enregistré avec Success" && <div className="alert alert-success text-center">{msg}</div>
-                        }
-                    </div>
-                    <div>
-                        {
-                            msg === "E-mail est déjà utilisé !!!" && <div className="alert alert-danger text-center">{msg}</div>
-                        }
-                    </div>
-                    <div>
-                        {
-                            msg === "Champs Obligatoires !" && <div className="alert alert-warning text-center">{msg}</div>
-                        }
-                    </div>
                     <div className="row">
                         <div className="col-md-6">
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Nom"  maxLength="30" className={classes.root} required onChange={e => setNom(e.target.value)} />
@@ -118,7 +114,7 @@ function AddCompte(props) {
                     {
                         role === "Copropriétaire" && 
                         <div className="row container">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Fonction au sein du Syndicat"  maxLength="30" className={classes.root} defaultValue={role} required onChange={e => setFonc(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Fonction au sein du Syndicat"  maxLength="30" className={classes.root} defaultValue={role} required onChange={e => setFonc("Copropriétaire")} />
                         </div>
                     }
                     {

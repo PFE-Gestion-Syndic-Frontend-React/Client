@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import {Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton} from '@material-ui/core'
+import {Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions} from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from '@material-ui/core/styles';
-import { DeleteOutlined, UpdateOutlined }from '@material-ui/icons';
 import axios from 'axios';
 import {toast} from 'react-toastify'
 
@@ -41,46 +40,52 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 
-
-function ListerCotisation() {
+function ListerMesPaiements() {
     const classes = useStyles()
     const [msg, setMsg] = useState('')
     const [cotisations, setCotisation] = useState([])
     const [search, setSearch] = useState('')
+    const id = localStorage.getItem('id')
 
 
     useEffect(() => {
-        if(search !== ""){
-            axios.get("http://localhost:5001/cotisations/" + search)
-            .then((response) => {
-                if(response){
-                    if(response.data.msgErr === "No Token Set"){
-                        localStorage.clear()
-                        History.push('/')
+        if(id !== undefined && id !== ""){
+            console.log("You Have it ;) ")
+            if(search !== ""){
+                const datasend = {id : id, search : search}
+                axios.get("http://localhost:5001/cotisations/mesCotisations/" + search, datasend)
+                .then((response) => {
+                    if(response){
+                        if(response.data.msgErr === "No Token Set"){
+                            localStorage.clear()
+                            History.push('/')
+                        }
+                        else if(response.data.msggg === "No Paiements"){
+                            setMsg("No Cotisation")
+                            toast.warn("Elle n'y'a Aucune Cotisation pour cette Recherche")
+                        }
+                        else if(response.data.length > 0){
+                            setCotisation(response.data)
+                            //console.log(response.data)
+                            setMsg("")
+                        }
                     }
-                    else if(response.data.msggg === "No Paiements"){
+                    else {
                         setMsg("No Cotisation")
+                        setCotisation(response.data.msggg)
                         toast.warn("Elle n'y'a Aucune Cotisation pour cette Recherche")
                     }
-                    else if(response.data.length > 0){
-                        setCotisation(response.data)
-                        //console.log(response.data)
-                        setMsg("")
-                    }
-                }
-                else {
+                    console.log(response)
+                })
+                .catch(() => {
                     setMsg("No Cotisation")
-                    setCotisation(response.data.msggg)
-                    toast.warn("Elle n'y'a Aucune Cotisation pour cette Recherche")
-                }
-            })
-            .catch(() => {
-                setMsg("No Cotisation")
-            })
-        }
-        else{
-            axios.get("http://localhost:5001/cotisations/all")
+                })
+            }
+            else{
+                console.log(id)
+                axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}`)
                 .then((response) => {
+                    //console.log(response)
                     if(response.data.msgErr === "No Token Set"){
                         localStorage.clear()
                         History.push('/')
@@ -92,18 +97,16 @@ function ListerCotisation() {
                 })
                 .catch((err) => 
                 {
-        
+                    console.log(err)
                 })
+            }
+        }
+        else{
+            console.log("HEHO ANY ID !")
         }
     },[search])
 
-    const updateCotisation = (RefCotisation) => {
 
-    }
-
-    const deleteCotisation = (RefCotisation) => {
-
-    }
 
     return (
         <div style={{top : "120px"}}>
@@ -127,13 +130,11 @@ function ListerCotisation() {
                                     <div>
                                         <Accordion key={c.RefPaiement} className="mb-5">
                                             <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                                                <Typography className={classes.heading}> <h5><strong> Cotisation du <span style={{color : "blue"}}>{c.NomCompte} {c.PrenomCompte}</span>  </strong></h5>  </Typography>
+                                                <Typography className={classes.heading}> <h5 style={{color : "blue"}}><strong> Cotisation du {c.datePaiement.replace("T23:00:00.000Z", "")} </strong></h5>  </Typography>
                                             </AccordionSummary>
                                             <AccordionDetails>
                                                 <Typography spacing={3}>
                                                     <Card className={classes.root} elevation={1}>
-                                                        <CardHeader action={ <div> <IconButton onClick={ updateCotisation.bind(this, "1") }  ><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton><IconButton onClick={ deleteCotisation.bind(this, "1") }><DeleteOutlined style={{color : "red", fontSize : "30px"}} /> </IconButton> </div> } 
-                                                                    subheader={`Référence :  ${c.RefPaiement}`} />
                                                         <CardContent>
                                                             <Typography variant="body1" color="textPrimary">
                                                                 <div className="row" >
@@ -171,4 +172,4 @@ function ListerCotisation() {
     )
 }
 
-export default ListerCotisation
+export default ListerMesPaiements

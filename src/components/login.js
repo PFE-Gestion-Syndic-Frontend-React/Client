@@ -1,14 +1,13 @@
-import React, {useState} from 'react'
+import React, { useState} from 'react'
 import {Link} from 'react-router-dom'
 import axios from 'axios'
-
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import Alert from '@material-ui/lab/Alert';
+import { toast } from 'react-toastify';
 
 const useStyles = makeStyles((theme) => ({
     alert :{
@@ -48,6 +47,7 @@ function Login(props) {
     const [email, setEmail] = useState('')
     const [pwd, setPassword] = useState('')
     const [msg, setMsg] = useState('')
+    
 
     const connect = () => {
         if(email !== "" && pwd !== ""){
@@ -56,17 +56,21 @@ function Login(props) {
                     if(resolve){
                         if(resolve.data.msgErr){
                             setMsg("Password or Email is incorrect !")
+                            toast.error("Password or Email is Incorrect !")
                         }
                         if(resolve.data.data[0] && resolve.data.token){
-                            localStorage.setItem("token",resolve.data.token)
+                            localStorage.setItem("token", resolve.data.token)
                             localStorage.setItem('id', resolve.data.data[0].NumCompte)
                             localStorage.setItem('Name', resolve.data.data[0].NomCompte)
+                            localStorage.setItem('First', resolve.data.data[0].PrenomCompte)
                             localStorage.setItem('photo', resolve.data.data[0].photo)
                             if(resolve.data.data[0].Role === "Administrateur" && localStorage.getItem("token")){
-                                props.history.push('/Home', {data : resolve.data.data[0]})
+                                props.history.push('/home', {data : resolve.data.data[0]})
+                                toast.success('Logged in Successfully', {position : toast.POSITION.TOP_CENTER})
                             }
                             else if(resolve.data.data[0].Role === "Copropriétaire" && localStorage.getItem("token")){
-                                props.history.push('/acceuil', {data : resolve.data.data[0]})
+                                props.history.push('/Acceuil', {data : resolve.data.data[0]})
+                                toast.success('Logged in Successfully', {position : toast.POSITION.TOP_CENTER})
                             }
                             else{
                                 props.history.push('/')
@@ -75,12 +79,14 @@ function Login(props) {
                     }
                     else{
                         setMsg("User does not Existe")
+                        toast.warn('Utilisateur Inrouvable !')
                     }
                 })
             .catch((err) => console.log(err))
         }
         else{
             setMsg("All Field Required")
+            toast.warn('Les Champs qui ont (*) sont Obligatoires')
         }
     }
     return (
@@ -88,9 +94,6 @@ function Login(props) {
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
                 <div className={classes.paper}>
-                <div>{msg === "Password or Email is incorrect !" && <div className={classes.alert}><Alert severity="error">Password ou l'E-mail est Incorrect !</Alert></div>}</div>
-                <div>{msg === "All Field Required" && <div className={classes.alert}><Alert security="error"> Les Champs Obligatoires</Alert> </div>}</div>
-                <div>{msg === "User does not Existe" && <div className="alert alert-danger text-center" >{msg}</div>}</div>
                     <div className={classes.root} noValidate>
                         <TextField InputLabelProps={{ shrink: true,}} margin="normal" required fullWidth id="standard-basic" label="Email Address" name="email" autoComplete="email" autoFocus onChange={(e) => setEmail(e.target.value)} />
                         <TextField InputLabelProps={{ shrink: true,}} margin="normal" required fullWidth name="password" label="Password" type="password" id="standard-basic" autoComplete="current-password" onChange={(e) => setPassword(e.target.value)} />

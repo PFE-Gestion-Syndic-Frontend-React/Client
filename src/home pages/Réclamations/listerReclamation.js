@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-import { Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
+import { Avatar, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { UpdateOutlined }from '@material-ui/icons';
 import { useHistory } from 'react-router';
 import axios from 'axios';
-import Alert from '@material-ui/lab/Alert'
+import { toast } from 'react-toastify';
+
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -33,6 +35,8 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ListerReclamation() {
+    const history = useHistory()
+
     const classes = useStyles()
     const [reclamations, setreclamation] = useState([])
     const [search, setSearch] = useState('')
@@ -47,8 +51,9 @@ function ListerReclamation() {
                     setMsg("")
                 }
                 else {
-                    setMsg("No reclmation")
+                    setMsg("No reclamation")
                     setreclamation(response.data.msggg)
+                    toast.warn("Aucune Réclamation pour cette Recherche !")
                 }
             })
             .catch(() => {
@@ -66,7 +71,7 @@ function ListerReclamation() {
         }
     }, [search])
 
-    const history = useHistory()
+    
     const handleUpdateRecla = (refReclamation) => {
         return(
             history.push(`/réclamation/edit/${refReclamation}`)
@@ -99,20 +104,32 @@ function ListerReclamation() {
                                     <AccordionDetails>
                                         <Typography spacing={3}>
                                             <Card className={classes.root} elevation={1}>
-                                                <CardHeader action={ <IconButton onClick={ handleUpdateRecla.bind(this, r.RefReclamation) }><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton> } 
-                                                    subheader={`Publié par : ${r.NomCompte} ${r.PrenomCompte}`}> </CardHeader>
+                                                <CardHeader action={ <IconButton onClick={ handleUpdateRecla.bind(this, r.RefReclamation) }><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton> } /> 
                                                 <CardContent>
-                                                    <Typography variant="inherit" color="textPrimary" style={{color : "silver"}}> l'Etat du Réclamation : {r.statut} </Typography>
+                                                    <div className="row">
+                                                        <div className="col-md-6"><Typography variant="inherit" color="textPrimary" style={{color : "silver"}}> Publier par : {r.NomCompte} {r.PrenomCompte} </Typography></div>
+                                                        <div className="col-md-6"><Typography variant="inherit" color="textPrimary" style={{color : "silver"}}> l'Etat du Réclamation : {r.statut} </Typography></div>
+                                                    </div>
                                                 </CardContent>
                                                 <CardContent>
                                                     <Typography variant="body1" color="textPrimary">
                                                         {r.Message}
-                                                    </Typography>
-                                                </CardContent>
-                                                <CardActions spacing={1}>
-                                                    <Typography variant="body2" color="textSecondary" component="p" className="float-start"> Cette Réclamation est : {r.pour} </Typography>
-                                                    <Typography variant="body2" color="textSecondary" component="p" className="float-end" style={{marginLeft : "370px"}}> Date Publication : {r.dateReclamation} </Typography>
-                                                </CardActions>
+                                                    </Typography><br/>
+                                                    {
+                                                        r.contenu !== "" && 
+                                                        <div>
+                                                            <Avatar src={"public/reclamation support/" + r.contenu} alt={""} style={{width : "200px", height : "200px"}} />
+                                                        </div>
+                                                    }
+                                                </CardContent><br/>
+                                                <div className="row">
+                                                    <div className="col-md-6">
+                                                        <CardActions><Typography variant="body2" color="textSecondary"> Cette Réclamation est : {r.pour} </Typography></CardActions>
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <CardActions><Typography variant="body2" color="textSecondary"> Date Publication : {r.dateReclamation.replace("T23:00:00.000Z", "")} </Typography></CardActions>
+                                                    </div>
+                                                </div>
                                             </Card>
                                         </Typography>
                                     </AccordionDetails>
@@ -120,12 +137,6 @@ function ListerReclamation() {
                             )}
                         )
                     }
-                </div>
-            }
-            {
-                msg === "No reclmation" && 
-                <div className={classes.alert} style={{textAlignLast :'center'}}>
-                    <Alert severity="error">Aucune Réclamation pour cette recherche : {search} </Alert>
                 </div>
             }
         </div>

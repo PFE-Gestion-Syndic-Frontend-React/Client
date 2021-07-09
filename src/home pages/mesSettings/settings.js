@@ -26,7 +26,12 @@ const useStyles = makeStyles((theme) => ({
 function Settings() {
     const classes = useStyles()
     const [compte, setCompte] = useState('')
-    const [msg, setMsg] = useState('')
+    //const [msg, setMsg] = useState('')
+    const [nom, setNom] = useState('')
+    const [prenom, setPrenom] = useState('')
+    const [tele, setTele] = useState('')
+    const [pwd, setPwd] = useState('')
+    const [newPwd, setNewPwd] = useState('')
 
     const id = localStorage.getItem('id')
     useEffect(() => {
@@ -34,9 +39,8 @@ function Settings() {
             axios.get(`http://localhost:5001/users/user/${id}`)
             .then((response) => {
                 if(response.data[0]){
-                    console.log(response.data[0])
                     setCompte(response.data[0])
-                    setMsg("ok")
+                    //setMsg("ok")
                 }
             })
             .catch(() => {
@@ -46,8 +50,36 @@ function Settings() {
     }, [id])
 
     const updateMonCompte = () => {
-        
+        if(id!== ""){
+            if(nom !== "" && prenom !== "" && tele !== ""){
+                if(pwd !== "" && newPwd !== ""){
+                    const datasend = { nom : nom, prenom : prenom, tele : tele, pwd : pwd, newPwd : newPwd }
+                    axios.put(`http://localhost:5001/users/monCompte/edit/${id}`, datasend)
+                    .then((resolve) => {
+                        console.log(resolve)
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+                }
+                else{
+                    const datasend = { nom : nom, prenom : prenom, tele : tele }
+                    console.log(datasend)
+                    axios.put(`http://localhost:5001/users/monCompte/edit/${id}`, datasend)
+                    .then((resolve) => {
+                        console.log(resolve)
+                    })
+                    .catch((err) => {
+                        if(err){
+                            console.log(err)
+                        }
+                    })
+                }
+            }
+        }
     }
+
+    
     return (
         <div className="container col-md-6 col-md-offset-3" style={{paddingTop : "90px"}}>
             <div className="card">
@@ -55,26 +87,26 @@ function Settings() {
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Nom" multiline={true} className={classes.root} defaultValue={compte.NomCompte} required maxLength="30"  />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Nom" multiline={true} className={classes.root} defaultValue={compte.NomCompte} required maxLength="30" onChange={e => setNom(e.target.value)}  />
                         </div>
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Prénom" multiline={true} className={classes.root} defaultValue={compte.PrenomCompte} required  maxLength="30" />
-                        </div>
-                    </div><br/>
-                    <div className="row">
-                        <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Adresse E-mail" multiline={true} className={classes.root} defaultValue={compte.EmailCompte} required type="email" maxLength="50" />
-                        </div>
-                        <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Numéro de Téléphone" multiline={true} className={classes.root} defaultValue={compte.telephone} required maxLength="10" />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Prénom" multiline={true} className={classes.root} defaultValue={compte.PrenomCompte} required  maxLength="30" onChange={e => setPrenom(e.target.value)} />
                         </div>
                     </div><br/>
                     <div className="row">
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Ancien Mot de Passe" className={classes.root} type="password" />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Adresse E-mail" multiline={true} className={classes.root} defaultValue={compte.EmailCompte} disabled required type="email" maxLength="50" />
                         </div>
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Ancien Mot de Passe" className={classes.root} type="password" maxLength="20" />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Numéro de Téléphone" multiline={true} className={classes.root} defaultValue={compte.telephone} required maxLength="10" onChange={e => setTele(e.target.value)} />
+                        </div>
+                    </div><br/>
+                    <div className="row">
+                        <div className="col-md-6">
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Ancien Mot de Passe" className={classes.root} type="password" onChange={e => setPwd(e.target.value)} />
+                        </div>
+                        <div className="col-md-6">
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Ancien Mot de Passe" className={classes.root} type="password" maxLength="20" onChange={e => setNewPwd(e.target.value)} />
                         </div>
                     </div><br />
                     <div className="row">

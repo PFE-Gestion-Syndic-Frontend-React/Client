@@ -1,8 +1,8 @@
 import React from 'react'
 import HeadingRec from './headingRec'
-import ListeRéclamation from './listeRéclamation'
+import ListeRéclamation from './listeReclamation'
 
-function Réclamations() {
+function Reclamations() {
     return (
         <div>
             <HeadingRec />
@@ -11,4 +11,4 @@ function Réclamations() {
     )
 }
 
-export default Réclamations
+export default Reclamations

@@ -19,7 +19,7 @@ function HeadingAnnonce() {
     const classes = useStyles()
     return (
         <div className={classes.root}>
-            <Button variant="button"  color="primary" style={{marginLeft : "1120px", width : "300px", textTransform : "capitalize", fontSize : "16px"}} component={Link} to="/add-annonce"><span><i className="bi bi-megaphone-fill" style={{paddingRight : "15px"}}></i></span>  Créer Une Annonce </Button>
+            <Button color="primary" style={{marginLeft : "1120px", width : "300px", textTransform : "capitalize", fontSize : "16px"}} component={Link} to="/add-annonce"><span><i className="bi bi-megaphone-fill" style={{paddingRight : "15px"}}></i></span>  Créer Une Annonce </Button>
         </div>
     )
 }

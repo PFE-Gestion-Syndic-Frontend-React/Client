@@ -1,6 +1,6 @@
 import React from 'react'
 
-function ListeRéclamation() {
+function ListeReclamation() {
     return (
         <div style={{top : "90px", paddingTop : "120px"}}>
             <h1 style={{marginLeft : "200px"}}>Lister Les Réclamations de la Résidence </h1><br/><br/>
@@ -20,4 +20,4 @@ function ListeRéclamation() {
     )
 }
 
-export default ListeRéclamation
+export default ListeReclamation
