@@ -63,11 +63,12 @@ function EditCompte(props) {
     }, [id])
 
 
-    const UpdateAccount = () => {
+    const UpdateAccount = (e) => {
         //console.log("clicked")
+        e.preventDefault()
         if(nom !== "" && prenom !== "" && tele !== ""){
             const dataUpdated = {nom : nom, prenom : prenom, tele : tele }
-            console.log(dataUpdated)
+            console.log("news : ", dataUpdated)
             if(id !== ""){
                 axios.put(`http://localhost:5001/users/edit/${id}`, dataUpdated)
                 .then((response) => {
@@ -108,6 +109,7 @@ function EditCompte(props) {
         }
         setOpen(false)
     }
+
 
     return (
         <div className="container col-md-6 col-md-offset-3" style={{paddingTop : "90px"}}>

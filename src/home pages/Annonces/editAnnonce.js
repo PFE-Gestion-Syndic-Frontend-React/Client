@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import {Link} from 'react-router-dom'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
-import {TextField, FormControlLabel} from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, TextField } from '@material-ui/core';
 import { toast } from 'react-toastify';
 
 const useStyles = makeStyles((theme) => ({
@@ -39,10 +39,17 @@ function EditAnnonce(props) {
     const [annonce, setAnnonce] = useState({})
     const [sujet, setSjt] = useState('')
     const [descrip, setDesc] = useState('')
-    const [statut, setStatut] = useState(false)
+    const [statut, setStatut] = useState('1')
+    const [open, setOpen] = useState(false)
     const refAnnonce = props.match.params.refAnnonce
 
-    console.log("Check : ",statut.checkedSt)
+    const handleOpen = () => {
+        setOpen(true)
+    }
+    const handleClose = () => {
+        setOpen(false)
+    }
+
     useEffect(() => {
         if(refAnnonce !== ""){
             axios.get(`http://localhost:5001/annonces/annonce/${refAnnonce}`)
@@ -60,14 +67,11 @@ function EditAnnonce(props) {
         }
     }, [refAnnonce])
 
-    const handleStatut = (e) => {
-        setStatut({[e.target.name] : e.target.checked})
-    }
 
     const update = () => {
         const refAnnonce = props.match.params.refAnnonce
-        if(sujet !== "" && descrip !== ""){
-            const datasend = {sujet : sujet, descrip : descrip}
+        if(sujet !== "" && descrip !== "" && statut !== ""){
+            const datasend = {sujet : sujet, descrip : descrip, statut : statut}
             axios.put(`http://localhost:5001/annonces/edit/${refAnnonce}`, datasend)
             .then((resolve) => {
                 if(resolve.data.message === "Updated Successfully"){
@@ -80,10 +84,15 @@ function EditAnnonce(props) {
                  
             })
         }
+        else if(sujet === "" && descrip === "" && statut === ""){
+            props.history.push('/annonces')
+            toast.success("l'Annonce a été modifiée avec Succès")
+        }
         else{
             setMsg("Champs Obligatoires")
             toast.warn("Les Champs qui ont (*) sont Obligatoires")
         }
+        setOpen(false)
     }
 
     return (
@@ -93,25 +102,25 @@ function EditAnnonce(props) {
                 <div className="card-body">
                     <div className="row">
                         <div>
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="l'Objet d'Annonce."  required className={classes.container} multiline={true} defaultValue={annonce.Sujet} onChange={e => setSjt(e.target.value)} /> 
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="l'Objet d'Annonce."  required className={classes.container} multiline={true} defaultValue={annonce.Sujet} onChange={ sujet !== "" ?  e => setSjt(e.target.value) : setSjt(annonce.Sujet)} />
                         </div>
                     </div><br/><br/>
                     <div className="row">
                         <div>
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Description d'Annonce"  required className={classes.container} multiline={true}  defaultValue={annonce.DescripAnnonce} onChange={e => setDesc(e.target.value)} /> 
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Description d'Annonce"  required className={classes.container} multiline={true}  defaultValue={annonce.DescripAnnonce} onChange={descrip !== "" ? e => setDesc(e.target.value) : setDesc(annonce.DescripAnnonce) } />
                         </div>
                     </div><br /><br/>
                     <div className="row">
                         <div className="col-md-4">Statut d'Annonce : </div>
-                        <div className="col-md-4"><input type="radio" name="st" value="Visible"  onChange={e => setStatut(e.target.value)} /> Visible</div>
-                        <div className="col-md-4"><input type="radio" name="st" value="Invisible"  onChange={e => setStatut(e.target.value)} /> Invisible</div>
+                        <div className="col-md-4"><input type="radio" name="st" value={1}  onChange={e => setStatut(e.target.value)} /> Visible</div>
+                        <div className="col-md-4"><input type="radio" name="st" value={0}  onChange={e => setStatut(e.target.value)} /> Invisible</div>
                     </div><br />
                     {
-                        statut === "Visible" && 
-                        <div className="text-muted"><small>Visible : les Copropriétaires peuvent consulter cette Annonce.</small> </div>
+                        statut === 1 && 
+                        <div className="text-muted"><small>Visible : les Copropriétaires peuvent consulter cette Annonce.</small><br/><br/></div>
                     }
                     {
-                        statut === "Invisible" &&
+                        statut === 0 &&
                         <div className="text-muted"><small>Invisible : Signifie que cette annonnce ne sera pas Visible par le Copropriétaire.</small><br/><br/></div>
                     }
                     <div className="row container">
@@ -124,11 +133,23 @@ function EditAnnonce(props) {
                             <Link to="/annonces" className="btn btn-outline-danger form-control">Annuler</Link>
                         </div>
                         <div className="col-md-6">
-                            <input type="submit" value="Valider" onClick={update} className="btn btn-primary form-control" />
+                            <input type="submit" value="Valider" onClick={handleOpen} className="btn btn-primary form-control" />
                         </div>
                     </div>
                 </div>
             </div>
+            <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de la mise à jour d'Annonce ?"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Est ce que vous etes sure de modifier cette Annonce ?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">Cancel</Button>
+                    <Button onClick={update} color="secondary" autoFocus>Oui, Je Confirme !</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }

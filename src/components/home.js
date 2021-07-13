@@ -20,7 +20,6 @@ import ListerCotisation from '../home pages/Cotisations/listerCotisation'
 import AddDepense from '../home pages/Dépenses/addDepense'
 import EditDepense from '../home pages/Dépenses/editDepense'
 import ListerDepense from '../home pages/Dépenses/listerDepense'
-import FilterDepense from '../home pages/Dépenses/filterDepense'
 import Login from './login'
 import Statistique from '../home pages/Statistique/statistique'
 import Logement from '../home pages/Logement/logement'
@@ -29,6 +28,8 @@ import ListerLogement from '../home pages/Logement/listerLogement'
 import AddLogement from '../home pages/Logement/addLogement'
 import axios from 'axios'
 import InfoLogement from '../home pages/Logement/infoLogement'
+import ReleveFinancier from '../home pages/Statistique/releveFinancier'
+import LesImpayes from '../home pages/Cotisations/lesImpayes'
 
 function Home(props) {
     const history = useHistory()
@@ -69,6 +70,7 @@ function Home(props) {
                     <Switch>
                         <Route exact path="/" component={Login} />
                         <Route exact path="/Home" component={Statistique} />
+                        <Route exact path="/relevé-financièr" component={ReleveFinancier} />
 
                         <Route exact path="/dépenses" component={Depense} />
                         <Route exact path="/cotisations" component={Cotisation} />
@@ -81,11 +83,11 @@ function Home(props) {
                         <Route exact path="/add-dépense" component={AddDepense} />
                         <Route exact path="/dépense/edit/:refDepense" component={EditDepense} />
                         <Route exact path="/all/dépenses" component={ListerDepense} />
-                        <Route exact path="/filter-dépense" component={FilterDepense} />
 
                         <Route exact path="/add-cotisation" component={AddCotisation} /> 
-                        <Route exact path="/cotisation/edit/:numCotisation" component={EditCotisation} />
+                        <Route exact path="/cotisation/edit/:RefPaiement" component={EditCotisation} />
                         <Route exact path="/all/cotisations" component={ListerCotisation} />                 
+                        <Route exact path="/les-impayés" component={LesImpayes} />
 
                         <Route exact path="/add-annonce" component={AddAnnonce} />
                         <Route exact path="/annonce/edit/:refAnnonce" component={EditAnnonce} />

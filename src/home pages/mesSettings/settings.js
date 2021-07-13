@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
+import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText,} from '@material-ui/core';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -32,6 +33,14 @@ function Settings() {
     const [tele, setTele] = useState('')
     const [pwd, setPwd] = useState('')
     const [newPwd, setNewPwd] = useState('')
+    const [open, setOpen] =useState(false)
+    
+    const handleClose = () => {
+        setOpen(false);
+    };
+    const handleClickOpen = () => {
+        setOpen(true)
+    }
 
     const id = localStorage.getItem('id')
     useEffect(() => {
@@ -76,7 +85,11 @@ function Settings() {
                     })
                 }
             }
+            else if(nom === "" && prenom === "" && tele === ""){
+                toast.success("Votre Profile est modifié avec Succès")
+            }
         }
+        setOpen(false)
     }
 
     
@@ -119,11 +132,23 @@ function Settings() {
                     </div><br /><br/>
                     <div className="row">
                         <div className="">
-                            <input type="submit" value="Enregistrer" onClick={updateMonCompte} className="form-control btn btn-primary" />
+                            <input type="submit" value="Enregistrer" onClick={handleClickOpen} className="form-control btn btn-primary" />
                         </div>
                     </div>
                 </div>
             </div><br/><br/><br/><br/>
+            <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de mettre à jour mon Compte ?"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Est ce que vous etes sure de mettre ces modifications !
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">Cancel</Button>
+                    <Button onClick={updateMonCompte} color="secondary" autoFocus>Oui, Je Confirme !</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }

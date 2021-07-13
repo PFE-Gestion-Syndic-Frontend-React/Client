@@ -36,15 +36,12 @@ function AddCompte(props) {
     const [role, setRole] = useState('')
     const [fonc, setFonc] = useState('')
     const [msg, setMsg] = useState('')
-    console.log(msg)
 
     useEffect(() => {
         if(email){
             axios.get("http://localhost:5001/users/byEmail/" + email)
             .then((response) => {
                 if(response){
-                    //console.log("coool")
-                    console.log(response)
                     if(response.data.msg === "Déjà Utilisé !"){
                         setMsg("E-mail est déjà utilisé !!!")
                         toast.error("Cette Adresse E-mail est déjà Utilisée !")
@@ -63,7 +60,10 @@ function AddCompte(props) {
     
     
     const createAccount =  () => {
-        if(nom !== "" && prenom !== "" && email !== "" && tele !== "" && role !== "" && fonc !== ""){
+        if(role === "Copropriétaire"){
+            setFonc("Copropriétaire")
+        }
+        if(nom !== "" && prenom !== "" && email !== "" && tele !== "" && role !== ""){
             const datasend = {nom : nom, prenom : prenom, email : email, tele : tele, role : role, fonc : fonc}
             axios.post("http://localhost:5001/users/new", datasend)
             .then((resolve) => {
@@ -71,6 +71,9 @@ function AddCompte(props) {
                     setMsg("Le Compte est enregistré avec Success")
                     props.history.push('/comptes')
                     toast.success("La Création du Compte est effectuée avec Succès")
+                }
+                else if(resolve.data.msgErr === "Duplicate Email"){
+                    toast.error("Cette Adresse E-mail est Déjà Utilisée !")
                 }
                 else if(resolve.data.messageErr === "E-mail Already Used !"){
                     setMsg("E-mail est déjà utilisé !!!")

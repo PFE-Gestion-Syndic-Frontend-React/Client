@@ -54,7 +54,7 @@ function NavGuest() {
     return (
         <div>
             <Paper square className={classes.root}>
-                <AppBar className="" style={{width : "100%"}} color="transparent">
+                <AppBar className="" style={{width : "100%"}} color="default">
                     <Tabs value={value} onChange={handleChange} variant="fullwidth" indicatorColor="primary" textColor="primary">
                         <Tab style={{width : "150px"}} label="GSC" component={Link} to="/Acceuil" />
                         <Tab style={{width : "150px"}} label="Dépense" component={Link} to="/Dépenses" />

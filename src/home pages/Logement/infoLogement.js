@@ -1,11 +1,9 @@
 import React, {useState, useEffect} from 'react'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Avatar, Accordion, AccordionSummary, AccordionDetails, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
+import { Typography, Avatar, Accordion, AccordionSummary, AccordionDetails, Card, CardHeader, CardContent, CardActions } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { toast } from 'react-toastify';
-import {DataGrid, GridToolbarContainer, GridToolbarExport} from '@material-ui/data-grid'
-import { useDemoData } from '@material-ui/x-grid-data-generator';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -88,7 +86,7 @@ function InfoLogement(props) {
             console.log(err)
         })
             
-    }, [Num])
+    }, [Num, RefLogement, compte.NumCompte])
 
     return (
         <div style={{ paddingTop : "5%"}}>

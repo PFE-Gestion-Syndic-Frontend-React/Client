@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
-import { Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions } from '@material-ui/core'
+import { IconButton, Avatar, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { toast } from 'react-toastify';
+import { CloudDownloadOutlined }from '@material-ui/icons';
 
 axios.interceptors.request.use(
     config => {
@@ -36,6 +37,10 @@ const useStyles = makeStyles((theme) => ({
         fontSize: theme.typography.pxToRem(15),
         fontWeight: theme.typography.fontWeightRegular,
         boxShadow : theme.typography,
+    },
+    media: {
+        height: 0,
+        paddingTop: '56.25%', // 16:9
     },
 }))
 
@@ -87,7 +92,10 @@ function ListerAnnonces() {
         }
     }, [search])
 
-    
+
+    const handleDownload = (fileName) => {
+        console.log(fileName)
+    }
 
     return (
         <div style={{top : "120px"}}>
@@ -119,7 +127,14 @@ function ListerAnnonces() {
                                                         <CardContent>
                                                             <Typography variant="body1" color="textPrimary">
                                                                 {a.DescripAnnonce}
-                                                            </Typography>
+                                                            </Typography><br/><br/>
+                                                            {
+                                                                a.contenuDocument !== null &&
+                                                                <div>
+                                                                    <Avatar src={`annonce doc/${a.contenuDocument}`} alt="" style={{width : "200px", height : "200px"}} />
+                                                                    <div style={{marginLeft : "60px"}} onClick={handleDownload.bind(this, a.contenuDocument)} ><IconButton aria-label="Download" aria-labelledby="Download" ><CloudDownloadOutlined style={{width : "50px", height : "50px"}} /> </IconButton></div>
+                                                                </div>
+                                                            }
                                                         </CardContent>
                                                         <CardActions>
                                                             <Typography variant="body2" color="textSecondary" component="p"> Date Publication : {a.dateAnnonce.replace("T23:00:00.000Z", "")} </Typography>

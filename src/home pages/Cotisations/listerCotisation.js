@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import {Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton} from '@material-ui/core'
+import { TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton} from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from '@material-ui/core/styles';
 import { DeleteOutlined, UpdateOutlined }from '@material-ui/icons';
 import axios from 'axios';
-import {toast} from 'react-toastify'
+import { useHistory } from 'react-router';
+import Alert from '@material-ui/lab/Alert';
 
 axios.interceptors.request.use(
     config => {
@@ -38,84 +39,87 @@ const useStyles = makeStyles((theme) => ({
         fontWeight: theme.typography.fontWeightRegular,
         boxShadow : theme.typography,
     },
+    textfield : {
+        width : "720px",
+    },
 }))
 
 
 
 function ListerCotisation() {
     const classes = useStyles()
+    const history = useHistory()
     const [msg, setMsg] = useState('')
     const [cotisations, setCotisation] = useState([])
     const [search, setSearch] = useState('')
+    const [open, setOpen] = useState(false)
+    //const [deleted, setDeleted] = useState('')
 
+    const handleOpen = () => {
+        setOpen(true)
+    }
+    const handleClose = () => {
+        setOpen(false)
+    }
 
     useEffect(() => {
         if(search !== ""){
             axios.get("http://localhost:5001/cotisations/" + search)
             .then((response) => {
-                if(response){
-                    if(response.data.msgErr === "No Token Set"){
-                        localStorage.clear()
-                        History.push('/')
-                    }
-                    else if(response.data.msggg === "No Paiements"){
-                        setMsg("No Cotisation")
-                        toast.warn("Elle n'y'a Aucune Cotisation pour cette Recherche")
-                    }
-                    else if(response.data.length > 0){
-                        setCotisation(response.data)
-                        //console.log(response.data)
-                        setMsg("")
-                    }
+                if(response.data.msgErr === "No Token Set"){
+                    localStorage.clear()
+                    History.push('/')
                 }
-                else {
+                else if(response.data === "No Paiements"){
                     setMsg("No Cotisation")
-                    setCotisation(response.data.msggg)
-                    toast.warn("Elle n'y'a Aucune Cotisation pour cette Recherche")
+                }
+                else if(response.data.length > 0){
+                    setCotisation(response.data)
+                    setMsg("")
                 }
             })
-            .catch(() => {
+            .catch((err) => {
+                console.log(err)
                 setMsg("No Cotisation")
             })
         }
         else{
             axios.get("http://localhost:5001/cotisations/all")
-                .then((response) => {
-                    if(response.data.msgErr === "No Token Set"){
-                        localStorage.clear()
-                        History.push('/')
-                    }
-                    if(response.data.length > 0){
-                        //console.log(response.data[0])
-                        setCotisation(response.data[0])
-                    }
-                })
-                .catch((err) => 
-                {
-        
-                })
+            .then((response) => {
+                if(response.data.msgErr === "No Token Set"){
+                    localStorage.clear()
+                    History.push('/')
+                }
+                if(response.data.length > 0){
+                    setCotisation(response.data[0])
+                }
+            })
+            .catch((err) => 
+            {
+                console.log(err)
+            })
         }
     },[search])
 
     const updateCotisation = (RefCotisation) => {
-
+        history.push('/cotisation/edit/' + RefCotisation)
     }
 
     const deleteCotisation = (RefCotisation) => {
-
+        setOpen(false)
     }
 
     return (
         <div style={{top : "120px"}}>
             <h1 style={{marginLeft : "200px"}}>Lister Les Cotisations</h1>
-            <div className="container col-md-8 col-md-offset-2"><br/>
+            <div className="container col-md-8 col-md-offset-2"><br/><br/>
                 <div className="container col-md-10 col-md-offset-1">
                     <div className="row">
                         <div>
-                            <input type="text" placeholder="Chercher Les Cotisations..." className="form-control" onChange={e => setSearch(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Cotisations..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
-                </div>
+                </div><br/>
             </div>
             <div className="container col-md-8 col-md-offset-2">
                 {
@@ -132,7 +136,7 @@ function ListerCotisation() {
                                             <AccordionDetails>
                                                 <Typography spacing={3}>
                                                     <Card className={classes.root} elevation={1}>
-                                                        <CardHeader action={ <div> <IconButton onClick={ updateCotisation.bind(this, "1") }  ><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton><IconButton onClick={ deleteCotisation.bind(this, "1") }><DeleteOutlined style={{color : "red", fontSize : "30px"}} /> </IconButton> </div> } 
+                                                        <CardHeader action={ <div> <IconButton onClick={ updateCotisation.bind(this, c.RefPaiement) }  ><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton><IconButton onClick={ handleOpen }><DeleteOutlined style={{color : "red", fontSize : "30px"}} /> </IconButton> </div> } 
                                                                     subheader={`Référence :  ${c.RefPaiement}`} />
                                                         <CardContent>
                                                             <Typography variant="body1" color="textPrimary">
@@ -160,11 +164,26 @@ function ListerCotisation() {
                                                 </Typography>
                                             </AccordionDetails>
                                         </Accordion>
+                                        <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                                            <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de la Suppression d'une Annonce ?"}</DialogTitle>
+                                            <DialogContent>
+                                                <DialogContentText id="alert-dialog-description">
+                                                    Est ce que Voulez-Vous de SUPPRIMER Cette Cotisation ?
+                                                </DialogContentText>
+                                            </DialogContent>
+                                            <DialogActions>
+                                                <Button onClick={handleClose} color="primary">Cancel</Button>
+                                                <Button onClick={deleteCotisation.bind(this, c.RefPaiement)} color="secondary" autoFocus>Oui, Je Supprime !</Button>
+                                            </DialogActions>
+                                        </Dialog>
                                     </div>
                                 )
                             })
                         }
                     </div>
+                }
+                {
+                    msg === "No Cotisation" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Cotisation Pour Cette Recherche "{search}"</Alert></div>
                 }
             </div>
         </div>

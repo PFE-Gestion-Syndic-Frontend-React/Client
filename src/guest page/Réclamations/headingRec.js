@@ -19,8 +19,8 @@ function HeadingRec() {
     const classes = useStyles()
     return (
         <div className={classes.root}>
-            <Button color="primary" style={{marginLeft : "1120px", width : "300px", textTransform : "capitalize", fontSize : "16px"}} component={Link} to="/mes-réclamations"><span><i className="bi bi-megaphone-fill" style={{paddingRight : "15px"}}></i></span>  Mes Réclamations </Button>
-            <Button color="primary" style={{marginLeft : "1120px", width : "300px", textTransform : "capitalize", fontSize : "16px"}} component={Link} to="/add-réclamation"><span><i className="bi bi-megaphone-fill" style={{paddingRight : "15px"}}></i></span>  Créer Une Réclamation </Button>
+            <Button color="primary" style={{marginLeft : "800px", width : "300px", textTransform : "capitalize", fontSize : "16px"}} component={Link} to="/mes-réclamations"><span><i className="bi bi-megaphone-fill" style={{paddingRight : "15px"}}></i></span>  Mes Réclamations </Button>
+            <Button color="primary" style={{marginLeft : "50px", width : "300px", textTransform : "capitalize", fontSize : "16px"}} component={Link} to="/add-réclamation"><span><i className="bi bi-megaphone-fill" style={{paddingRight : "15px"}}></i></span>  Créer Une Réclamation </Button>
         </div>
     )
 }

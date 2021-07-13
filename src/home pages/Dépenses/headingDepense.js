@@ -20,8 +20,7 @@ function HeadingDepense() {
 
     return (
         <div className={classes.root}>
-            <Button variant="contained"  style={{marginLeft : "900px", width : "200px", textTransform : "capitalize", fontSize : "16px"}} component={Link} to="/filter-dépense">Filtrer Les Dépenses</Button>
-            <Button variant="text"  color="primary" style={{marginLeft : "50px", width : "300px", textTransform : "capitalize", fontSize : "16px"}} component={Link} to="/add-dépense"><span><i className="bi bi-plus-circle-fill" style={{paddingRight : "15px"}}></i></span>  Enregistrer Une Dépense </Button>
+            <Button variant="text"  color="primary" style={{marginLeft : "1000px", width : "300px", textTransform : "capitalize", fontSize : "16px"}} component={Link} to="/add-dépense"><span><i className="bi bi-plus-circle-fill" style={{paddingRight : "15px"}}></i></span>  Enregistrer Une Dépense </Button>
         </div>
     )
 }

@@ -12,7 +12,7 @@ const useStyles = makeStyles({
 
 function Nav(props) {
     const classes = useStyles();
-    const [value, setValue] = React.useState(0);
+    const [value, setValue] = useState(0);
     const [anchorEl, setAnchorEl] = useState(null)
     let Name = localStorage.getItem('Name')
     let Prenom = localStorage.getItem('First')
@@ -26,7 +26,7 @@ function Nav(props) {
 
 
     const handleClick = (e) => {
-        setAnchorEl(e.currentTarget);
+        setAnchorEl(e.currentTarget + 1);
     }
 
     const handleClose = () => {
@@ -51,7 +51,7 @@ function Nav(props) {
             {
                 OK === true &&
                 <Paper square className={classes.root}>
-                    <AppBar color="transparent">
+                    <AppBar color="default">
                         <Tabs value={value} onChange={handleChange} variant="fullwidth" indicatorColor="primary" textColor="primary">
                             <Tab label="GSC" component={Link} to="/home" />
                             <Tab label="Dépense" component={Link} to="/dépenses" />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {Link} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
+import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText} from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -31,8 +31,17 @@ function EditDepense(props) {
     const [desc, setDesc] = useState('')
     const [dep, setDep] = useState({})
     const [msg, setMsg] = useState('')
-    console.log(msg)
+    const [open, setOpen] = useState(false)
     const refDepense = props.match.params.refDepense
+
+
+    const handleOpen = () => {
+        setOpen(true)
+    }
+    const handleClose = () => {
+        setOpen(false)
+    }
+
     useEffect(() => {
         if(refDepense){
             axios.get(`http://localhost:5001/depenses/depense/${refDepense}`)
@@ -70,6 +79,7 @@ function EditDepense(props) {
             setMsg("Champs Obligatoires")
             toast.warn("Les Champs qui ont (*) sont Obligatoires")
         }
+        setOpen(false)
     }
 
 
@@ -111,11 +121,23 @@ function EditDepense(props) {
                             <Link to="/dépenses" className="btn btn-outline-danger form-control">Annuler</Link>
                         </div>
                         <div className="col-md-6">
-                            <input type="submit" value="Partager" onClick={updateDepense} className="btn btn-primary form-control" />
+                            <input type="submit" value="Partager" onClick={handleOpen} className="btn btn-primary form-control" />
                         </div>
                     </div>
                 </div>
             </div>
+            <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de la mise à jour du cette Dépense ?"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Confirmez-vous la modification du cette Dépense ?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">Cancel</Button>
+                    <Button onClick={updateDepense}  color="secondary" autoFocus>Oui, Je Confirme !</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }

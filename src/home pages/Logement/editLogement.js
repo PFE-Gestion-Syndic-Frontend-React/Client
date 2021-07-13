@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Select, MenuItem, FormControl, InputLabel, Typography, Card, CardHeader, CardContent, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Select, MenuItem, FormControl, InputLabel, Typography, Card, CardHeader, CardContent } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
@@ -38,14 +38,15 @@ function EditLogement(props) {
     
     useEffect(() => {
         axios.get("http://localhost:5001/logements/coproprietaire/" + refLogement)
-            .then((resolve) => {
-                if(resolve.data.length > 0){
-                    setCopro(resolve.data[0])
-                }
-            })
-            .catch(() => {
+        .then((resolve) => {
+            if(resolve.data.length > 0){
+                setCopro(resolve.data[0])
+            }
+        })
+        .catch(() => {
 
-            })
+        })
+        setOpen(false)
     }, [refLogement])
 
 

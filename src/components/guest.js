@@ -56,7 +56,7 @@ function Guest(props) {
                         <Route exact path="/Dépenses" component={ListerDepenses} />
                         <Route exact path="/Settings" component={Settings} />
                         <Route exact path="/Cotisations" component={ListerMesPaiements} />
-                        <Route exact path="/Réclamation" component={Reclamations} />
+                        <Route exact path="/Réclamations" component={Reclamations} />
 
 
 

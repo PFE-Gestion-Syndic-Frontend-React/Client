@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom'
-import { IconButton, Button, Dialog, DialogContentText, DialogActions, DialogTitle, DialogContent } from '@material-ui/core';
+import { makeStyles, TextField, IconButton, Button, Dialog, DialogContentText, DialogActions, DialogTitle, DialogContent } from '@material-ui/core';
 import { DeleteOutlined, UpdateOutlined }from '@material-ui/icons';
 import { toast } from 'react-toastify';
+import Alert from '@material-ui/lab/Alert'
 
 
 axios.interceptors.request.use(
@@ -16,16 +17,29 @@ axios.interceptors.request.use(
     }
 )
 
-function ListeCompte(props) {
+const useStyles = makeStyles((theme) => ({
+    
+    textField : {
+        width : "720px",
+    },
+  }));
 
+
+
+function ListeCompte(props) {
+    const history = useHistory()
+    const classes = useStyles()
     /*if(!localStorage.getItem("token")){
         props.history.push('/')
     }*/
+    const id = localStorage.getItem('id')
     const [compte, setCompte] = useState([])
     const [search, setSearch] = useState('')
     const [msg, setMsg] = useState('')
     const [open, setOpen] = useState(false)
     const [Num, setNum] = useState('')
+    const [deleted, setDeleted] = useState('')
+
 
     const handleClose = () => {
         setOpen(false);
@@ -33,14 +47,12 @@ function ListeCompte(props) {
     const handleOpen = (NumCompte) => {
         setOpen(true);
         setNum(NumCompte)
-        console.log(NumCompte)
     };
 
     useEffect(() => {
         if(search !== ""){
             axios.get("http://localhost:5001/users/" + search)
             .then((response) => {
-                console.log(response)
                 if(response.data.length > 0){
                     setCompte(response.data)
                     setMsg("")
@@ -48,7 +60,6 @@ function ListeCompte(props) {
                 else {
                     setMsg("No Users")
                     setCompte(response.data.msggg)
-                    toast.warn("Aucun Compte est trouvé pour cette Recherche !")
                 }
                 
             })
@@ -58,14 +69,14 @@ function ListeCompte(props) {
         }
         else{ 
             axios.get("http://localhost:5001/users/all")
-                .then((response) => {
-                    if(response.data.length > 0){
-                        setCompte(response.data)
-                    }
-                })
-                .catch(() => console.log("No users"))
+            .then((response) => {
+                if(response.data.length > 0){
+                    setCompte(response.data)
+                }
+            })
+            .catch(() => console.log("No users")) 
         }
-    }, [search])
+    }, [search, deleted, msg])
     
 
     const deleteCompte = (NumCompte) => {
@@ -80,18 +91,15 @@ function ListeCompte(props) {
             }
             else if(response.data === "Deleted"){
                 toast.info("Le Compte est Supprimé avec Succès")
-                setMsg("Le Compte est Supprimé avec Succès")
+                setMsg("")
+                setDeleted("ok")
             }
         })
-        .then((next) => {
-            next()
-        })
-        .catch(() => console.log("err"))
-        
+        .catch((err) => console.log("err : ", err))
         setOpen(false)
     }
 
-    const history = useHistory()
+
     const updateCompte = (id) => {
         history.push('/compte/edit/' + id)
     }
@@ -101,14 +109,14 @@ function ListeCompte(props) {
     return (
         <div className="" style={{top : "120px"}}><br/>
             <h1 style={{marginLeft : "200px"}}>Lister Les Comptes</h1>
-            <div className="container col-md-8 col-md-offset-2"><br/>
+            <div className="container col-md-8 col-md-offset-2"><br/><br/>
                 <div className="container col-md-10 col-md-offset-1">
                     <div className="row">
                         <div>
-                            <input type="text" placeholder="Chercher Les Comptes..." className="form-control" onChange={e => setSearch(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Comptes..." required className={classes.textField} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
-                </div>
+                </div><br/>
                 {
                     msg === "" &&
                     <table className="table table-hover">
@@ -135,14 +143,17 @@ function ListeCompte(props) {
                                             <td> {c.telephone} </td>
                                             <td> {c.Role} </td>
                                             <td><img src={`profile img/${c.photo}`} alt="" width="60px" /> </td>
-                                            <td><IconButton onClick={updateCompte.bind(this, c.NumCompte)}><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton></td>
-                                            <td><IconButton onClick={handleOpen.bind(this, c.NumCompte)} ><DeleteOutlined style={{color : "red", fontSize : "30px"}} /></IconButton></td>
+                                            <td>{c.NumCompte !== parseInt(id) && <IconButton onClick={updateCompte.bind(this, c.NumCompte)}><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton>}</td>
+                                            <td>{c.NumCompte !== parseInt(id) && <IconButton onClick={handleOpen.bind(this, c.NumCompte)} ><DeleteOutlined style={{color : "red", fontSize : "30px"}} /></IconButton>}</td>
                                         </tr>
                                     )}
                                 )
                             }
                         </tbody>
                     </table>
+                }
+                {
+                    msg === "No Users" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error" >Aucun Compte Pour Cette Recherche "{search}" </Alert></div>
                 }
             </div><br/><br/><br/><br/>
             <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">

@@ -3,7 +3,7 @@ import {Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardCon
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
-import {toast} from 'react-toastify'
+import Alert from '@material-ui/lab/Alert'
 
 axios.interceptors.request.use(
     config => {
@@ -50,49 +50,37 @@ function ListerMesPaiements() {
 
     useEffect(() => {
         if(id !== undefined && id !== ""){
-            console.log("You Have it ;) ")
             if(search !== ""){
-                const datasend = {id : id, search : search}
-                axios.get("http://localhost:5001/cotisations/mesCotisations/" + search, datasend)
+                axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}/${search}`)
                 .then((response) => {
-                    if(response){
-                        if(response.data.msgErr === "No Token Set"){
-                            localStorage.clear()
-                            History.push('/')
-                        }
-                        else if(response.data.msggg === "No Paiements"){
-                            setMsg("No Cotisation")
-                            toast.warn("Elle n'y'a Aucune Cotisation pour cette Recherche")
-                        }
-                        else if(response.data.length > 0){
-                            setCotisation(response.data)
-                            //console.log(response.data)
-                            setMsg("")
-                        }
-                    }
-                    else {
-                        setMsg("No Cotisation")
-                        setCotisation(response.data.msggg)
-                        toast.warn("Elle n'y'a Aucune Cotisation pour cette Recherche")
-                    }
-                    console.log(response)
-                })
-                .catch(() => {
-                    setMsg("No Cotisation")
-                })
-            }
-            else{
-                console.log(id)
-                axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}`)
-                .then((response) => {
-                    //console.log(response)
-                    if(response.data.msgErr === "No Token Set"){
+                    if(response.data === "No Token at all" || response.data === "Invalid Token"){
                         localStorage.clear()
                         History.push('/')
                     }
-                    if(response.data.length > 0){
-                        //console.log(response.data[0])
-                        setCotisation(response.data[0])
+                    /*else if(response.data === "No Paiements"){
+                        setCotisation("")
+                        setMsg("No Paiements")
+                    }*/
+                    else if(response.data.length > 0){
+                        setCotisation(response.data)
+                        setMsg("")
+                    }
+                })
+                .catch((err) => { console.log(err) })
+            }
+            else{
+                axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}`)
+                .then((response) => {
+                    //console.log(response)
+                    if(response.data === "No Token at all" || response.data === "Invalid Token"){
+                        localStorage.clear()
+                        History.push('/')
+                    }
+                    else if(response.data.length > 0){
+                        setCotisation(response.data)
+                    }
+                    else{
+                        setMsg("No Cotisations")
                     }
                 })
                 .catch((err) => 
@@ -104,7 +92,7 @@ function ListerMesPaiements() {
         else{
             console.log("HEHO ANY ID !")
         }
-    },[search])
+    },[search, id])
 
 
 
@@ -166,6 +154,12 @@ function ListerMesPaiements() {
                             })
                         }
                     </div>
+                }
+                {
+                    msg === "No Paiements" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Vous n'avez aucun Paiement sous Cette Recherche "{search}" </Alert></div>
+                }
+                {
+                       msg === "No Cotisations" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Vous n'avez Aucune Cotisation Pour l'Instant </Alert></div> 
                 }
             </div>
         </div>

@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
-import {Button, IconButton, TextField} from '@material-ui/core';
+import { TextField} from '@material-ui/core';
 import { toast } from 'react-toastify';
-import { PhotoCamera } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
     
@@ -37,50 +36,69 @@ const useStyles = makeStyles((theme) => ({
 
 
 function AddAnnonce(props) {
+    const History = useHistory()
     const classes = useStyles();
     const id = localStorage.getItem('id')
-    if(id !== null){
-        const idParsed = parseInt(id)
-        //console.log(idParsed)
-    }
+
     const [sujet, setSujet] = useState('')
     const [descripAnnonce, setDescrip] = useState('')
     const [msg, setMsg] = useState('')
     const [file, setFile] = useState('')
-    const [filename, setFileName] = useState('Chooose File')
-    const [uploaded, setUploaded] = useState({})
 
-
-    const selectedFile = (e) => {
-        setFile(e.target.files[0])
-        setFileName(e.target.files[0].name)
-    }
     
     const annoncer = () => {
-        //const datasend = {id : id, sujet : sujet, descripAnnonce : descripAnnonce}
-        //console.log(datasend)
-        /*axios.post("http://localhost:5001/annonces/new", datasend)
-        .then((resolve) => {
-            if(resolve.data.message === "Inserted"){
-                setMsg("L'annonce est enregistré avec Success")
-                props.history.push('/annonces')
-                toast.success('Votre Annonce est enregistré avec Succès')
+        if(id !== "" && sujet !== "" && descripAnnonce !== ""){
+            if(file !== "" && file !== null){
+                const formdata = new FormData()
+                formdata.append('anonce', file)
+                axios.post("http://localhost:5001/upload/annonce/" + id + "/" + sujet + "/" + descripAnnonce, formdata)
+                .then((res) => {
+                    if(res.data === "Inserted" || res.data === "Inserted and Uploaded"){
+                        setMsg("L'annonce est enregistré avec Success")
+                        History.push('/annonces')
+                        toast.success('Votre Annonce est Enregistrée avec Succès')
+                    }
+                    else if(res.data.messageErr === "Bad One"){
+                        setMsg("Really Bad")
+                        toast.warn("l'Annonce est échoué ! Réssayez-vous une autre fois..")
+                    }
+                    else if(res.data.affectedRows !== 0){
+                        History.push('/annonces')
+                        toast.success("Votre Annonce est Enregistrée avec Succès")
+                    }
+                })
+                .catch((err) => console.log(err))
             }
-            else if(resolve.data.messageErr === "bad"){
-                setMsg("Really Bad")
-                toast.warn("l'Annonce est échoué ! Réssayez-vous une autre fois..")
+            else{
+                const datasend = { sujet : sujet, descripAnnonce : descripAnnonce}
+                axios.post("http://localhost:5001/annonces/new/" + id, datasend)
+                .then((resolve) => {
+                    if(resolve.data === "Inserted"){
+                        setMsg("L'annonce est enregistré avec Success")
+                        History.push('/annonces')
+                        toast.success('Votre Annonce est enregistré avec Succès')
+                    }
+                    else if(resolve.data === "bad"){
+                        setMsg("Really Bad")
+                        toast.warn("l'Annonce est échoué ! Réssayez-vous une autre fois..")
+                    }
+                    else if(resolve.data === "Failed"){
+                        toast.warn("l'Annonce est échoué ! Réssayez-vous une autre fois..")
+                    }
+                    else{
+                        console.log("ress : ", resolve)
+                    }
+                    //console.log(resolve)
+                })
+                .catch((err) => console.log(err))
+                }
             }
-        })
-        .catch((err) => console.log(err))*/
-
-        const formdata = new FormData()
-        formdata.append('anonce', file)
-        //const datasend = {file : file, filename : filename}
-         axios.post("http://localhost:5001/upload/annonce", formdata)
-        .then((res) => console.log(res))
-        .catch((err) => console.log(err))
+        else{
+            toast.warn("Les Champs qui ont (*) sont Obligatoires")
+        }
     }
 
+    
     return (
         <div className="container col-md-6 col-md-offset-3" style={{paddingTop : "90px"}}>
             <div className="card">
@@ -98,7 +116,7 @@ function AddAnnonce(props) {
                     </div><br />
                     <div className="row container">
                         <div>
-                            <input type="file" onChange={e => selectedFile(e)} className="custom-file-input" id="customFile" />
+                            <input type="file" onChange={e => setFile(e.target.files[0])} className="custom-file-input" id="customFile" />
                             <label htmlFor="cutomFile" className="custom-file-label"></label>
                         </div>
                     </div><br />

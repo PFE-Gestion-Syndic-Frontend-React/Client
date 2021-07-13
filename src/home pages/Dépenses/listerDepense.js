@@ -1,11 +1,13 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import {Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardHeader, CardContent, CardActions, IconButton} from '@material-ui/core'
+import { TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardHeader, CardContent, CardActions, IconButton} from '@material-ui/core'
 import { UpdateOutlined, DeleteOutlined } from '@material-ui/icons'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { makeStyles } from '@material-ui/styles'
 import { useHistory } from 'react-router'
 import {toast} from 'react-toastify'
+import Alert from '@material-ui/lab/Alert'
+
 
 axios.interceptors.request.use(
     config => {
@@ -30,43 +32,83 @@ const useStyles = makeStyles((theme) => ({
     root: {
         width: '955px',
     },
+    textfield : {
+        width : "720px",
+    },
 }))
 
 
 function ListerDepense(props) {
     const classes = useStyles()
+    const [search, setSearch] = useState('')
     const [depense, setDepense] = useState() 
     const [msg, setMsg] = useState('')
+    const [deleted, setDeleted] = useState('')
+    const [open, setOpen] = useState(false)
+
+    const handleClose = () => {
+        setOpen(false)
+    }
+    const handleOpen = () => {
+        setOpen(true)
+    }
+
     useEffect(() => {
-        axios.get("http://localhost:5001/depenses/all")
-            .then((resolve) => {
-                if(resolve.data.length > 0){
-                    setDepense(resolve.data)
+        if(search !== ""){
+            axios.get("http://localhost:5001/depenses/" + search)
+            .then((response) => {
+                if(response.data.msgErr === "No Token Set"){
+                    localStorage.clear()
+                    History.push('/')
+                }
+                else if(response.data === "No Dépense"){
+                    setMsg("No Dépense")
+                }
+                else if(response.data.length > 0){
+                    setDepense(response.data)
                     setMsg("data")
                 }
-                else{
-                    setDepense()
-                    setMsg("")
-                    toast.warn("Aucune Dépense")
-                }
             })
             .catch(() => {
-
-            })
-    })
-
-    const deleteDepense = (RefDepense) => {
-        if(window.confirm("La Dépense sera supprimé permanante !")){
-            axios.delete(`http://localhost:5001/depenses/delete/${RefDepense}`)
-            .then((resolve) => {
-                History.push('/dépenses')
-                props.history.push('/dépenses')
-                toast.info("La Dépense a été Supprimée avec Succès")
-            })
-            .catch(() => {
-    
+                setMsg("No Dépense")
             })
         }
+        else{
+            axios.get("http://localhost:5001/depenses/all")
+            .then((response) => {
+                if(response.data){
+                    if(response.data.length > 0){
+                        setDepense(response.data)
+                        setMsg("data")
+                    }
+                    else if(response.data === "No Dépense"){
+                        setDepense("")
+                        setMsg("No Dépense")
+                        toast.warn("Aucune Dépense")
+                    }
+                }
+                else{
+                    setMsg("No Dépense")
+                }
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+        }
+    }, [search, msg, deleted])
+
+    const deleteDepense = (RefDepense) => {
+        axios.delete(`http://localhost:5001/depenses/delete/${RefDepense}`)
+        .then((resolve) => {
+            toast.info("La Dépense a été Supprimée avec Succès")
+        })
+        .catch(() => {
+            
+        })
+        toast.info("La Dépense a été Supprimée avec Succès")
+        setMsg("")
+        setDeleted("ok")
+        setOpen(false)
     }
 
     const history = useHistory()
@@ -78,16 +120,16 @@ function ListerDepense(props) {
 
 
     return (
-        <div style={{top : "120px"}}>
+        <div style={{top : "120px"}}><br/>
             <h1 style={{marginLeft : "200px"}}>Lister Les Dépenses</h1>
-            <div className="container col-md-8 col-md-offset-2"><br/>
+            <div className="container col-md-8 col-md-offset-2"><br/><br/>
                 <div className="container col-md-10 col-md-offset-1">
                     <div className="row">
                         <div>
-                            <input type="text" placeholder="Chercher Les Dépenses..." className="form-control"  />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Dépenses..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
-                </div>
+                </div><br/>
             </div>
             {
                 msg === "data" &&
@@ -95,7 +137,7 @@ function ListerDepense(props) {
                     {
                         depense.map((d) => {
                             return(
-                                <div>
+                                <div key={d.RefDepense}>
                                     <Accordion key={d.RefDepense} className="mb-5">
                                         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
                                             <Typography className={classes.heading} style={{color : "blue"}}><strong> {d.descriptionDepense} </strong></Typography>
@@ -103,7 +145,7 @@ function ListerDepense(props) {
                                         <AccordionDetails>
                                             <Typography spacing={3}>
                                                 <Card className={classes.root}>
-                                                    <CardHeader action={ <div> <IconButton onClick={ updateDepense.bind(this, d.RefDepense)} ><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton><IconButton onClick={deleteDepense.bind(this, d.RefDepense)}><DeleteOutlined style={{color : "red", fontSize : "30px"}} /></IconButton></div> } />
+                                                    <CardHeader action={ <div> <IconButton onClick={ updateDepense.bind(this, d.RefDepense)} ><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton><IconButton onClick={handleOpen}><DeleteOutlined style={{color : "red", fontSize : "30px"}} /></IconButton></div> } />
                                                     <CardContent>
                                                         <div className="row">
                                                             <div className="col-md-6">
@@ -113,7 +155,7 @@ function ListerDepense(props) {
                                                                 <Typography variant="body1" color="textPrimary">Montant : <strong style={{color : "blue"}}>{d.MontantDepense} (en Dhs)</strong></Typography>
                                                             </div>
                                                         </div><br/>
-                                                        <Typography > Facture : {d.facture} </Typography>
+                                                        <Typography > Facture : {"d.facture"} </Typography>
                                                     </CardContent>
                                                     <div className="row">
                                                         <div className="col-md-6">
@@ -127,11 +169,26 @@ function ListerDepense(props) {
                                             </Typography>
                                         </AccordionDetails>
                                     </Accordion>
+                                    <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                                        <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de la suppression d'une Dépense ?"}</DialogTitle>
+                                        <DialogContent>
+                                            <DialogContentText id="alert-dialog-description">
+                                                Confirmez-vous la SUPPRESSION du cette Dépense ?
+                                            </DialogContentText>
+                                        </DialogContent>
+                                        <DialogActions>
+                                            <Button onClick={handleClose} color="primary">Cancel</Button>
+                                            <Button onClick={deleteDepense.bind(this, d.RefDepense)}  color="secondary" autoFocus>Oui, Je Confirme !</Button>
+                                        </DialogActions>
+                                    </Dialog>
                                 </div>
                             )
                         })
                     }
                 </div>
+            }
+            {
+                msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Dépense pour Cette Recherche "{search}"</Alert></div>
             }
         </div>
     )

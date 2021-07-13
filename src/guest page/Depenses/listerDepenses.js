@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import {Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardContent, CardActions } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { makeStyles } from '@material-ui/styles'
+import Alert from '@material-ui/lab/Alert'
 import {toast} from 'react-toastify'
 
 axios.interceptors.request.use(
@@ -35,23 +36,50 @@ function ListerDepenses() {
     const classes = useStyles()
     const [depense, setDepense] = useState() 
     const [msg, setMsg] = useState('')
+    const [search, setSearch] = useState('')
 
     useEffect(() => {
-        axios.get("http://localhost:5001/depenses/all")
-            .then((resolve) => {
-                if(resolve.data.length > 0){
-                    setDepense(resolve.data)
-                    setMsg("data")
+        if(search !== ""){
+            axios.get("http://localhost:5001/depenses/" + search)
+            .then((response) => {
+                if(response.data.msgErr === "No Token Set"){
+                    localStorage.clear()
+                    History.push('/')
                 }
-                else{
-                    setDepense()
-                    setMsg("")
-                    toast.warn("Aucune Dépense")
+                else if(response.data === "No Dépense"){
+                    setMsg("No Dépense")
+                }
+                else if(response.data.length > 0){
+                    setDepense(response.data)
+                    setMsg("data")
                 }
             })
             .catch(() => {
-
+                setMsg("No Dépense")
             })
+        }
+        else{
+            axios.get("http://localhost:5001/depenses/all")
+            .then((response) => {
+                if(response.data){
+                    if(response.data.length > 0){
+                        setDepense(response.data)
+                        setMsg("data")
+                    }
+                    else if(response.data === "No Dépense"){
+                        setDepense("")
+                        setMsg("No Dépense")
+                        toast.warn("Aucune Dépense")
+                    }
+                }
+                else{
+                    setMsg("No Dépense")
+                }
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+        }
     })
 
 
@@ -62,7 +90,7 @@ function ListerDepenses() {
                 <div className="container col-md-10 col-md-offset-1">
                     <div className="row">
                         <div>
-                            <input type="text" placeholder="Chercher Les Dépenses..." className="form-control"  />
+                            <input type="text" placeholder="Chercher Les Dépenses..." className="form-control" onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
                 </div>
@@ -109,6 +137,9 @@ function ListerDepenses() {
                         })
                     }
                 </div>
+            }
+            {
+                msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Dépense Pour Cette Recherche "{search}" </Alert></div>
             }
         </div>
     )

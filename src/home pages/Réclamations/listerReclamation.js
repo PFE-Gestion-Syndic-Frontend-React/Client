@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-import { Avatar, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
+import { TextField, Avatar, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { UpdateOutlined }from '@material-ui/icons';
 import { useHistory } from 'react-router';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-
+import Alert from '@material-ui/lab/Alert'
 
 
 
@@ -31,6 +30,9 @@ const useStyles = makeStyles((theme) => ({
         fontWeight: theme.typography.fontWeightRegular,
         boxShadow : theme.typography,
     },
+    textField : {
+        width : "720px",
+    },
 }))
 
 
@@ -46,14 +48,21 @@ function ListerReclamation() {
         if(search !== ""){
             axios.get("http://localhost:5001/reclamations/" + search)
             .then((response) => {
-                if(response.data.length > 0){
+                if(response.data.msggg === "No Réclamation"){
+                    setMsg("No Réclamation")
+                    setreclamation("")
+                    //toast.warn("Aucune Réclamation pour cette Recherche !")
+                }
+                else if(response.data === "Failed to load Data"){
+                    setMsg("No Réclamation")
+                }
+                else if(response.data.length > 0){
                     setreclamation(response.data)
                     setMsg("")
                 }
                 else {
-                    setMsg("No reclamation")
-                    setreclamation(response.data.msggg)
-                    toast.warn("Aucune Réclamation pour cette Recherche !")
+                    setreclamation("")
+                    setMsg("No Réclamation")
                 }
             })
             .catch(() => {
@@ -81,16 +90,15 @@ function ListerReclamation() {
     return (
         <div style={{top : "120px"}}>
             <h1 style={{marginLeft : "200px", paddingTop : "9%"}}>Lister Les Réclamations</h1>
-            <div className="container col-md-8 col-md-offset-2"><br/>
+            <div className="container col-md-8 col-md-offset-2"><br/><br/>
                 <div className="container col-md-10 col-md-offset-1">
                     <div className="row">
                         <div>
-                            <input type="text" placeholder="Chercher Les Réclamations..." className="form-control" onChange={e => setSearch(e.target.value)}  />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Réclamations..." required className={classes.textField} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
-                </div>
+                </div><br/>
             </div>
-
             {
                 msg === "" && 
                 <div className="container col-md-8 col-md-offset-2">
@@ -116,7 +124,7 @@ function ListerReclamation() {
                                                         {r.Message}
                                                     </Typography><br/>
                                                     {
-                                                        r.contenu !== "" && 
+                                                        r.contenu !== null && 
                                                         <div>
                                                             <Avatar src={"public/reclamation support/" + r.contenu} alt={""} style={{width : "200px", height : "200px"}} />
                                                         </div>
@@ -138,6 +146,10 @@ function ListerReclamation() {
                         )
                     }
                 </div>
+            }
+            {
+                msg === "No Réclamation" &&
+                <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Réclamation pour cette Recherche "{search}" </Alert></div>
             }
         </div>
     )

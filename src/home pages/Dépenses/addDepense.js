@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import {Link} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
-import { Button, MenuItem, Select, FormControl, TextField } from '@material-ui/core';
+import { InputLabel, Button, MenuItem, Select, FormControl, TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import { toast } from 'react-toastify';
 
 
@@ -40,11 +40,23 @@ function AddDepense(props) {
     const [montant, setMontant] = useState('')
     const [fact, setFact] = useState('')
     const [detail, setDetail] = useState('')
-    const [categorie, setCategorie] = useState()
+    const [categorie, setCategorie] = useState('')
     const [mc, setMC] = useState('')
     const [msg, setMsg] = useState('')
     const id = localStorage.getItem('id')
-    console.log(msg)
+    const [open, setOpen] = useState(false)
+    const [addCat, setAddCat] = useState('')
+    const [added, setAdded] = useState('')
+
+
+    const handleClose = () => {
+        setOpen(false)
+    }
+    const handleOpen = () => {
+        setOpen(true)
+    }
+
+
     useEffect(() => {
         axios.get("http://localhost:5001/depenses/categorie/all")
         .then((resolve) => {
@@ -55,7 +67,30 @@ function AddDepense(props) {
             setCategorie(err)
             setMC('')
         })
-    }, [])
+    }, [added])
+
+
+    const AddCategorie = () => {
+        if(addCat !== ""){
+            const datasend = {cat : addCat}
+            axios.post("http://localhost:5001/depenses/categorie/new", datasend)
+            .then((resolve) => {
+                if(resolve.data.duplicate === "cette categorie déjà existe"){
+                    toast.error("Cette Catégorie Déjà Existe")
+                }
+                else if(resolve.data.messageErr === "bad"){
+
+                }
+                else if(resolve.data.message === "Inserted"){
+                    toast.success("La Catégorie est Enregistrée avec Succès")
+                    setAdded(addCat)
+                }
+            })
+            .catch(() => {})
+        }
+        setOpen(false)
+    }
+
 
     const EnregistrerDepense = () => {
         if(id !== null && id !== undefined){
@@ -73,11 +108,13 @@ function AddDepense(props) {
                             setMsg("Really Bad")
                             toast.error("La Dépense est échouée ! Réssayez-vous une autre fois.")
                         }
+                        else if(resolve.data.err === "NomCategorie is Null"){
+                            toast.warn("Merci de Séléctionner Une Catégorie !")
+                        }
                     })
                     .catch((err) => {
 
                     })
-                    console.log(datasend)
                 }
                 else{
                     const datasend = {id : id, typeDepense : typeDep, montant : montant, fact : fact, detail : detail}
@@ -92,12 +129,17 @@ function AddDepense(props) {
                             setMsg("Really Bad")
                             toast.warn("Aucune Dépense pour l'instant !")
                         }
+                        else if(resolve.data.err === "NomCategorie is Null"){
+                            toast.warn("Merci de Séléctionner Une Catégorie !")
+                        }
                     })
                     .catch((err) => {
                         console.log(err)
                     })
-                    console.log(datasend)
                 }
+            }
+            else{
+                toast.warn("Les Champs qui ont (*) Sont Obligatoires")
             }
         }
         else{
@@ -113,9 +155,9 @@ function AddDepense(props) {
                     <div className="row">
                         <div className="col-md-6">
                             <FormControl className={classes.formControl}>
-                                <Select style={{width : "100%"}} value={typeDep} onChange={e => setTypeDep(e.target.value)} displayEmpty className={classes.selectEmpty} inputProps={{ 'aria-label': 'Without label' }} >
-                                    <MenuItem value="" disabled> Type du Dépense </MenuItem>
-                                    <Button color="primary" style={{width : "100%"}}><strong> Ajouter Une Catégorie</strong></Button>
+                                <InputLabel InputLabelProps={{ shrink: true,}} id="demo-simple-select-label">Type De La Dépense</InputLabel>
+                                <Select style={{width : "100%"}} value={typeDep} onChange={e => setTypeDep(e.target.value)} displayEmpty className={classes.selectEmpty}>
+                                    <Button color="primary" style={{width : "100%"}} onClick={handleOpen}><strong> Ajouter Une Catégorie</strong></Button>
                                         {
                                             mc === "Cool" && 
                                             categorie.map((cate) => {
@@ -154,6 +196,18 @@ function AddDepense(props) {
                     </div>
                 </div>
             </div><br/><br/><br/><br/>
+            <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                <DialogTitle id="alert-dialog-title" color="secondary">{"Création d'une Catégorie !"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" multiline={true} label="Ajouter Une Categorie " className={classes.textField} onChange={e => setAddCat(e.target.value)} />
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="default">Cancel</Button>
+                    <Button onClick={AddCategorie} color="primary" autoFocus>Oui, Je Confirme !</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }
