@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Button, TextField } from '@material-ui/core'
+import { Button, TextField, Slide, Paper } from '@material-ui/core'
 import { Link } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
 import axios from 'axios'
+
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -25,6 +26,9 @@ const useStyles = makeStyles((theme) => ({
     formControl: {
         margin: theme.spacing(1),
         width: 320,
+    },
+    paper: {
+        position: 'relative',
     },
   }));
 
@@ -64,61 +68,65 @@ function Statistique() {
 
     return (
         <div>
-            <div className="container ">
-                <div style={{top : "120px", paddingTop : "50px"}}>
-                    <h1 style={{marginLeft : "200px"}}>Les Statistiques </h1><br/>
-                    <div className="col-md-6" style={{marginLeft : "70%"}}>
-                        <Button variant="contained" color="primary" style={{width : "300px", textTransform : "capitalize", fontSize : "16px", color : "white"}} component={Link} to="/relevé-financièr">Demander Relevé Financièr</Button>
-                    </div><br/><br/><br/><br/>
-                </div>
-                    <div className="row">
-                        <div className="col-md-6"><TextField InputLabelProps={{ shrink: true,}} id="date" label="Du" type="date" className={classes.textField} onChange={e => setDepart(e.target.value)} /></div>
-                        <div className="col-md-6"><TextField InputLabelProps={{ shrink: true,}} id="date" label="Au" type="date" className={classes.textField} onChange={e => setFin(e.target.value)} /></div>
+            <Slide direction="up" in={useEffect} mountOnEnter unmountOnExit timeout={1000}>
+                <Paper elevation={4} className={classes.paper}>
+                    <div className="container ">
+                        <div style={{top : "120px", paddingTop : "50px"}}>
+                            <h1 style={{marginLeft : "200px"}}>Les Statistiques </h1><br/>
+                            <div className="col-md-6" style={{marginLeft : "70%"}}>
+                                <Button variant="contained" color="primary" style={{width : "300px", textTransform : "capitalize", fontSize : "16px", color : "white"}} component={Link} to="/relevé-financièr">Demander Relevé Financièr</Button>
+                            </div><br/><br/><br/><br/>
+                        </div>
+                            <div className="row">
+                                <div className="col-md-6"><TextField InputLabelProps={{ shrink: true,}} id="date" label="Du" type="date" className={classes.textField} onChange={e => setDepart(e.target.value)} /></div>
+                                <div className="col-md-6"><TextField InputLabelProps={{ shrink: true,}} id="date" label="Au" type="date" className={classes.textField} onChange={e => setFin(e.target.value)} /></div>
+                            </div><br/><br/><br/>
+                        <div className="container">
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <div className="card w-75 text-black bg-primary mb-3" style={{height : "300px", borderRadius : "25px"}}>
+                                        <div className=" row">
+                                            <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-people-fill m-5" style={{width : "700px"}} ></i></h1> </div>
+                                            <h2 className="" style={{paddingLeft : "45px"}} > {NbrUsers} Utilisateurs ( {admi} Administrateurs et {copro} Copropriétaires) </h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="card w-75 text-black bg-secondary mb-3" style={{height : "300px", borderRadius : "25px"}}>
+                                        <div className="row">
+                                            <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-wallet2 m-5" style={{width : "700px"}}></i></h1></div>
+                                            <h2 style={{paddingLeft : "45px"}}> Nombre des Dépenses : {NbrDepense} </h2>
+                                            <h3 style={{paddingLeft : "45px"}}> Montant TTC <strong style={{color : "white"}}>{MontantDepense}</strong>  MAD</h3><br /><br/><br/>
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                        </div><br/><br/><br/>
+                        <div className="container">
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <div className="card w-75 text-black bg-primary mb-3" style={{height : "300px", borderRadius : "25px"}}>
+                                        <div className=" row">
+                                            <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-clipboard-check m-5" style={{width : "700px"}} ></i></h1> </div>
+                                            <h3 className="" style={{paddingLeft : "45px"}} > Nombre des Annonces : {NbrAnnonce} </h3>
+                                            <h3 className="" style={{paddingLeft : "45px"}} > Nombre des Réclamations : {NbrRecla} </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="card w-75 text-black bg-secondary mb-3" style={{height : "300px", borderRadius : "25px"}}>
+                                        <div className="row">
+                                            <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-wallet m-5" style={{width : "700px"}}></i></h1></div>
+                                            <h2 style={{paddingLeft : "45px"}}> Nombre des Cotisations : {NbrCoti} </h2>
+                                            <h3 style={{paddingLeft : "45px"}}> Les Retenus <strong style={{color : "white"}}>{MontantCoti} </strong>MAD</h3><br /><br/><br/>
+                                        </div>    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div><br/><br/><br/>
-                <div className="container">
-                    <div className="row">
-                        <div className="col-md-6">
-                            <div className="card w-75 text-black bg-primary mb-3" style={{height : "300px", borderRadius : "25px"}}>
-                                <div className=" row">
-                                    <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-people-fill m-5" style={{width : "700px"}} ></i></h1> </div>
-                                    <h2 className="" style={{paddingLeft : "45px"}} > {NbrUsers} Utilisateurs ( {admi} Administrateurs et {copro} Copropriétaires) </h2>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-6">
-                            <div className="card w-75 text-black bg-secondary mb-3" style={{height : "300px", borderRadius : "25px"}}>
-                                <div className="row">
-                                    <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-wallet2 m-5" style={{width : "700px"}}></i></h1></div>
-                                    <h2 style={{paddingLeft : "45px"}}> Nombre des Dépenses : {NbrDepense} </h2>
-                                    <h3 style={{paddingLeft : "45px"}}> Montant TTC <strong style={{color : "white"}}>{MontantDepense}</strong>  MAD</h3><br /><br/><br/>
-                                </div>    
-                            </div>
-                        </div>
-                    </div>
-                </div><br/><br/><br/>
-                <div className="container">
-                    <div className="row">
-                        <div className="col-md-6">
-                            <div className="card w-75 text-black bg-primary mb-3" style={{height : "300px", borderRadius : "25px"}}>
-                                <div className=" row">
-                                    <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-clipboard-check m-5" style={{width : "700px"}} ></i></h1> </div>
-                                    <h3 className="" style={{paddingLeft : "45px"}} > Nombre des Annonces : {NbrAnnonce} </h3>
-                                    <h3 className="" style={{paddingLeft : "45px"}} > Nombre des Réclamations : {NbrRecla} </h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-6">
-                            <div className="card w-75 text-black bg-secondary mb-3" style={{height : "300px", borderRadius : "25px"}}>
-                                <div className="row">
-                                    <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-wallet m-5" style={{width : "700px"}}></i></h1></div>
-                                    <h2 style={{paddingLeft : "45px"}}> Nombre des Cotisations : {NbrCoti} </h2>
-                                    <h3 style={{paddingLeft : "45px"}}> Les Retenus <strong style={{color : "white"}}>{MontantCoti} </strong>MAD</h3><br /><br/><br/>
-                                </div>    
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div><br/><br/><br/>
+                </Paper>
+            </Slide>
         </div>
     )
 }

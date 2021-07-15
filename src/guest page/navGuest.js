@@ -61,7 +61,7 @@ function NavGuest() {
                         <Tab style={{width : "150px"}} label="Cotisation" component={Link} to="/Cotisations" />
                         <Tab style={{width : "150px"}} label="Annonce" component={Link} to="/Annonces" />
                         <Tab style={{width : "200px"}} label="Réclamation" component={Link} to="/Réclamations" />
-                        <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>{photo && <Avatar alt="" src={`/public/profile img/${photo}`} style={{width : "30px", height : "30px"}} />} <strong> { Name && Name } { Prenom && Prenom} </strong></Button>
+                        <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>{photo && <Avatar alt="" src={`/public/profile img/${photo}`} style={{width : "30px", height : "30px"}} />} &nbsp;&nbsp;&nbsp; <strong> { Name && Name } { Prenom && Prenom} </strong></Button>
                         <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose} >
                             <MenuItem onClick={handleClose}>Profile</MenuItem>
                             <MenuItem onClick={handleClose} component={Link} to="/Settings"> Mon Compte</MenuItem>

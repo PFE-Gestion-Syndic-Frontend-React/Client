@@ -102,12 +102,12 @@ function EditAnnonce(props) {
                 <div className="card-body">
                     <div className="row">
                         <div>
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="l'Objet d'Annonce."  required className={classes.container} multiline={true} defaultValue={annonce.Sujet} onChange={ sujet !== "" ?  e => setSjt(e.target.value) : setSjt(annonce.Sujet)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="l'Objet d'Annonce."  required className={classes.container} multiline={true} defaultValue={annonce.Sujet} onChange={e => setSjt(e.target.value)} />
                         </div>
                     </div><br/><br/>
                     <div className="row">
                         <div>
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Description d'Annonce"  required className={classes.container} multiline={true}  defaultValue={annonce.DescripAnnonce} onChange={descrip !== "" ? e => setDesc(e.target.value) : setDesc(annonce.DescripAnnonce) } />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Description d'Annonce"  required className={classes.container} multiline={true}  defaultValue={annonce.DescripAnnonce} onChange={e => setDesc(e.target.value) } />
                         </div>
                     </div><br /><br/>
                     <div className="row">
@@ -124,7 +124,7 @@ function EditAnnonce(props) {
                         <div className="text-muted"><small>Invisible : Signifie que cette annonnce ne sera pas Visible par le Copropriétaire.</small><br/><br/></div>
                     }
                     <div className="row container">
-                        <input type="file" className="form-control" multiple="multiple" />
+                        <input type="file" className="form-control" />
                     </div><br />
                 </div>
                 <div className="card-footer">

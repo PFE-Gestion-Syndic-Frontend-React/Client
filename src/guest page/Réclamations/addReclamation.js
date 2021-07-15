@@ -87,7 +87,7 @@ function AddReclamation(props) {
                 })
                 .catch((err) => console.log(err))
             }
-            /*else{
+            else{
                 
                 const datasend = {log : log, objet : objet, message : message, pour : pour}
                 axios.post("http://localhost:5001/reclamations/new", datasend)
@@ -103,7 +103,7 @@ function AddReclamation(props) {
                     }
                 })
                 .catch((err) => console.log(err))
-            }*/
+            }
         }
     }
 

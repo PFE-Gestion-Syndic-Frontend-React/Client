@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
-import { IconButton, Avatar, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions } from '@material-ui/core'
+import { Paper, Grow, TextField, IconButton, Avatar, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { toast } from 'react-toastify';
 import { CloudDownloadOutlined }from '@material-ui/icons';
+import { Alert }from '@material-ui/lab'
 
 axios.interceptors.request.use(
     config => {
@@ -31,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     root: {
-        width: '955px',
+        width: '915px',
     },
     heading: {
         fontSize: theme.typography.pxToRem(15),
@@ -41,6 +42,12 @@ const useStyles = makeStyles((theme) => ({
     media: {
         height: 0,
         paddingTop: '56.25%', // 16:9
+    },
+    paper : {
+        margin : "20px",
+    },
+    textfield : {
+        width : "780px",
     },
 }))
 
@@ -54,24 +61,28 @@ function ListerAnnonces() {
 
     useEffect(() => {
         if(search !== ""){
+            console.log(search)
             axios.get("http://localhost:5001/annonces/all/statut/true/" + search)
             .then((response) => {
                 if(response.data.msgErr === "No Token Set"){
                     localStorage.clear()
                     History.push('/')
                 }
-                if(response.data.length > 0){
+                else if(response.data === 'No Annonce'){
+                    setAnnonce([])
+                    setMsg('No Annonce')
+                }
+                else if(response.data.length > 0){
                     setAnnonce(response.data)
                     setMsg("")
                 }
                 else {
                     setMsg("No Annonce")
-                    setAnnonce(response.data.msggg)
-                    toast.warn("Aucune Annonce pour Cette Recherche !")
+                    setAnnonce([])
                 }
             })
-            .catch(() => {
-
+            .catch((err) => {
+                console.log(err)
             })
         }
         else{
@@ -81,11 +92,20 @@ function ListerAnnonces() {
                     localStorage.clear()
                     History.push('/')
                 }
-                if(response.data.length > 0){
+                else if(response.data === 'No Annonce'){
+                    setAnnonce([])
+                    setMsg('No Annonce')
+                }
+                else if(response.data.length > 0){
                     setAnnonce(response.data)
+                    setMsg("")
+                }
+                else {
+                    setAnnonce([])
+                    setMsg('No Annonce')
                 }
             })
-            .catch((err) => 
+            .catch(() => 
             {
                 
             })
@@ -104,7 +124,7 @@ function ListerAnnonces() {
                 <div className="container col-md-10 col-md-offset-1">
                     <div className="row">
                         <div>
-                            <input type="text" placeholder="Chercher Les Annonces..." className="form-control" onChange={e => setSearch(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Annonces..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
                 </div>
@@ -114,40 +134,52 @@ function ListerAnnonces() {
                     msg === "" &&
                     <div className="container col-md-8 col-md-offset-2">
                         {
+                            annonces.length > 0 &&
                             annonces.map((a) => {
                                 return(
-                                    <div>
-                                        <Accordion key={a.RefAnnonce} className="mb-5">
-                                            <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                                                <Typography className={classes.heading}> <h5 style={{color : "blue"}}><strong>{a.Sujet}</strong></h5>  </Typography>
-                                            </AccordionSummary>
-                                            <AccordionDetails>
-                                                <Typography spacing={3}>
-                                                    <Card className={classes.root} elevation={1}>
-                                                        <CardContent>
-                                                            <Typography variant="body1" color="textPrimary">
-                                                                {a.DescripAnnonce}
-                                                            </Typography><br/><br/>
-                                                            {
-                                                                a.contenuDocument !== null &&
-                                                                <div>
-                                                                    <Avatar src={`annonce doc/${a.contenuDocument}`} alt="" style={{width : "200px", height : "200px"}} />
-                                                                    <div style={{marginLeft : "60px"}} onClick={handleDownload.bind(this, a.contenuDocument)} ><IconButton aria-label="Download" aria-labelledby="Download" ><CloudDownloadOutlined style={{width : "50px", height : "50px"}} /> </IconButton></div>
+                                    <Grow key={a.RefAnnonce} in={useEffect} timeout={1000}> 
+                                        <Paper elevation={4} className={classes.paper}>
+                                            <Accordion className="mb-5 card">
+                                                <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+                                                    <Typography className={classes.heading}> <h5 style={{color : "blue"}}><strong>{a.Sujet}</strong></h5>  </Typography>
+                                                </AccordionSummary>
+                                                <AccordionDetails>
+                                                    <Typography spacing={3}>
+                                                        <Card className={classes.root} elevation={1}>
+                                                            <CardContent>
+                                                                <Typography variant="body1" color="textPrimary">
+                                                                    {a.DescripAnnonce}
+                                                                </Typography><br/><br/>
+                                                                {
+                                                                    a.contenuDocument !== null &&
+                                                                    <div className="overflow">
+                                                                        <img className="scaleImg" src={`annonce doc/${a.contenuDocument}`} alt="" style={{width : "200px", height : "200px"}} />
+                                                                        <div style={{marginLeft : "60px"}} onClick={handleDownload.bind(this, a.contenuDocument)} ><IconButton aria-label="Download" aria-labelledby="Download" ><CloudDownloadOutlined style={{width : "50px", height : "50px"}} /> </IconButton></div>
+                                                                    </div>
+                                                                }
+                                                            </CardContent>
+                                                            <CardActions>
+                                                                <div className="row container">
+                                                                    <div className="col-md-6"><Typography variant="body2" color="textSecondary"> Partager Par : {a.NomCompte} {a.PrenomCompte} </Typography></div>
+                                                                    <div className="col-md-6"><Typography variant="body2" color="textSecondary"> Date Publication : {a.dateAnnonce && a.dateAnnonce.replace("T23:00:00.000Z", "")} </Typography></div>
                                                                 </div>
-                                                            }
-                                                        </CardContent>
-                                                        <CardActions>
-                                                            <Typography variant="body2" color="textSecondary" component="p"> Date Publication : {a.dateAnnonce.replace("T23:00:00.000Z", "")} </Typography>
-                                                        </CardActions>
-                                                    </Card>
-                                                </Typography>
-                                            </AccordionDetails>
-                                        </Accordion>
-                                    </div>
+                                                            </CardActions>
+                                                        </Card>
+                                                    </Typography>
+                                                </AccordionDetails>
+                                            </Accordion>
+                                        </Paper>
+                                    </Grow>
                                 )
                             })
                         }
                     </div>
+                }
+                {
+                    search !== "" ? 
+                    <div className="col-md-6" style={{marginLeft : "24%"}}>{msg === "No Annonce" && <div><Alert severity="error">Aucune Annonce Pour Cette Recherche "{search}"</Alert></div>}</div> 
+                    :
+                    <div className="col-md-6" style={{marginLeft : "24%"}}>{msg === "No Annonce" && <div><Alert severity="error">Aucune Annonce Pour l'Instant</Alert></div>}</div> 
                 }
             </div>
         </div>

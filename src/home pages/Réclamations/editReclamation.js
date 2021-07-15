@@ -61,7 +61,7 @@ function EditReclamation(props) {
         setOpen(false);
     };
 
-    const refReclamation = props.match.params.refReclamation
+    const refReclamation = props.match.params.refReclamation 
     useEffect(() => {
         if(refReclamation !== ""){
             axios.get(`http://localhost:5001/reclamations/reclamation/${refReclamation}`)

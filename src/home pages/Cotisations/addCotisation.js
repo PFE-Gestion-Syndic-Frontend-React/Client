@@ -130,11 +130,11 @@ function AddCotisation(props) {
                     </div><br/>
                     <div className="row">
                         <div className="col-md-6">
-                            <TextField className={classes.textField} InputLabelProps={{ shrink: true,}} id="Nombre de Mois" label="Nombre de Mois" defaultValue="1" onChange={e => setMois(e.target.value)}/>
+                            <TextField className={classes.textField} InputLabelProps={{ shrink: true,}} id="Nombre de Mois" label="Nombre de Mois" type="number" defaultValue="1" onChange={e => setMois(e.target.value)}/>
                         </div>
                         <div className="col-md-6">
                             {
-                                mois !== "" && <label style={{paddingTop : "2px"}}> Montant TTC : <strong style={{color : "blue", fontSize : "20px"}}>  {mois * cotMontanat} Dhs</strong></label>
+                                mois !== "" && <label style={{paddingTop : "25px"}}> Montant TTC : <strong style={{color : "blue", fontSize : "20px"}}>  {mois * cotMontanat} Dhs</strong></label>
                             }
                         </div>
                     </div><br/>

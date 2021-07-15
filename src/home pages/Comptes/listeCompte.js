@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useHistory } from 'react-router-dom'
-import { makeStyles, TextField, IconButton, Button, Dialog, DialogContentText, DialogActions, DialogTitle, DialogContent } from '@material-ui/core';
+import { Paper, Grow, makeStyles, TextField, IconButton, Button, Dialog, DialogContentText, DialogActions, DialogTitle, DialogContent } from '@material-ui/core';
 import { DeleteOutlined, UpdateOutlined }from '@material-ui/icons';
 import { toast } from 'react-toastify';
 import Alert from '@material-ui/lab/Alert'
@@ -21,6 +21,9 @@ const useStyles = makeStyles((theme) => ({
     
     textField : {
         width : "720px",
+    },
+    paper : {
+        
     },
   }));
 
@@ -59,22 +62,25 @@ function ListeCompte(props) {
                 }
                 else {
                     setMsg("No Users")
-                    setCompte(response.data.msggg)
+                    setCompte([])
                 }
                 
             })
-            .catch(() => {
-
-            })
+            .catch(() => {})
         }
         else{ 
             axios.get("http://localhost:5001/users/all")
             .then((response) => {
                 if(response.data.length > 0){
                     setCompte(response.data)
+                    setMsg("")
+                }
+                else{
+                    setMsg("No Users")
+                    setCompte([])
                 }
             })
-            .catch(() => console.log("No users")) 
+            .catch(() => {}) 
         }
     }, [search, deleted, msg])
     
@@ -119,42 +125,49 @@ function ListeCompte(props) {
                 </div><br/>
                 {
                     msg === "" &&
-                    <table className="table table-hover">
-                        <thead>
-                            <tr className="thead-light">
-                                <th>Nom et Prénom</th>
-                                <th>Fonction</th>
-                                <th>Email</th>
-                                <th>Téléphone</th>
-                                <th>Role</th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                compte.map((c) => {
-                                    return (
-                                        <tr key={c.NumCompte}>
-                                            <td> {c.NomCompte} {c.PrenomCompte} </td>
-                                            <td> {c.fonc} </td>
-                                            <td> {c.EmailCompte} </td>
-                                            <td> {c.telephone} </td>
-                                            <td> {c.Role} </td>
-                                            <td><img src={`profile img/${c.photo}`} alt="" width="60px" /> </td>
-                                            <td>{c.NumCompte !== parseInt(id) && <IconButton onClick={updateCompte.bind(this, c.NumCompte)}><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton>}</td>
-                                            <td>{c.NumCompte !== parseInt(id) && <IconButton onClick={handleOpen.bind(this, c.NumCompte)} ><DeleteOutlined style={{color : "red", fontSize : "30px"}} /></IconButton>}</td>
-                                        </tr>
-                                    )}
-                                )
-                            }
-                        </tbody>
-                    </table>
+                    <Grow  in={useEffect} timeout={4000}>
+                        <Paper className={classes.paper}>
+                            <table className="table table-hover">
+                                <thead>
+                                    <tr className="thead-light">
+                                        <th>Nom et Prénom</th>
+                                        <th>Fonction</th>
+                                        <th>Email</th>
+                                        <th>Téléphone</th>
+                                        <th>Role</th>
+                                        <th></th>
+                                        <th style={{textAlign : 'center'}} colSpan="2">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        compte.map((c) => {
+                                            return (
+                                                <tr key={c.NumCompte}>
+                                                    <td> {c.NomCompte} {c.PrenomCompte} </td>
+                                                    <td> {c.fonc} </td>
+                                                    <td> {c.EmailCompte} </td>
+                                                    <td> {c.telephone} </td>
+                                                    <td> {c.Role} </td>
+                                                    <td><img src={`profile img/${c.photo}`} alt="" width="60px" /> </td>
+                                                    <td>{c.NumCompte !== parseInt(id) && <IconButton onClick={updateCompte.bind(this, c.NumCompte)}><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton>}</td>
+                                                    <td>{c.NumCompte !== parseInt(id) && <IconButton onClick={handleOpen.bind(this, c.NumCompte)} ><DeleteOutlined style={{color : "red", fontSize : "30px"}} /></IconButton>}</td>
+                                                </tr>  
+                                            )}
+                                        )
+                                    }
+                                </tbody>
+                            </table>
+                        </Paper> 
+                    </Grow>
                 }
                 {
-                    msg === "No Users" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error" >Aucun Compte Pour Cette Recherche "{search}" </Alert></div>
+                    search !== "" ?
+                    <div>{ msg === "No Users" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error" >Aucun Compte Pour Cette Recherche "{search}" </Alert></div>}</div>
+                    :
+                    <div>{ msg === "No Users" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error" >Aucun Compte Pour l'Instant </Alert></div>}</div>
                 }
+                
             </div><br/><br/><br/><br/>
             <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
                 <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de la Suppression d'un Utilisateur ?"}</DialogTitle>

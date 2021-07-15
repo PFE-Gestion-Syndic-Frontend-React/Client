@@ -64,8 +64,6 @@ function EditCompte(props) {
 
 
     const UpdateAccount = (e) => {
-        //console.log("clicked")
-        e.preventDefault()
         if(nom !== "" && prenom !== "" && tele !== ""){
             const dataUpdated = {nom : nom, prenom : prenom, tele : tele }
             console.log("news : ", dataUpdated)

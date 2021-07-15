@@ -60,8 +60,8 @@ function Nav(props) {
                             <Tab label="Réclamation" component={Link} to="/réclamations" />
                             <Tab label="Comptes" component={Link} to="/comptes" />
                             <Tab label="Logement" component={Link} to="/logement" />
-                            <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>{photo && <Avatar alt="" src={`/public/profile img/${photo}`} style={{width : "30px", height : "30px"}} />} <strong> { Name && Name } { Prenom && Prenom} </strong></Button>
-                            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose} >
+                            <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>{photo && <Avatar alt="" src={`/public/profile img/${photo}`} style={{width : "30px", height : "30px"}} />} &nbsp;&nbsp;&nbsp; <strong> { Name && Name } { Prenom && Prenom} </strong></Button>
+                            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose} style={{top : "0", right : "0"}} >
                                 <MenuItem onClick={handleClose}>Profile</MenuItem>
                                 <MenuItem onClick={handleClose} component={Link} to="/settings"> Mon Compte</MenuItem>
                                 <MenuItem onClick={logout} >Logout</MenuItem>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory} from 'react-router-dom'
 import axios from 'axios'
-import { makeStyles, IconButton, TextField} from '@material-ui/core'
+import { Paper, Grow, makeStyles, IconButton, TextField} from '@material-ui/core'
 import { UpdateOutlined, InfoOutlined }from '@material-ui/icons';
 import Alert from '@material-ui/lab/Alert'
 
@@ -28,7 +28,10 @@ const useStyle = makeStyles((theme) => ({
     },
     textField : {
         width : "720px"
-    }
+    },
+    paper : {
+        margin : "20px",
+    },
 }))
 
 
@@ -36,36 +39,45 @@ const useStyle = makeStyles((theme) => ({
 function ListerLogement() {
     const classes = useStyle()
     const [search, setSearch] = useState('')
-    const [logement, setLogement] = useState()
+    const [logement, setLogement] = useState([])
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
         if(search !== ""){
             axios.get("http://localhost:5001/logements/" + search)
             .then((response) => {
-                if(response.data.length > 0){
+                if(response.data === "No Logement"){
+                    setLogement([])
+                    setMsg("No Logements")
+                }
+                else if(response.data.length > 0){
                     setLogement(response.data)
-                    setMsg("founded")
+                    setMsg("data")
                 }
                 else {
+                    setLogement([])
                     setMsg("No Logements")
-                    setLogement(response.data.msggg)
                 }
-                
             })
-            .catch(() => {
-
-            })
+            .catch(() => {})
         }
         else{ 
             axios.get("http://localhost:5001/logements/all")
             .then((response) => {
-                if(response.data.length > 0){
+                if(response.data === "No Logement"){
+                    setLogement([])
+                    setMsg("No Logements")
+                }
+                else if(response.data.length > 0){
                     setLogement(response.data)
-                    setMsg("founded")
+                    setMsg("data")
+                }
+                else{
+                    setLogement([])
+                    setMsg("No Logements")
                 }
             })
-            .catch(() => console.log("No Logements"))
+            .catch(() => {})
         }
     }, [search])
 
@@ -99,38 +111,45 @@ function ListerLogement() {
                 </div><br/><br/>
                 <div className="container col-md-8 col-md-offset-4">
                     {
-                        msg === "founded" && 
-                        <table className="table">
-                            <thead>
-                                <tr className="thead-light">
-                                    <th>Nom et Prénom du Copropriétaire</th>
-                                    <th>E-mail</th>
-                                    <th>Téléphone</th>
-                                    <th>Logement</th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    logement.map((l) => {
-                                        return (
-                                            <tr key={l.RefLogement}>
-                                                <td> {l.NomCompte} {l.PrenomCompte} </td>
-                                                <td> {l.EmailCompte} </td>
-                                                <td> {l.telephone} </td>
-                                                <td> {l.RefLogement} </td>
-                                                <td><IconButton onClick={handleUpdateLog.bind(this, l.RefLogement)}><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton></td>
-                                                <td><IconButton onClick={handleInfo.bind(this, l.RefLogement)}><InfoOutlined style={{color : "blue", fontSize : "30px"}} /></IconButton></td>
-                                            </tr>
-                                        )
-                                    })
-                                }
-                            </tbody>
-                        </table>
+                        msg === "data" && 
+                        <Grow  in={useEffect} timeout={4000}>
+                            <Paper className={classes.paper}>
+                                <table className="table">
+                                    <thead>
+                                        <tr className="thead-light">
+                                            <th>Nom et Prénom du Copropriétaire</th>
+                                            <th>E-mail</th>
+                                            <th>Téléphone</th>
+                                            <th>Logement</th>
+                                            <th style={{textAlign : "center"}} colSpan="2">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            logement.length > 0 && 
+                                            logement.map((l) => {
+                                                return (
+                                                    <tr key={l.RefLogement}>
+                                                        <td> {l.NomCompte} {l.PrenomCompte} </td>
+                                                        <td> {l.EmailCompte} </td>
+                                                        <td> {l.telephone} </td>
+                                                        <td> {l.RefLogement} </td>
+                                                        <td><IconButton onClick={handleUpdateLog.bind(this, l.RefLogement)}><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton></td>
+                                                        <td><IconButton onClick={handleInfo.bind(this, l.RefLogement)}><InfoOutlined style={{color : "blue", fontSize : "30px"}} /></IconButton></td>
+                                                    </tr>
+                                                )
+                                            })
+                                        }
+                                    </tbody>
+                                </table>
+                            </Paper>
+                        </Grow>
                     }
                     {
-                        msg === "No Logements" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucun Logement Pour Cette Recherche "{search}"</Alert></div>
+                        search !== "" ?
+                        <div>{ msg === "No Logements" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucun Logement Pour Cette Recherche "{search}"</Alert></div>}</div>
+                        :
+                        <div>{ msg === "No Logements" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucun Logement Pour l'Instant</Alert></div>}</div>
                     }
                 </div><br/><br/>
             </div><br /><br/>

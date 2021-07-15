@@ -3,6 +3,7 @@ import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Avatar, Accordion, AccordionSummary, AccordionDetails, Card, CardHeader, CardContent, CardActions } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Alert from '@material-ui/lab/Alert';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -36,57 +37,77 @@ const useStyles = makeStyles((theme) => ({
 function InfoLogement(props) {
     const classes = useStyles()
     const RefLogement = props.match.params.refLogement
-    const [compte, setCompte] = useState('')
-    const [cotisation, setCotisation] = useState('')
-    const [Num, setNum] = useState('')
+    const [compte, setCompte] = useState([])
+    const [cotisation, setCotisation] = useState([])
+    const [id, setId] = useState('')
     const [msg, setMsg] = useState('')
-    const [reclamation, setReclamation] = useState({})
+    const [reclamation, setReclamation] = useState([])
     const [rec, setRec] = useState('')
+    const [cot, setCot] = useState('')
 
-    useEffect(() => {
+
+
+
+
+    useEffect( () => {
         axios.get(`http://localhost:5001/logements/coproprietaire/${RefLogement}`)
         .then((resolve) => {
-            setCompte(resolve.data[0])
-            setNum(compte.NumCompte)
-            // console.log(Num)
+            console.log(resolve)
+            if(resolve.data === "No Logement"){
+                setCompte([])
+                setId('')
+                setMsg('No Logement')
+            }
+            else if(resolve.data.length !== 0){
+                setCompte(resolve.data[0])
+                setId(compte.NumCompte)
+                setMsg("Loading")
+            }
         })
-        .catch((err) => console.log(err))
+        .catch(() => {})
 
-        if(Num !== ""){
-            setTimeout(() => {
-                axios.get(`http://localhost:5001/cotisations/mesCotisations/${Num}`)
-                .then((response) => {
-                    if(response.data.msgErr === "No Token Set"){
-                        localStorage.clear()
-                        History.push('/')
-                    }
-                    if(response.data.length > 0){
-                        setCotisation(response.data[0])
-                        setMsg("Loading")
-                    }
-                })
-                .catch((err) => {console.log(err)})
-            }, 2000);
+        if(id !== ""){
+            axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}`)
+            .then((response) => {
+                console.log(response)
+                if(response.data === "No Token at all" || response.data === "Invalid Token"){
+                    localStorage.clear()
+                    History.push('/')
+                }
+                else if(response.data === "No Cotisation"){
+                    setCotisation([])
+                    setCot("No Cotisation")
+                }
+                else if(response.data.length !== 0){
+                    setCotisation(response.data)
+                    setCot("")
+                }
+                else{
+                    setCotisation([])
+                    setCot("No Cotisation")
+                }
+            })
+            .catch(() => {})
         }
 
-        
         axios.get(`http://localhost:5001/reclamations/logement/${RefLogement}`)
         .then((res) => {
-            if(res.data === "No Reclamation"){
-                setReclamation('')
+            if(res.data === "No Réclamation"){
+                setReclamation([])
+                setRec('No Réclamation')
+            }
+            else if(res.data.length !== 0){
+                setReclamation(res.data)
                 setRec('')
             }
-            else if(res.data){
-                setReclamation(res.data)
-                setRec("Load Rec")
-                console.log(res.data)
+            else{
+                setReclamation([])
+                setRec('No Réclamation')
             }
         })
-        .catch((err) => {
-            console.log(err)
-        })
-            
-    }, [Num, RefLogement, compte.NumCompte])
+        .catch(() => {})
+
+    }, [id, RefLogement, compte.NumCompte])
 
     return (
         <div style={{ paddingTop : "5%"}}>
@@ -96,7 +117,7 @@ function InfoLogement(props) {
                     {
                         compte !== "" &&
                         <div>
-                            <Card className={classes.root} style={{marginTop : "7px", marginBottom : "7px"}} onChange={() => setNum(compte.NumCompte)}>
+                            <Card className={classes.root} style={{marginTop : "7px", marginBottom : "7px"}} onChange={() => setId(compte.NumCompte)}>
                                 <div className="col-md-12">
                                     <CardHeader title={" Nom et Prénom : " + compte.NomCompte + " " + compte.PrenomCompte + " "  } />
                                 </div>
@@ -112,57 +133,68 @@ function InfoLogement(props) {
                             </Card><br/>
                         </div>    
                     }
-                    <div className="mt-4">
-                        <Card>
-                            <CardHeader />
-                            <div className="row">
-                                <h4 style={{marginLeft : "20px"}}><strong>Ses Cotisations :</strong></h4>
+                    <div>
+                        {
+                            cot === "" && 
+                            <div className="mt-4">
+                                <Card>
+                                    <CardHeader />
+                                    <div className="row">
+                                        <h4 style={{marginLeft : "20px"}}><strong>Ses Cotisations :</strong></h4>
+                                    </div>
+                                    <CardContent>
+                                        {
+                                            cotisation.map((c) => {
+                                                return(
+                                                    <Accordion key={c.RefPaiement} className="mb-3 card">
+                                                        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+                                                            <Typography className={classes.heading}> <h5> Réf Paiement : <strong style={{color : "blue"}}>{c.RefPaiement}</strong></h5></Typography>
+                                                        </AccordionSummary>
+                                                        <AccordionDetails>
+                                                            <div className="mt-2 mb-3 card">
+                                                                <Card className={classes.root1} key={c.RefPaiement}>
+                                                                    <CardContent>
+                                                                        <Typography variant="body1" color="textPrimary">
+                                                                            <div className="row" >
+                                                                                <div className="col-md-6"> Méthode de Paiement : {c.MethodePaiement} </div>
+                                                                                <div className="col-md-6"> Montant à Payer : <strong style={{color : "blue"}}> {c.Montant} (en MAD) X {c.NbrMois} Mois  </strong></div><br/>
+                                                                            </div>
+                                                                            {
+                                                                                c.MethodePaiement === "Chèque" && 
+                                                                                <div className="row">
+                                                                                    <div className="col-md-6">Numéro du Chèque : <strong>{c.NumeroCheque}</strong>  </div>
+                                                                                    <div className="col-md-6">Banque : <strong>{c.Banque}</strong>  </div><br/>
+                                                                                </div>
+                                                                            }
+                                                                            <div className="row">
+                                                                                <div className="col-md-6">Du : <strong>{c.Du && c.Du.replace("T23:00:00.000Z", "")} </strong>  </div>
+                                                                                <div className="col-md-6">Au : <strong>{c.Au && c.Au.replace("T23:00:00.000Z", "")}</strong>  </div>
+                                                                            </div>
+                                                                        </Typography>
+                                                                    </CardContent>
+                                                                    <CardActions>
+                                                                        <Typography variant="body2" color="textSecondary"> Date Paiement : {c.datePaiement && c.datePaiement.replace("T23:00:00.000Z", "")} </Typography>
+                                                                    </CardActions>
+                                                                </Card>
+                                                            </div>
+                                                        </AccordionDetails>
+                                                    </Accordion>
+                                                )
+                                            })
+                                        }
+                                    </CardContent>
+                                </Card><br/>
                             </div>
-                            <CardContent>
-                                {
-                                    cotisation.map((c) => {
-                                        return(
-                                            <Accordion key={c.RefPaiement} className="mb-2">
-                                                <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                                                    <Typography className={classes.heading}> <h5> Réf Paiement : <strong style={{color : "blue"}}>{c.RefPaiement}</strong></h5>  </Typography>
-                                                </AccordionSummary>
-                                                <AccordionDetails>
-                                                    <div className="mt-2">
-                                                        <Card className={classes.root1} key={c.RefPaiement} style={{ marginBottom : "7px"}}>
-                                                            <CardContent>
-                                                                <Typography variant="body1" color="textPrimary">
-                                                                    <div className="row" >
-                                                                        <div className="col-md-6"> Méthode de Paiement : {c.MethodePaiement} </div>
-                                                                        <div className="col-md-6"> Montant à Payer : <strong style={{color : "blue"}}> {c.Montant} (en MAD) X {c.NbrMois} Mois  </strong></div><br/>
-                                                                    </div>
-                                                                    {
-                                                                        c.MethodePaiement === "Chèque" && 
-                                                                        <div className="row">
-                                                                            <div className="col-md-6">Numéro du Chèque : <strong>{c.NumeroCheque}</strong>  </div>
-                                                                            <div className="col-md-6">Banque : <strong>{c.Banque}</strong>  </div><br/>
-                                                                        </div>
-                                                                    }
-                                                                    <div className="row">
-                                                                        <div className="col-md-6">Du : <strong>{c.Du.replace("T23:00:00.000Z", "")} </strong>  </div>
-                                                                        <div className="col-md-6">Au : <strong>{c.Au.replace("T23:00:00.000Z", "")}</strong>  </div>
-                                                                    </div>
-                                                                </Typography>
-                                                            </CardContent>
-                                                            <CardActions>
-                                                                <Typography variant="body2" color="textSecondary" component="p"> Date Paiement : {c.datePaiement.replace("T23:00:00.000Z", "")} </Typography>
-                                                            </CardActions>
-                                                        </Card>
-                                                    </div>
-                                                </AccordionDetails>
-                                            </Accordion>
-                                        )
-                                    })
-                                }
-                            </CardContent>
-                        </Card><br/>
+                        }
+                    </div>
+                    <div>
+                        {
+                            cot === "No Cotisation" && 
+                            <div className="col-md-6" style={{marginLeft : "25%"}}><Alert style={{textAlign : "center"}} severity="warning"><strong style={{fontSize : "18px"}}>Le Copropriétaire n'a Aucune Cotisation !</strong></Alert></div>
+                        }
                     </div>
                     {
-                        rec === "Load Rec" && 
+                        rec === "" && 
                         <div className="mt-4">
                             <Card>
                                 <CardHeader />
@@ -173,7 +205,7 @@ function InfoLogement(props) {
                                     {
                                         reclamation.map((r) => {
                                             return(
-                                                <Accordion key={r.RefReclamation} className="mb-2">
+                                                <Accordion key={r.RefReclamation} className="mb-3 card">
                                                     <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
                                                         <Typography className={classes.heading}> <h5> Etat du Réclamation : <strong style={{color : "blue"}}>{r.statut}</strong></h5>  </Typography>
                                                     </AccordionSummary>
@@ -191,13 +223,13 @@ function InfoLogement(props) {
                                                                     </Typography>
                                                                     {
                                                                         r.contenu !== null &&
-                                                                        <Avatar src={`/public/reclamation support/${r.contenu}`} alt="" style={{width : "200px", height : "200px"}} />
+                                                                        <div className="overflow"><Avatar className="scaleImg" src={`reclamation support/${r.contenu}`} alt="" style={{width : "200px", height : "200px"}} /></div>
                                                                     }
                                                                 </CardContent>
                                                                 <CardActions>
                                                                     <div className="row col-md-12">
-                                                                        <div className="col-md-6"><Typography variant="body2" color="textSecondary" component="p"> Cette Réclamation est <strong>{r.pour}</strong>  </Typography></div>
-                                                                        <div className="col-md-6"><Typography variant="body2" color="textSecondary" component="p"> Date mise à Jour du Réclamation : {r.dateReclamation.replace("T23:00:00.000Z", "")} </Typography></div>
+                                                                        <div className="col-md-6"><Typography variant="body2" color="textSecondary"> Cette Réclamation est <strong>{r.pour}</strong>  </Typography></div>
+                                                                        <div className="col-md-6"><Typography variant="body2" color="textSecondary"> Date mise à Jour du Réclamation : {r.dateReclamation && r.dateReclamation.replace("T23:00:00.000Z", "")} </Typography></div>
                                                                     </div>
                                                                 </CardActions>
                                                             </Card>
@@ -211,8 +243,12 @@ function InfoLogement(props) {
                             </Card><br/><br/><br/>
                         </div>
                     }
+                    {
+                        rec === "No Réclamation" && 
+                        <div className="col-md-6" style={{marginLeft : "25%"}}><Alert style={{textAlign : "center"}} severity="info"><strong style={{fontSize : "18px"}}>Le Copropriétaire n'a Aucune Réclamation </strong></Alert></div>
+                    }
                 </div>
-            }
+            }<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
         </div>
     )
 }

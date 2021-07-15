@@ -1,6 +1,6 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import {Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardContent, CardActions } from '@material-ui/core'
+import { Paper, Grow, TextField, Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardContent, CardActions } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { makeStyles } from '@material-ui/styles'
 import Alert from '@material-ui/lab/Alert'
@@ -27,14 +27,17 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     root: {
-        width: '955px',
+        width: '964px',
+    },
+    textfield : {
+        width : "750px",
     },
 }))
 
 
 function ListerDepenses() {
     const classes = useStyles()
-    const [depense, setDepense] = useState() 
+    const [depense, setDepense] = useState([]) 
     const [msg, setMsg] = useState('')
     const [search, setSearch] = useState('')
 
@@ -47,29 +50,36 @@ function ListerDepenses() {
                     History.push('/')
                 }
                 else if(response.data === "No Dépense"){
+                    setDepense([])
                     setMsg("No Dépense")
                 }
                 else if(response.data.length > 0){
                     setDepense(response.data)
                     setMsg("data")
                 }
+                else{
+                    setDepense([])
+                    setMsg("No Dépense")
+                }
             })
             .catch(() => {
-                setMsg("No Dépense")
             })
         }
         else{
             axios.get("http://localhost:5001/depenses/all")
             .then((response) => {
                 if(response.data){
-                    if(response.data.length > 0){
+                    if(response.data === "No Dépense"){
+                        setDepense([])
+                        setMsg("No Dépense")
+                    }
+                    else if(response.data.length > 0){
                         setDepense(response.data)
                         setMsg("data")
                     }
-                    else if(response.data === "No Dépense"){
-                        setDepense("")
+                    else {
+                        setDepense([])
                         setMsg("No Dépense")
-                        toast.warn("Aucune Dépense")
                     }
                 }
                 else{
@@ -80,7 +90,7 @@ function ListerDepenses() {
                 console.log(err)
             })
         }
-    })
+    }, [search])
 
 
     return (
@@ -90,7 +100,7 @@ function ListerDepenses() {
                 <div className="container col-md-10 col-md-offset-1">
                     <div className="row">
                         <div>
-                            <input type="text" placeholder="Chercher Les Dépenses..." className="form-control" onChange={e => setSearch(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Dépenses..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
                 </div>
@@ -101,45 +111,50 @@ function ListerDepenses() {
                     {
                         depense.map((d) => {
                             return(
-                                <div>
-                                    <Accordion key={d.RefDepense} className="mb-5">
-                                        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                                            <Typography className={classes.heading} style={{color : "blue"}}><strong> {d.descriptionDepense} </strong></Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            <Typography spacing={3}>
-                                                <Card className={classes.root}>
-                                                    <CardContent>
+                                <Grow key={d.RefDepense} in={useEffect} timeout={1000}> 
+                                    <Paper elevation={4} className={classes.paper}>
+                                        <Accordion className="mb-5 card">
+                                            <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+                                                <Typography className={classes.heading} style={{color : "blue"}}><strong> {d.descriptionDepense} </strong></Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+                                                <Typography spacing={3}>
+                                                    <Card className={classes.root}>
+                                                        <CardContent>
+                                                            <div className="row">
+                                                                <div className="col-md-6">
+                                                                    <Typography variant="body1" color="textPrimary">La Categorie : <strong>{d.NomCategorie}</strong> </Typography>
+                                                                </div>
+                                                                <div className="col-md-6">
+                                                                    <Typography variant="body1" color="textPrimary">Montant : <strong style={{color : "blue"}}>{d.MontantDepense} (en Dhs)</strong></Typography>
+                                                                </div>
+                                                            </div><br/>
+                                                            <Typography > Facture : {d.facture} </Typography>
+                                                        </CardContent>
                                                         <div className="row">
                                                             <div className="col-md-6">
-                                                                <Typography variant="body1" color="textPrimary">La Categorie : <strong>{d.NomCategorie}</strong> </Typography>
+                                                                <CardActions><Typography variant="body2" color="textSecondary"> Déclarer par : {d.NomCompte} {d.PrenomCompte} </Typography></CardActions>
                                                             </div>
                                                             <div className="col-md-6">
-                                                                <Typography variant="body1" color="textPrimary">Montant : <strong style={{color : "blue"}}>{d.MontantDepense} (en Dhs)</strong></Typography>
+                                                                <CardActions><Typography variant="body2" color="textSecondary">  Date mise à jour : {d.dateDepense && d.dateDepense.replace("T23:00:00.000Z", "")} </Typography></CardActions>
                                                             </div>
-                                                        </div><br/>
-                                                        <Typography > Facture : {d.facture} </Typography>
-                                                    </CardContent>
-                                                    <div className="row">
-                                                        <div className="col-md-6">
-                                                            <CardActions><Typography variant="body2" color="textSecondary"> Déclarer par : {d.NomCompte} {d.PrenomCompte} </Typography></CardActions>
                                                         </div>
-                                                        <div className="col-md-6">
-                                                            <CardActions><Typography variant="body2" color="textSecondary">  Date mise à jour : {d.dateDepense.replace("T23:00:00.000Z", "")} </Typography></CardActions>
-                                                        </div>
-                                                    </div>
-                                                </Card>
-                                            </Typography>
-                                        </AccordionDetails>
-                                    </Accordion>
-                                </div>
+                                                    </Card>
+                                                </Typography>
+                                            </AccordionDetails>
+                                        </Accordion>
+                                    </Paper>
+                                </Grow>
                             )
                         })
                     }
                 </div>
             }
             {
-                msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Dépense Pour Cette Recherche "{search}" </Alert></div>
+                search !== "" ?
+                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Dépense Pour Cette Recherche "{search}" </Alert></div> }</div>
+                : 
+                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Dépense Pour l'Instant </Alert></div> }</div>
             }
         </div>
     )
