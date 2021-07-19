@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import { InputLabel, MenuItem, Select, FormControl, TextField, makeStyles } from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -36,6 +38,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function AddCotisation(props) {
+    const History = useHistory()
     const classes = useStyles()
     let cotMontanat = 200
     const [Accounts, setAccounts] = useState([])
@@ -92,6 +95,8 @@ function AddCotisation(props) {
         }
     }
     useEffect(() => {
+        Util()
+
         axios.get("http://localhost:5001/users/logement/cop")
             .then((resolve) => {
                 if(resolve.data.length > 0){
@@ -106,7 +111,9 @@ function AddCotisation(props) {
             .catch((err) => {
                 //console.log(err)
             })
-    }, [])
+    }, [History])
+
+
     return (
         <div className="container col-md-6 col-md-offset-3" style={{paddingTop : "90px"}}>
             <div className="card">

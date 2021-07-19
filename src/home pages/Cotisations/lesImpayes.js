@@ -4,6 +4,7 @@ import {makeStyles} from '@material-ui/core/styles'
 import axios from 'axios'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Alert from '@material-ui/lab/Alert';
+import Util from '../../utils/util';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -23,6 +24,8 @@ function LesImpayes() {
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
+        Util()
+
         if(search !== ""){
             axios.get("http://localhost:5001/cotisations/getImpayes/" + search)
             .then((resolve) => {

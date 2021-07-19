@@ -6,6 +6,7 @@ import { UpdateOutlined, CloudDownloadOutlined }from '@material-ui/icons';
 import { useHistory } from 'react-router';
 import axios from 'axios';
 import Alert from '@material-ui/lab/Alert'
+import Util from '../../utils/util';
 
 
 
@@ -48,6 +49,7 @@ function ListerReclamation() {
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
+        Util()
         if(search !== ""){
             axios.get("http://localhost:5001/reclamations/" + search)
             .then((response) => {

@@ -4,6 +4,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
 import Alert from '@material-ui/lab/Alert'
+import GuestVerify from '../../utils/guestVerify';
 
 axios.interceptors.request.use(
     config => {
@@ -55,6 +56,7 @@ function ListerMesPaiements() {
 
 
     useEffect(() => {
+        GuestVerify()
         if(id !== undefined && id !== ""){
             if(search !== ""){
                 axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}/${search}`)

@@ -4,6 +4,18 @@ import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, TextField } from '@material-ui/core';
 import { toast } from 'react-toastify';
+import GuestVerify from '../../utils/guestVerify';
+
+axios.interceptors.request.use(
+    config => {
+        config.headers.authorization = `Bearer ${localStorage.getItem("token")}`
+        return config
+    },
+    err => {
+        return Promise.reject(err)
+    }
+)
+
 
 const useStyles = makeStyles((theme) => ({
     alert :{
@@ -55,6 +67,7 @@ function EditReclamation(props) {
 
 
     useEffect(() => {
+        GuestVerify()
         if(refReclamation !== "" || refReclamation !== undefined){
             axios.get(`http://localhost:5001/reclamations/reclamation/${refReclamation}`)
             .then(res => 

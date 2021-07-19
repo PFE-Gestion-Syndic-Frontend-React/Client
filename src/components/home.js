@@ -30,35 +30,35 @@ import axios from 'axios'
 import InfoLogement from '../home pages/Logement/infoLogement'
 import ReleveFinancier from '../home pages/Statistique/releveFinancier'
 import LesImpayes from '../home pages/Cotisations/lesImpayes'
+//import Util from '../utils/util'
 
 function Home(props) {
-    const history = useHistory()
+    const History = useHistory()
     useEffect(() => {
         axios.get("http://localhost:5001/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
         .then((resolve) => {
             if(resolve){
                 if(resolve.data.role === "Administrateur"){
-
+                    console.log("Yes Authenticated")
                 }
                 else if(resolve.data.role !== "Administrateur"){
                     localStorage.clear()
-                    history.push('/')
+                    History.push('/')
                 }
                 else if(resolve.data.msg === "Incorrect token !"){
                     console.log("Incorrect Token")
                     localStorage.clear()
-                    history.push('/')
+                    History.push('/')
                 }// added
             }
             else{
                 localStorage.clear()
-                history.push('/')
+                History.push('/')
             }
         })
-        .catch(() => {
+        .catch(() => {})
 
-        })
-    })
+    }, [History])
 
     return (
         <div>

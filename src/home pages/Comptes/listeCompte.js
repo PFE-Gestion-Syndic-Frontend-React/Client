@@ -5,17 +5,8 @@ import { Paper, Grow, makeStyles, TextField, IconButton, Button, Dialog, DialogC
 import { DeleteOutlined, UpdateOutlined }from '@material-ui/icons';
 import { toast } from 'react-toastify';
 import Alert from '@material-ui/lab/Alert'
+import Util from '../../utils/util';
 
-
-axios.interceptors.request.use(
-    config => {
-        config.headers.authorization = `Bearer ${localStorage.getItem("token")}`
-        return config
-    },
-    err => {
-        return Promise.reject(err)
-    }
-)
 
 const useStyles = makeStyles((theme) => ({
     
@@ -53,6 +44,8 @@ function ListeCompte(props) {
     };
 
     useEffect(() => {
+        Util()
+
         if(search !== ""){
             axios.get("http://localhost:5001/users/" + search)
             .then((response) => {
@@ -82,7 +75,7 @@ function ListeCompte(props) {
             })
             .catch(() => {}) 
         }
-    }, [search, deleted, msg])
+    }, [search, deleted, msg, history])
     
 
     const deleteCompte = (NumCompte) => {

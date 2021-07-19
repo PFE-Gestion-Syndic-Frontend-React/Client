@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
-import { Paper, Grow, TextField, IconButton, Avatar, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions } from '@material-ui/core'
+import { Paper, Grow, TextField, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { toast } from 'react-toastify';
 import { CloudDownloadOutlined }from '@material-ui/icons';
 import { Alert }from '@material-ui/lab'
+import GuestVerify from '../../utils/guestVerify';
 
 axios.interceptors.request.use(
     config => {
@@ -60,6 +60,7 @@ function ListerAnnonces() {
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
+        GuestVerify()
         if(search !== ""){
             console.log(search)
             axios.get("http://localhost:5001/annonces/all/statut/true/" + search)

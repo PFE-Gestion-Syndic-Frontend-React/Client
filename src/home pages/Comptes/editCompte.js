@@ -1,9 +1,11 @@
 import axios from 'axios'
 import React, {useEffect, useState} from 'react'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import {TextField, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@material-ui/core';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
 
 const useStyles = makeStyles((theme) => ({
     
@@ -46,6 +48,8 @@ function EditCompte(props) {
     
     const id = props.match.params.id
     useEffect(() => {
+        Util()
+
         if(id !== ""){
             axios.get(`http://localhost:5001/users/user/${id}`)
             .then(res => 

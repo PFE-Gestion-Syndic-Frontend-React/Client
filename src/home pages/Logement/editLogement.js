@@ -4,6 +4,9 @@ import { makeStyles } from '@material-ui/styles'
 import {Link} from 'react-router-dom'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import Util from '../../utils/util'
+
+
 
 const useStyles = makeStyles((theme) => ({
     
@@ -37,20 +40,20 @@ function EditLogement(props) {
 
     
     useEffect(() => {
-        axios.get("http://localhost:5001/logements/coproprietaire/" + refLogement)
-        .then((resolve) => {
-            if(resolve.data.length > 0){
-                setCopro(resolve.data[0])
-            }
-        })
-        .catch(() => {
-
-        })
-        setOpen(false)
-    }, [refLogement])
-
-
-    useEffect(() => {
+        Util()
+        if(refLogement !== ""){
+            axios.get("http://localhost:5001/logements/coproprietaire/" + refLogement)
+            .then((resolve) => {
+                if(resolve.data.length > 0){
+                    setCopro(resolve.data[0])
+                }
+            })
+            .catch(() => {
+    
+            })
+            setOpen(false)
+        }
+   
         axios.get("http://localhost:5001/logements/Coproprietaire/byEmail")
         .then((response) => {
             if(response.data.length > 0){
@@ -68,7 +71,7 @@ function EditLogement(props) {
         .catch(() => {
             console.log("err")
         })
-    }, [])
+    }, [refLogement])
 
 
     const updateLog = () => {

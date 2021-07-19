@@ -4,7 +4,7 @@ import { Paper, Grow, TextField, Accordion, AccordionSummary, Typography, Accord
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { makeStyles } from '@material-ui/styles'
 import Alert from '@material-ui/lab/Alert'
-import {toast} from 'react-toastify'
+import GuestVerify from './../../utils/guestVerify'
 
 axios.interceptors.request.use(
     config => {
@@ -42,6 +42,7 @@ function ListerDepenses() {
     const [search, setSearch] = useState('')
 
     useEffect(() => {
+        GuestVerify()
         if(search !== ""){
             axios.get("http://localhost:5001/depenses/" + search)
             .then((response) => {

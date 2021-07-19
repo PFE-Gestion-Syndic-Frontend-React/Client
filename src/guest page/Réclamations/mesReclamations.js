@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import axios from 'axios'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
+import GuestVerify from '../../utils/guestVerify'
 
 axios.interceptors.request.use(
     config => {
@@ -74,6 +75,7 @@ function MesReclamations() {
     }
 
     useEffect(() => {
+        GuestVerify()
         if(search !== ""){
             axios.get("http://localhost:5001/reclamations/mesReclamations/all/" + id + "/" + search)
             .then((response) => {

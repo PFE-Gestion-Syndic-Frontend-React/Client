@@ -1,9 +1,12 @@
 import React, {useState, useEffect} from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, TextField } from '@material-ui/core';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
+
 
 const useStyles = makeStyles((theme) => ({
     alert :{
@@ -51,6 +54,8 @@ function EditAnnonce(props) {
     }
 
     useEffect(() => {
+        Util()
+
         if(refAnnonce !== ""){
             axios.get(`http://localhost:5001/annonces/annonce/${refAnnonce}`)
             .then(res => 

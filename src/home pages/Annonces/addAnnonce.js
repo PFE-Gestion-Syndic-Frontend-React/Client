@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
 import { TextField} from '@material-ui/core';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
+
 
 const useStyles = makeStyles((theme) => ({
     
@@ -39,13 +42,16 @@ function AddAnnonce(props) {
     const History = useHistory()
     const classes = useStyles();
     const id = localStorage.getItem('id')
+    const token = localStorage.getItem('id')
 
     const [sujet, setSujet] = useState('')
     const [descripAnnonce, setDescrip] = useState('')
     const [msg, setMsg] = useState('')
     const [file, setFile] = useState('')
 
-    
+    useEffect(() =>{
+        Util()
+    })
     const annoncer = () => {
         if(id !== "" && sujet !== "" && descripAnnonce !== ""){
             if(file !== "" && file !== null){

@@ -4,18 +4,9 @@ import axios from 'axios'
 import { Paper, Grow, makeStyles, IconButton, TextField} from '@material-ui/core'
 import { UpdateOutlined, InfoOutlined }from '@material-ui/icons';
 import Alert from '@material-ui/lab/Alert'
+import Util from '../../utils/util';
 
 
-
-axios.interceptors.request.use(
-    config => {
-        config.headers.authorization = `Bearer ${localStorage.getItem("token")}`
-        return config
-    },
-    err => {
-        return Promise.reject(err)
-    }
-)
 
 
 const useStyle = makeStyles((theme) => ({
@@ -43,6 +34,7 @@ function ListerLogement() {
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
+        Util()
         if(search !== ""){
             axios.get("http://localhost:5001/logements/" + search)
             .then((response) => {

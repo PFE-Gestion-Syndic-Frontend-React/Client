@@ -4,9 +4,11 @@ import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { toast } from 'react-toastify';
+import GuestVerify from '../../utils/guestVerify';
+
+
 
 const useStyles = makeStyles((theme) => ({
-    
     textField: {
       marginLeft: theme.spacing(1),
       marginRight: theme.spacing(1),
@@ -31,10 +33,6 @@ const useStyles = makeStyles((theme) => ({
 function AddReclamation(props) {
     const classes = useStyles();
     const id = localStorage.getItem('id')
-    if(id !== null){
-        const idParsed = parseInt(id)
-        console.log(idParsed)
-    }
     const [objet, setObjet] = useState('')
     const [message, setMessage] = useState('')
     const [pour, setPour] = useState('Privée')
@@ -43,6 +41,7 @@ function AddReclamation(props) {
     const [file, setFile] = useState('')
 
     useEffect(() => {
+        GuestVerify()
         if(id !== '' && id !== undefined && id !== null){
             axios.get(`http://localhost:5001/logements/copro/NumCompte/${id}`)
             .then((resolve) => {

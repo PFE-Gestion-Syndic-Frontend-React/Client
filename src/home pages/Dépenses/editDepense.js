@@ -4,6 +4,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText} from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
+
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -43,6 +46,7 @@ function EditDepense(props) {
     }
 
     useEffect(() => {
+        Util()
         if(refDepense){
             axios.get(`http://localhost:5001/depenses/depense/${refDepense}`)
             .then(res => 

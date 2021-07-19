@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { FormControl, InputLabel, Select, MenuItem, Typography, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText} from '@material-ui/core'
 import axios from 'axios'
 import {makeStyles} from '@material-ui/core/styles'
 import { toast } from 'react-toastify'
+import Util from '../../utils/util'
 
 
 
@@ -48,6 +49,8 @@ function EditCotisation(props) {
     }
 
     useEffect(() => {
+        Util()
+
         axios.get("http://localhost:5001/cotisations/getData/" + RefPaiement)
         .then((resolve) => {
             if(resolve.data === "err"){

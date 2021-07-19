@@ -4,6 +4,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
 import { InputLabel, Button, MenuItem, Select, FormControl, TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -58,6 +61,7 @@ function AddDepense(props) {
 
 
     useEffect(() => {
+        Util()
         axios.get("http://localhost:5001/depenses/categorie/all")
         .then((resolve) => {
             setCategorie(resolve.data)

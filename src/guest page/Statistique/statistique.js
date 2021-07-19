@@ -2,6 +2,18 @@ import React, { useEffect, useState } from 'react'
 import { TextField, Slide, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import axios from 'axios'
+import GuestVerify from '../../utils/guestVerify';
+
+axios.interceptors.request.use(
+    config => {
+        config.headers.authorization = `Bearer ${localStorage.getItem("token")}`
+        return config
+    },
+    err => {
+        return Promise.reject(err)
+    }
+)
+
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -49,6 +61,7 @@ function Statistique() {
 
 
     useEffect(() => {
+        GuestVerify()
         axios.get("http://localhost:5001/statistiques/data")
         .then((response) => {
             setNbrDepense(response.data[0][0].NbrDepense)

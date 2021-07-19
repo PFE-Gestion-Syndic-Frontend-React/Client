@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Button, TextField, Slide, Paper } from '@material-ui/core'
+import { FormControl, InputLabel, Select, MenuItem, Button, Slide, Paper } from '@material-ui/core'
 import { Link } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
 import axios from 'axios'
+import Util from '../../utils/util'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -35,9 +36,12 @@ const useStyles = makeStyles((theme) => ({
 
 
 function Statistique() {
+    
     const classes = useStyles()
-    const [depart, setDepart] = useState(null)
-    const [fin, setFin] = useState(null)
+    const [moisDep, setmoisDep] = useState(1)
+    const [anneeDep, setanneeDep] = useState(2021)
+    const [moisFin, setFin] = useState(12)
+    const [anneeFin, setanneeFin] = useState(2021)
     const [NbrDepense, setNbrDepense] = useState('')
     const [MontantDepense, setMontantDepense] = useState('')
     const [NbrUsers, setNbrUsers] = useState('')
@@ -48,21 +52,33 @@ function Statistique() {
     const [NbrAnnonce, setNbrAnnonce] = useState('')
     const [NbrRecla, setNbrRecla] = useState('')
 
-
+    
+    
     useEffect(() => {
-        axios.get("http://localhost:5001/statistiques/data")
-        .then((response) => {
-            setNbrDepense(response.data[0][0].NbrDepense)
-            setMontantDepense(response.data[0][0].montant)
-            setNbrUsers(response.data[1][0].NbrUsers)
-            setAdmi(response.data[2][0].admi)
-            setCopro(response.data[3][0].copro)
-            setNbrCoti(response.data[4][0].NbrPaiement)
-            setMontantCoti(response.data[4][0].montantPayed)
-            setNbrAnnonce(response.data[5][0].NbrAnonce)
-            setNbrRecla(response.data[6][0].NbrReclam)
-        })
-        .catch(() => {})
+        Util()
+        /* const datasend = { moisDep : moisDep, anneeDep : anneeDep, moisFin : moisFin, anneeFin : anneeFin}
+        if(moisDep !== "" && anneeDep !== ""){
+            /*axios.get("http://localhost:5001/statistiques/du", datasend)
+            .then((resolve) => {
+                console.log(resolve)
+            })
+            .catch(() => {})
+        }
+        else{*/
+            axios.get("http://localhost:5001/statistiques/data")
+            .then((response) => {
+                setNbrDepense(response.data[0][0].NbrDepense)
+                setMontantDepense(response.data[0][0].montant)
+                setNbrUsers(response.data[1][0].NbrUsers)
+                setAdmi(response.data[2][0].admi)
+                setCopro(response.data[3][0].copro)
+                setNbrCoti(response.data[4][0].NbrPaiement)
+                setMontantCoti(response.data[4][0].montantPayed)
+                setNbrAnnonce(response.data[5][0].NbrAnonce)
+                setNbrRecla(response.data[6][0].NbrReclam)
+            })
+            .catch(() => {})
+        //}
     }, [])
 
 
@@ -77,10 +93,42 @@ function Statistique() {
                                 <Button variant="contained" color="primary" style={{width : "300px", textTransform : "capitalize", fontSize : "16px", color : "white"}} component={Link} to="/relevé-financièr">Demander Relevé Financièr</Button>
                             </div><br/><br/><br/><br/>
                         </div>
-                            <div className="row">
-                                <div className="col-md-6"><TextField InputLabelProps={{ shrink: true,}} id="date" label="Du" type="date" className={classes.textField} onChange={e => setDepart(e.target.value)} /></div>
-                                <div className="col-md-6"><TextField InputLabelProps={{ shrink: true,}} id="date" label="Au" type="date" className={classes.textField} onChange={e => setFin(e.target.value)} /></div>
-                            </div><br/><br/><br/>
+                            <div className="container col-md-10 col-md-offset-1">
+                                <div className="row">
+                                    <div className="col-md-6">
+                                        <FormControl className={classes.formControl}>
+                                            <InputLabel id="demo-mutiple-name-label">Mois de Départ</InputLabel>
+                                            <Select labelId="demo-mutiple-name-label" id="demo-mutiple-name" defaultValue={moisDep} defaultChecked={"Janvier"} onChange={e => setmoisDep(e.target.value)}>
+                                                <MenuItem value={1} >Janvier</MenuItem>
+                                                <MenuItem value={2} >Février</MenuItem>
+                                                <MenuItem value={3} >Mars</MenuItem>
+                                                <MenuItem value={4} >Avril</MenuItem>
+                                                <MenuItem value={5} >Mai</MenuItem>
+                                                <MenuItem value={6} >Juin</MenuItem>
+                                                <MenuItem value={7} >Juillet</MenuItem>
+                                                <MenuItem value={8} >Août</MenuItem>
+                                                <MenuItem value={9} >Septembre</MenuItem>
+                                                <MenuItem value={10} >Octobre</MenuItem>
+                                                <MenuItem value={11} >November</MenuItem>
+                                                <MenuItem value={12} >Décembre</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <FormControl className={classes.formControl}>
+                                            <InputLabel id="demo-mutiple-name-label">Année de Départ</InputLabel>
+                                            <Select labelId="demo-mutiple-name-label" id="demo-mutiple-name" defaultValue={anneeDep} defaultChecked={"2021"} onChange={e => setanneeDep(e.target.value)}>
+                                                <MenuItem key={2020} value={2021} >2021</MenuItem>
+                                                <MenuItem key={2021} value={2022} >2022</MenuItem>
+                                                <MenuItem key={2022} value={2023} >2023</MenuItem>
+                                                <MenuItem key={2023} value={2024} >2024</MenuItem>
+                                                <MenuItem key={2024} value={2025} >2025</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </div>
+                                </div>
+                            </div>
+                            <br/><br/><br/>
                         <div className="container">
                             <div className="row">
                                 <div className="col-md-6">

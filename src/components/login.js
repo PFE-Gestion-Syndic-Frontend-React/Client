@@ -54,35 +54,32 @@ function Login(props) {
         if(email !== "" && pwd !== ""){
             axios.post("http://localhost:5001/",  { withCredentials : true , email : email, pwd : pwd })
             .then((resolve)=> {
-                    if(resolve){
-                        if(resolve.data.msgErr){
-                            setMsg("Password or Email is incorrect !")
-                            toast.error("Password or Email is Incorrect !")
+                if(resolve){
+                    if(resolve.data.msgErr){
+                        setMsg("Password or Email is incorrect !")
+                        toast.error("Password or Email is Incorrect !")
+                    }
+                    if(resolve.data.data[0] && resolve.data.token){
+                        localStorage.setItem("token", resolve.data.token)
+                        localStorage.setItem('id', resolve.data.data[0].NumCompte)
+                        if(resolve.data.data[0].Role === "Administrateur" && localStorage.getItem("token")){
+                            props.history.push('/home', {data : resolve.data.data[0]})
+                            toast.success('Logged in Successfully', {position : toast.POSITION.TOP_CENTER})
                         }
-                        if(resolve.data.data[0] && resolve.data.token){
-                            localStorage.setItem("token", resolve.data.token)
-                            localStorage.setItem('id', resolve.data.data[0].NumCompte)
-                            localStorage.setItem('Name', resolve.data.data[0].NomCompte)
-                            localStorage.setItem('First', resolve.data.data[0].PrenomCompte)
-                            localStorage.setItem('photo', resolve.data.data[0].photo)
-                            if(resolve.data.data[0].Role === "Administrateur" && localStorage.getItem("token")){
-                                props.history.push('/home', {data : resolve.data.data[0]})
-                                toast.success('Logged in Successfully', {position : toast.POSITION.TOP_CENTER})
-                            }
-                            else if(resolve.data.data[0].Role === "Copropriétaire" && localStorage.getItem("token")){
-                                props.history.push('/Acceuil', {data : resolve.data.data[0]})
-                                toast.success('Logged in Successfully', {position : toast.POSITION.TOP_CENTER})
-                            }
-                            else{
-                                props.history.push('/')
-                            }
+                        else if(resolve.data.data[0].Role === "Copropriétaire" && localStorage.getItem("token")){
+                            props.history.push('/Acceuil', {data : resolve.data.data[0]})
+                            toast.success('Logged in Successfully', {position : toast.POSITION.TOP_CENTER})
+                        }
+                        else{
+                            props.history.push('/')
                         }
                     }
-                    else{
-                        setMsg("User does not Existe")
-                        toast.warn('Utilisateur Inrouvable !')
-                    }
-                })
+                }
+                else{
+                    setMsg("User does not Existe")
+                    toast.warn('Utilisateur Inrouvable !')
+                }
+            })
             .catch((err) => console.log(err))
         }
         else{

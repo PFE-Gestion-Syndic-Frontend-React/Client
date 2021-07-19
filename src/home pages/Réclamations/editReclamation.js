@@ -4,6 +4,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { FormControl, Select, MenuItem, FormHelperText, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -63,6 +65,7 @@ function EditReclamation(props) {
 
     const refReclamation = props.match.params.refReclamation 
     useEffect(() => {
+        Util()
         if(refReclamation !== ""){
             axios.get(`http://localhost:5001/reclamations/reclamation/${refReclamation}`)
             .then(res => 

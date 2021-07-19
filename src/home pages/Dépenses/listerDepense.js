@@ -7,17 +7,8 @@ import { makeStyles } from '@material-ui/styles'
 import { useHistory } from 'react-router'
 import {toast} from 'react-toastify'
 import Alert from '@material-ui/lab/Alert'
+import Util from '../../utils/util'
 
-
-axios.interceptors.request.use(
-    config => {
-        config.headers.authorization = `Bearer ${localStorage.getItem("token")}`
-        return config
-    },
-    err => {
-        return Promise.reject(err)
-    }
-)
 
 
 const useStyles = makeStyles((theme) => ({
@@ -57,6 +48,7 @@ function ListerDepense(props) {
     }
 
     useEffect(() => {
+        Util()
         if(search !== ""){
             axios.get("http://localhost:5001/depenses/" + search)
             .then((response) => {

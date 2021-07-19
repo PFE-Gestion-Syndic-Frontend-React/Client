@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import { makeStyles, TextField } from '@material-ui/core';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -28,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function AddCompte(props) {
+    const History = useHistory()
     const classes = useStyles()
     const [nom, setNom] = useState('')
     const [prenom, setPrenom] = useState('')
@@ -38,6 +41,8 @@ function AddCompte(props) {
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
+        Util()
+
         if(email){
             axios.get("http://localhost:5001/users/byEmail/" + email)
             .then((response) => {
@@ -50,13 +55,12 @@ function AddCompte(props) {
                         setMsg("")
                     }
                 }
-                //console.log(msg)
             })
             .catch(() => {
                 console.log("err")
             })
         }
-    }, [email]) 
+    }, [email, History]) 
     
     
     const createAccount =  () => {

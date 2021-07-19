@@ -7,16 +7,8 @@ import axios from 'axios';
 import { useHistory } from 'react-router';
 import Alert from '@material-ui/lab/Alert';
 import { toast } from 'react-toastify'
+import Util from '../../utils/util';
 
-axios.interceptors.request.use(
-    config => {
-        config.headers.authorization = `Bearer ${localStorage.getItem("token")}`
-        return config
-    },
-    err => {
-        return Promise.reject(err)
-    }
-)
 
 
 const useStyles = makeStyles((theme) => ({
@@ -49,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 
 function ListerCotisation() {
     const classes = useStyles()
-    const history = useHistory()
+    const History = useHistory()
     const [msg, setMsg] = useState('')
     const [cotisations, setCotisation] = useState([])
     const [search, setSearch] = useState('')
@@ -66,6 +58,8 @@ function ListerCotisation() {
     }
 
     useEffect(() => {
+        Util()
+
         if(search !== ""){
             axios.get("http://localhost:5001/cotisations/" + search)
             .then((response) => {
@@ -107,10 +101,10 @@ function ListerCotisation() {
             .catch((err) => {})
         }
         setDeleted('')
-    },[search, deleted, msg, paied])
+    },[search, deleted, msg, paied, History])
 
     const updateCotisation = (RefCotisation) => {
-        history.push('/cotisation/edit/' + RefCotisation)
+        History.push('/cotisation/edit/' + RefCotisation)
     }
 
     const deleteCotisation = () => {

@@ -3,6 +3,18 @@ import {TextField} from '@material-ui/core'
 import {makeStyles} from '@material-ui/core/styles'
 import { useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import GuestVerify from '../../utils/guestVerify';
+
+axios.interceptors.request.use(
+    config => {
+        config.headers.authorization = `Bearer ${localStorage.getItem("token")}`
+        return config
+    },
+    err => {
+        return Promise.reject(err)
+    }
+)
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -23,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 
-function Settings() {
+function Settings(props) {
     const classes = useStyles()
     const [compte, setCompte] = useState('')
     //const [msg, setMsg] = useState('')
@@ -35,6 +47,7 @@ function Settings() {
     const id = localStorage.getItem('id')
 
     useEffect(() => {
+        GuestVerify()
         if(id !== ""){
             axios.get(`http://localhost:5001/users/user/${id}`)
             .then((response) => {
@@ -47,34 +60,30 @@ function Settings() {
 
             })
         }
-    }, [id])
+        else{
+            localStorage.clear()
+            props.history.push('/Acceuil')
+        }
+    }, [id, props.history])
 
     const updateMonCompte = () => {
-        if(id!== ""){
-            if(nom !== "" && prenom !== "" && tele !== ""){
-                if(pwd !== "" && newPwd !== ""){
-                    const datasend = { nom : nom, prenom : prenom, tele : tele, pwd : pwd, newPwd : newPwd }
-                    axios.put(`http://localhost:5001/users/monCompte/edit/${id}`, datasend)
-                    .then((resolve) => {
-                        console.log(resolve)
-                    })
-                    .catch((err) => {
-                        console.log(err)
-                    })
-                }
-                else{
-                    const datasend = { nom : nom, prenom : prenom, tele : tele }
-                    console.log(datasend)
-                    axios.put(`http://localhost:5001/users/monCompte/edit/${id}`, datasend)
-                    .then((resolve) => {
-                        console.log(resolve)
-                    })
-                    .catch((err) => {
-                        if(err){
-                            console.log(err)
-                        }
-                    })
-                }
+        if(id !== ""){
+            const datasend = { nom : nom, prenom : prenom, tele : tele, pwd : pwd, newPwd : newPwd }
+            if(nom === "" && prenom === "" && tele === "" && pwd === "" && newPwd === ""){   
+                toast.success("Votre Compte est Enregistré avec Succès")
+            }    
+            else if(nom !== "" && prenom !== "" && tele !== "" || pwd !== "" && newPwd !== ""){
+                axios.put(`http://localhost:5001/monCompte/edit/${id}`, datasend)
+                .then((resolve) => {
+                    console.log(resolve.data)
+                    if(resolve.data === "Updated"){
+                        toast.success("Votre Compte est Enregistré avec Succès")
+                    }
+                    else if(resolve.data === "Not Updated"){
+                        toast.error("Votre Modification est Echouée")
+                    }
+                })
+                .catch((err) => {console.log(err)})
             }
         }
     }

@@ -3,6 +3,10 @@ import {Link} from 'react-router-dom'
 import axios from 'axios'
 import { InputLabel, makeStyles, TextField, FormControl, Select, MenuItem } from '@material-ui/core';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
+
+
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -38,8 +42,9 @@ function AddLogement(props) {
     const [msg, setMsg] = useState('')
     const [adr, setadr] = useState('')
 
-    console.log(msg)
+
     useEffect(() => {
+        Util()
         axios.get("http://localhost:5001/logements/Coproprietaire/byEmail")
         .then((response) => {
             console.log(response)

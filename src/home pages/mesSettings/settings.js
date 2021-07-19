@@ -3,6 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText,} from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Util from '../../utils/util';
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -33,6 +35,7 @@ function Settings() {
     const [tele, setTele] = useState('')
     const [pwd, setPwd] = useState('')
     const [newPwd, setNewPwd] = useState('')
+    const [file, setFile] = useState('')
     const [open, setOpen] =useState(false)
     
     const handleClose = () => {
@@ -44,6 +47,7 @@ function Settings() {
 
     const id = localStorage.getItem('id')
     useEffect(() => {
+        Util()
         if(id !== ""){
             axios.get(`http://localhost:5001/users/user/${id}`)
             .then((response) => {
@@ -52,41 +56,47 @@ function Settings() {
                     //setMsg("ok")
                 }
             })
-            .catch(() => {
-
-            })
+            .catch(() => {})
         }
     }, [id])
 
     const updateMonCompte = () => {
-        if(id!== ""){
-            if(nom !== "" && prenom !== "" && tele !== ""){
-                if(pwd !== "" && newPwd !== ""){
-                    const datasend = { nom : nom, prenom : prenom, tele : tele, pwd : pwd, newPwd : newPwd }
-                    axios.put(`http://localhost:5001/users/monCompte/edit/${id}`, datasend)
-                    .then((resolve) => {
-                        console.log(resolve)
-                    })
-                    .catch((err) => {
-                        console.log(err)
-                    })
-                }
-                else{
-                    const datasend = { nom : nom, prenom : prenom, tele : tele }
-                    console.log(datasend)
-                    axios.put(`http://localhost:5001/users/monCompte/edit/${id}`, datasend)
-                    .then((resolve) => {
-                        console.log(resolve)
-                    })
-                    .catch((err) => {
-                        if(err){
-                            console.log(err)
-                        }
-                    })
-                }
+        if(id !== ""){
+            const datasend = { nom : nom, prenom : prenom, tele : tele, pwd : pwd, newPwd : newPwd }
+            if(nom === "" && prenom === "" && tele === "" && pwd === "" && newPwd === "" && file === ""){   
+                toast.success("Votre Compte est Enregistré avec Succès")
+            }    
+            else if(nom !== "" && prenom !== "" && tele !== "" || pwd !== "" && newPwd !== ""){
+                axios.put(`http://localhost:5001/monCompte/edit/${id}`, datasend)
+                .then((resolve) => {
+                    console.log(resolve.data)
+                    if(resolve.data === "Updated"){
+                        toast.success("Votre Compte est Enregistré avec Succès")
+                    }
+                    else if(resolve.data === "Not Updated"){
+                        toast.error("Votre Modification est Echouée")
+                    }
+                })
+                .catch((err) => {console.log(err)})
             }
-            else if(nom === "" && prenom === "" && tele === ""){
-                toast.success("Votre Profile est modifié avec Succès")
+            else if(file !== "" && file !== null){
+                const formdata = new FormData()
+                formdata.append('profile', file)
+                axios.put("http://localhost:5001/upload/profile/" + id, formdata)
+                .then((res) => {
+                    if(res.data === "Inserted" || res.data === "Inserted and Uploaded"){
+                        //setMsg("L'annonce est enregistré avec Success")
+                        toast.success('Votre Annonce est Enregistrée avec Succès')
+                    }
+                    else if(res.data.messageErr === "Bad One"){
+                        //setMsg("Really Bad")
+                        toast.warn("l'Annonce est échoué ! Réssayez-vous une autre fois..")
+                    }
+                    else if(res.data.affectedRows !== 0){
+                        toast.success("Votre Annonce est Enregistrée avec Succès")
+                    }
+                })
+                .catch((err) => console.log(err))
             }
         }
         setOpen(false)
@@ -127,7 +137,7 @@ function Settings() {
                             <label style={{fontSize : "15px"}}>Sélectionner Votre Avatare : </label>
                         </div>
                         <div className="col-md-6">
-                            <input type="file" accept=".png" className="form-control" />
+                            <input type="file" className="form-control" onChange={e => setFile(e.target.files[0])} />
                         </div>
                     </div><br /><br/>
                     <div className="row">

@@ -36,9 +36,7 @@ function Guest(props) {
                 history.push('/')
             }
         })
-        .catch(() => {
-
-        })
+        .catch(() => {})
     })
 
 

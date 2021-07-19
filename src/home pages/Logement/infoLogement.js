@@ -4,6 +4,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Avatar, Accordion, AccordionSummary, AccordionDetails, Card, CardHeader, CardContent, CardActions } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Alert from '@material-ui/lab/Alert';
+import Util from '../../utils/util';
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -50,9 +52,10 @@ function InfoLogement(props) {
 
 
     useEffect( () => {
+        Util()
+
         axios.get(`http://localhost:5001/logements/coproprietaire/${RefLogement}`)
         .then((resolve) => {
-            console.log(resolve)
             if(resolve.data === "No Logement"){
                 setCompte([])
                 setId('')
@@ -69,7 +72,6 @@ function InfoLogement(props) {
         if(id !== ""){
             axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}`)
             .then((response) => {
-                console.log(response)
                 if(response.data === "No Token at all" || response.data === "Invalid Token"){
                     localStorage.clear()
                     History.push('/')

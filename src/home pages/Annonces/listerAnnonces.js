@@ -7,17 +7,8 @@ import { DeleteOutlined, UpdateOutlined, CloudDownloadOutlined }from '@material-
 import { useHistory } from 'react-router';
 import { toast } from 'react-toastify';
 import Alert from '@material-ui/lab/Alert'
+import Util from '../../utils/util';
 
-
-axios.interceptors.request.use(
-    config => {
-        config.headers.authorization = `Bearer ${localStorage.getItem("token")}`
-        return config
-    },
-    err => {
-        return Promise.reject(err)
-    }
-)
 
 
 const useStyles = makeStyles((theme) => ({
@@ -74,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ListerAnnonces(props) {
-
+    const History = useHistory()
     const classes = useStyles()
     const [annonces, setAnnonce] = useState([])
     const [search, setSearch] = useState('')
@@ -91,7 +82,6 @@ function ListerAnnonces(props) {
         setRef(RefAnnonce)
     };
 
-    const History = useHistory()
     const updateAnnonce = (refAnnonce) => {
         return(
             History.push(`/annonce/edit/${refAnnonce}`)
@@ -100,6 +90,7 @@ function ListerAnnonces(props) {
 
 
     useEffect(() => {
+        Util()
         if(search !== ""){
             axios.get("http://localhost:5001/annonces/" + search)
             .then((response) => {
@@ -144,12 +135,9 @@ function ListerAnnonces(props) {
                     setMsg("No Annonce")
                 }
             })
-            .catch(() => 
-            {
-                
-            })
+            .catch(() => {})
         }
-    }, [search, deleted, msg, History])
+    }, [search, deleted, msg])
 
     const deleteAnnonce = () => {
         axios.delete(`http://localhost:5001/annonces/delete/${ref}`)
