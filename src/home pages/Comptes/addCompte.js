@@ -3,7 +3,6 @@ import axios from 'axios'
 import {Link, useHistory} from 'react-router-dom'
 import { makeStyles, TextField } from '@material-ui/core';
 import { toast } from 'react-toastify';
-import Util from '../../utils/util';
 
 
 
@@ -40,11 +39,42 @@ function AddCompte(props) {
     const [fonc, setFonc] = useState('')
     const [msg, setMsg] = useState('')
 
+    if(msg){}
+
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
 
         if(email){
-            axios.get("http://localhost:5001/users/byEmail/" + email)
+            axios.get("/users/byEmail/" + email)
             .then((response) => {
                 if(response){
                     if(response.data.msg === "Déjà Utilisé !"){
@@ -56,9 +86,7 @@ function AddCompte(props) {
                     }
                 }
             })
-            .catch(() => {
-                console.log("err")
-            })
+            .catch(() => {})
         }
     }, [email, History]) 
     
@@ -69,7 +97,7 @@ function AddCompte(props) {
         }
         if(nom !== "" && prenom !== "" && email !== "" && tele !== "" && role !== ""){
             const datasend = {nom : nom, prenom : prenom, email : email, tele : tele, role : role, fonc : fonc}
-            axios.post("http://localhost:5001/users/new", datasend)
+            axios.post("/users/new", datasend)
             .then((resolve) => {
                 if(resolve.data.message === "Inserted"){
                     setMsg("Le Compte est enregistré avec Success")
@@ -84,7 +112,7 @@ function AddCompte(props) {
                     toast.error("E-mail est déjà Utilisé !")
                 }
             })
-            .catch((err) => console.log(err))
+            .catch(() => {})
         }
         else{
             toast.warn("Les Champs qui ont (*) sont Obligatoires")
@@ -99,18 +127,18 @@ function AddCompte(props) {
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Nom"  maxLength="30" className={classes.root} required onChange={e => setNom(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" name="nom" label="Votre Nom" InputProps={{maxLength : "30"}} className={classes.root} required onChange={e => setNom(e.target.value)} />
                         </div>
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Prénom"  maxLength="30" className={classes.root} required onChange={e => setPrenom(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" name="prenom" label="Votre Prénom" InputProps={{maxLength : "30"}} className={classes.root} required onChange={e => setPrenom(e.target.value)} />
                         </div>
                     </div><br/>
                     <div className="row ">
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Adresse E-mail"  maxLength="50" className={classes.root} required onChange={e => setEmail(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" name="email" label="Votre Adresse E-mail"  InputProps={{maxLength : "50"}} className={classes.root} required onChange={e => setEmail(e.target.value)} />
                         </div>
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Numéro de Téléphone"  maxLength="10" className={classes.root} required onChange={e => setTele(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" name="tele" label="Votre Numéro de Téléphone" InputProps={{maxLength : "10"}} className={classes.root} required onChange={e => setTele(e.target.value)} />
                         </div>
                     </div><br/>
                     <div className="row container">
@@ -121,19 +149,19 @@ function AddCompte(props) {
                     {
                         role === "Copropriétaire" && 
                         <div className="row container">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Fonction au sein du Syndicat"  maxLength="30" className={classes.root} defaultValue={role} required onChange={e => setFonc("Copropriétaire")} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" name="fonc" label="Votre Fonction au sein du Syndicat"  InputProps={{maxLength : "30"}} className={classes.root} defaultValue={role} required onChange={e => setFonc("Copropriétaire")} />
                         </div>
                     }
                     {
                         role === "Administrateur" &&
                         <div className="row container">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Fonction au sein du Syndicat"  maxLength="30" className={classes.root} required onChange={e => setFonc(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" name="fonc" label="Votre Fonction au sein du Syndicat"  InputProps={{maxLength : "30"}} className={classes.root} required onChange={e => setFonc(e.target.value)} />
                         </div>
                     }
                     {
                         role === "" &&
                         <div className="row container">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Fonction au sein du Syndicat"  maxLength="30" className={classes.root} required onChange={e => setFonc(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" name="fonc" label="Votre Fonction au sein du Syndicat"  InputProps={{maxLength : "30"}} className={classes.root} required onChange={e => setFonc(e.target.value)} />
                         </div>
                     }
                     <br/>

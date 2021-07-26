@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText} from '@material-ui/core';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import Util from '../../utils/util';
+import { toast } from 'react-toastify'
 
 
 
@@ -28,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 function EditDepense(props) {
+    const History = useHistory()
     const classes = useStyles()
     const [montant, setMontant] = useState('')
     const [fac, setFac] = useState('')
@@ -37,6 +37,7 @@ function EditDepense(props) {
     const [open, setOpen] = useState(false)
     const refDepense = props.match.params.refDepense
 
+    if(msg){}
 
     const handleOpen = () => {
         setOpen(true)
@@ -46,9 +47,39 @@ function EditDepense(props) {
     }
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
         if(refDepense){
-            axios.get(`http://localhost:5001/depenses/depense/${refDepense}`)
+            axios.get(`/depenses/depense/${refDepense}`)
             .then(res => 
                 {
                     if(res.data.msgErr === "Not Found"){
@@ -61,13 +92,13 @@ function EditDepense(props) {
                 })
                 .catch(() => console.log("Cannot Read Data"))
         }
-    },[refDepense])
+    },[refDepense, History])
 
     const updateDepense = () => {
         if(montant !== "" && fac !== "" && desc !== ""){
             const datasend = {montant : montant, fac : fac, desc : desc}
             console.log(datasend)
-            axios.put(`http://localhost:5001/depenses/edit/${refDepense}`, datasend)
+            axios.put(`/depenses/edit/${refDepense}`, datasend)
             .then((resolve) => {
                 if(resolve.data.message === "Updated Successfully"){
                     setMsg("Updated Successfully")

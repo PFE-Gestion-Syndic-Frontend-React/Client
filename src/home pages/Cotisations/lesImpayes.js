@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { Paper, Grow, TextField, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent } from '@material-ui/core'
 import {makeStyles} from '@material-ui/core/styles'
 import axios from 'axios'
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import Alert from '@material-ui/lab/Alert';
-import Util from '../../utils/util';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import Alert from '@material-ui/lab/Alert'
+import { useHistory } from 'react-router'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -18,34 +18,46 @@ const useStyles = makeStyles((theme) => ({
 
 
 function LesImpayes() {
+    const History = useHistory()
     const classes = useStyles()
     const [search, setSearch] = useState('')
     const [impaye, setImpaye] = useState([])
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
 
         if(search !== ""){
-            axios.get("http://localhost:5001/cotisations/getImpayes/" + search)
-            .then((resolve) => {
-                if(resolve.data === 'Not Found'){
-                    setImpaye([])
-                    setMsg('Not Found')
-                }
-                else if(resolve.data !== 'Not Found'){
-                    setImpaye(resolve.data)
-                    setMsg('')
-                }
-                else{
-                    setImpaye([])
-                    setMsg('Not Found')
-                }
-            })
-            .catch((err) => {})
-        }
-        else{
-            axios.get("http://localhost:5001/cotisations/getImpayes")
+            const run = axios.get("/cotisations/getImpayes/" + search)
             .then((resolve) => {
                 if(resolve.data === 'Not Found'){
                     setImpaye([])
@@ -61,11 +73,33 @@ function LesImpayes() {
                 }
             })
             .catch(() => {})
+
+            return (() => clearInterval(run))
         }
-    }, [search, msg])
+        else{
+            const run1 = axios.get("/cotisations/getImpayes")
+            .then((resolve) => {
+                if(resolve.data === 'Not Found'){
+                    setImpaye([])
+                    setMsg('Not Found')
+                }
+                else if(resolve.data !== 'Not Found'){
+                    setImpaye(resolve.data)
+                    setMsg('')
+                }
+                else{
+                    setImpaye([])
+                    setMsg('Not Found')
+                }
+            })
+            .catch(() => {})
+
+            return(() => clearInterval(run1))
+        }
+    }, [search, msg, History])
 
     return (
-        <div style={{top : "120px"}}><br/><br/><br/>
+        <div style={{top : "90px"}}><br/><br/>
             <h1 style={{marginLeft : "200px"}}>Lister Les Impayés</h1>
             <div className="container col-md-8 col-md-offset-2"><br/><br/>
                 <div className="container col-md-10 col-md-offset-1">
@@ -141,9 +175,9 @@ function LesImpayes() {
             }
             {
                 search !== "" ?
-                <div>{ msg === "Not Found" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucun Résultat Pour Cette Recherche "{search}"</Alert></div> }</div>
+                <div>{ msg === "Not Found" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucun Résultat Pour Cette Recherche "{search}"</strong></Alert></div> }</div>
                 :
-                <div>{ msg === "Not Found" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="success">Tous les Copropriétaires ont Payées leurs Cotisations</Alert></div> }</div>
+                <div>{ msg === "Not Found" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="success"><strong style={{fontSize : "18px"}}>Tous les Copropriétaires ont Payées leurs Cotisations</strong></Alert></div> }</div>
             }
             </div><br/><br/>
         </div>

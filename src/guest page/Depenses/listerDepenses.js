@@ -4,7 +4,7 @@ import { Paper, Grow, TextField, Accordion, AccordionSummary, Typography, Accord
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { makeStyles } from '@material-ui/styles'
 import Alert from '@material-ui/lab/Alert'
-import GuestVerify from './../../utils/guestVerify'
+import { useHistory } from 'react-router'
 
 axios.interceptors.request.use(
     config => {
@@ -36,15 +36,36 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ListerDepenses() {
+    const History = useHistory()
     const classes = useStyles()
     const [depense, setDepense] = useState([]) 
     const [msg, setMsg] = useState('')
     const [search, setSearch] = useState('')
 
     useEffect(() => {
-        GuestVerify()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                History.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                History.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                History.push('/')
+            }
+        })
+        .catch(() => {})
+
         if(search !== ""){
-            axios.get("http://localhost:5001/depenses/" + search)
+            axios.get("/depenses/" + search)
             .then((response) => {
                 if(response.data.msgErr === "No Token Set"){
                     localStorage.clear()
@@ -67,7 +88,7 @@ function ListerDepenses() {
             })
         }
         else{
-            axios.get("http://localhost:5001/depenses/all")
+            axios.get("/depenses/all")
             .then((response) => {
                 if(response.data){
                     if(response.data === "No Dépense"){
@@ -91,7 +112,7 @@ function ListerDepenses() {
                 console.log(err)
             })
         }
-    }, [search])
+    }, [search, History])
 
 
     return (
@@ -104,8 +125,8 @@ function ListerDepenses() {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Dépenses..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
-                </div>
-            </div>
+                </div><br/>
+            </div><br/>
             {
                 msg === "data" &&
                 <div className="container col-md-8 col-md-offset-2">    
@@ -153,9 +174,9 @@ function ListerDepenses() {
             }
             {
                 search !== "" ?
-                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Dépense Pour Cette Recherche "{search}" </Alert></div> }</div>
+                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Dépense Pour Cette Recherche "{search}"</strong></Alert></div> }</div>
                 : 
-                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Dépense Pour l'Instant </Alert></div> }</div>
+                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Dépense Pour l'Instant </strong></Alert></div> }</div>
             }
         </div>
     )

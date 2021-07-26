@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-import { Paper, Grow, TextField, Avatar, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
+import { Paper, Grow, TextField, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { UpdateOutlined, CloudDownloadOutlined }from '@material-ui/icons';
 import { useHistory } from 'react-router';
 import axios from 'axios';
 import Alert from '@material-ui/lab/Alert'
-import Util from '../../utils/util';
 
 
 
@@ -41,17 +40,46 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ListerReclamation() {
-    const history = useHistory()
-
+    const History = useHistory()
     const classes = useStyles()
     const [reclamations, setreclamation] = useState([])
     const [search, setSearch] = useState('')
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
         if(search !== ""){
-            axios.get("http://localhost:5001/reclamations/" + search)
+            axios.get("/reclamations/" + search)
             .then((response) => {
                 if(response.data.msggg === "No Réclamation"){
                     setMsg("No Réclamation")
@@ -75,7 +103,7 @@ function ListerReclamation() {
             })
         }
         else{
-            axios.get("http://localhost:5001/reclamations/all")
+            axios.get("/reclamations/all")
                 .then((response) => {
                     if(response.data.length > 0){
                         setreclamation(response.data)
@@ -83,12 +111,12 @@ function ListerReclamation() {
                 })
                 .catch(() => console.log("No Reclamation"))
         }
-    }, [search])
+    }, [search, History])
 
     
     const handleUpdateRecla = (refReclamation) => {
         return(
-            history.push(`/réclamation/edit/${refReclamation}`)
+            History.push(`/réclamation/edit/${refReclamation}`)
         )
     }
 
@@ -98,8 +126,8 @@ function ListerReclamation() {
     }
 
     return (
-        <div style={{top : "120px"}}>
-            <h1 style={{marginLeft : "200px", paddingTop : "9%"}}>Lister Les Réclamations</h1>
+        <div>
+            <h1 style={{marginLeft : "200px", paddingTop : "55px"}}>Lister Les Réclamations</h1>
             <div className="container col-md-8 col-md-offset-2"><br/><br/>
                 <div className="container col-md-10 col-md-offset-1">
                     <div className="row">
@@ -164,7 +192,7 @@ function ListerReclamation() {
             }
             {
                 msg === "No Réclamation" &&
-                <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Réclamation pour cette Recherche "{search}" </Alert></div>
+                <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Réclamation pour cette Recherche "{search}"</strong></Alert></div>
             }
             <br/><br/><br/><br/><br/><br/>
         </div>

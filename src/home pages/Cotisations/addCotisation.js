@@ -3,7 +3,6 @@ import {Link, useHistory} from 'react-router-dom'
 import { InputLabel, MenuItem, Select, FormControl, TextField, makeStyles } from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import Util from '../../utils/util';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -48,9 +47,9 @@ function AddCotisation(props) {
     const [bnq, setBnq] = useState('')
     const [cheque, setCheque] = useState('')
     const [msg, setMsg] = useState('')
-    //console.log(msg)
     const id = localStorage.getItem('id')
 
+    if(msg){}
 
     const Valider = () => {
         if(id !== "" && log !== "" && mois !== "" && methode !== "" ){
@@ -64,7 +63,7 @@ function AddCotisation(props) {
             const montant = mois * cotMontanat
             if(methode === "Chèque" && bnq !== "" && cheque !== ""){
                 const datasend = {id : id, paied : paied, log :log, mois : mois, montant : montant, methode : methode, cheque : cheque, bnq : bnq}
-                axios.post("http://localhost:5001/cotisations/new/cheque", datasend)
+                axios.post("/cotisations/new/cheque", datasend)
                 .then((resolve) => {
                     if(resolve.data.message === "Inserted"){
                         props.history.push('/cotisations')
@@ -77,7 +76,7 @@ function AddCotisation(props) {
             }
             else if(methode === "Espèce"){
                 const datasend = {id : id, paied : paied, log : log, mois : mois, montant : montant, methode : methode}
-                axios.post("http://localhost:5001/cotisations/new/espece", datasend)
+                axios.post("/cotisations/new/espece", datasend)
                 .then((resolve) => {
                     //console.log(resolve)
                     if(resolve.data.message === "Inserted"){
@@ -95,9 +94,39 @@ function AddCotisation(props) {
         }
     }
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
 
-        axios.get("http://localhost:5001/users/logement/cop")
+
+        axios.get("/users/logement/cop")
             .then((resolve) => {
                 if(resolve.data.length > 0){
                     setAccounts(resolve.data)

@@ -1,13 +1,9 @@
 import React, { useState} from 'react'
 import {Link} from 'react-router-dom'
 import axios from 'axios'
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import { toast } from 'react-toastify';
+import {TextField, Avatar, CssBaseline, Button, Container, Grid} from '@material-ui/core'
+import { makeStyles } from '@material-ui/core/styles'
+import { toast } from 'react-toastify'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -49,10 +45,11 @@ function Login(props) {
     const [pwd, setPassword] = useState('')
     const [msg, setMsg] = useState('')
     
+    if(msg){}
 
     const connect = () => {
         if(email !== "" && pwd !== ""){
-            axios.post("http://localhost:5001/",  { withCredentials : true , email : email, pwd : pwd })
+            axios.post("/login",  { withCredentials : true , email : email, pwd : pwd })
             .then((resolve)=> {
                 if(resolve){
                     if(resolve.data.msgErr){
@@ -88,14 +85,15 @@ function Login(props) {
         }
     }
     return (
-        <div style={{paddingTop : "10%"}}>
+        <div style={{paddingTop : "6%"}}>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
+                <Avatar src={'G.S.C.png'} alt="" style={{width : "150px", height : "150px", marginLeft : "30%"}} />
                 <div className={classes.paper}>
                     <div className={classes.root} noValidate>
-                        <TextField InputLabelProps={{ shrink: true,}} margin="normal" required fullWidth id="standard-basic" label="Email Address" name="email" autoComplete="email" autoFocus onChange={(e) => setEmail(e.target.value)} />
-                        <TextField InputLabelProps={{ shrink: true,}} margin="normal" required fullWidth name="password" label="Password" type="password" id="standard-basic" autoComplete="current-password" onChange={(e) => setPassword(e.target.value)} />
-                        <Button type="submit" fullWidth variant="contained" color="inherit" onClick={connect} className={classes.submit}> Login </Button>
+                        <TextField InputLabelProps={{ shrink: true,}} margin="normal" required fullwidth id="standard-basic" label="Email Address" name="email" autoComplete="email" autoFocus onChange={(e) => setEmail(e.target.value)} />
+                        <TextField InputLabelProps={{ shrink: true,}} margin="normal" required fullwidth name="password" label="Password" type="password" id="standard-basic" autoComplete="current-password" onChange={(e) => setPassword(e.target.value)} />
+                        <Button type="submit" fullwidth variant="contained" color="primary" onClick={connect} className={classes.submit}> Login </Button>
                         <Grid container style={{textAlign : "center"}}>
                             <Grid item xs>
                                 <Link to="/reset-password" style={{textDecoration : "none"}} variant="body2"> Avez-Vous oublié votre mot de passe ? </Link>
@@ -105,7 +103,6 @@ function Login(props) {
                 </div>
             </Container>                    
         </div>
-        
     )
 }
 

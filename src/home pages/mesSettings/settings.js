@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText,} from '@material-ui/core';
+import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText } from '@material-ui/core'
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import Util from '../../utils/util';
-
-
+import { useHistory } from 'react-router';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -27,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function Settings() {
+    const History = useHistory()
     const classes = useStyles()
     const [compte, setCompte] = useState('')
     //const [msg, setMsg] = useState('')
@@ -36,8 +35,9 @@ function Settings() {
     const [pwd, setPwd] = useState('')
     const [newPwd, setNewPwd] = useState('')
     const [file, setFile] = useState('')
-    const [open, setOpen] =useState(false)
+    const [open, setOpen] = useState(false)
     
+     
     const handleClose = () => {
         setOpen(false);
     };
@@ -47,9 +47,39 @@ function Settings() {
 
     const id = localStorage.getItem('id')
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
         if(id !== ""){
-            axios.get(`http://localhost:5001/users/user/${id}`)
+            axios.get(`/users/user/${id}`)
             .then((response) => {
                 if(response.data[0]){
                     setCompte(response.data[0])
@@ -58,7 +88,7 @@ function Settings() {
             })
             .catch(() => {})
         }
-    }, [id])
+    }, [id, History])
 
     const updateMonCompte = () => {
         if(id !== ""){
@@ -66,8 +96,8 @@ function Settings() {
             if(nom === "" && prenom === "" && tele === "" && pwd === "" && newPwd === "" && file === ""){   
                 toast.success("Votre Compte est Enregistré avec Succès")
             }    
-            else if(nom !== "" && prenom !== "" && tele !== "" || pwd !== "" && newPwd !== ""){
-                axios.put(`http://localhost:5001/monCompte/edit/${id}`, datasend)
+            else if((nom !== "" && prenom !== "" && tele !== "") || (pwd !== "" && newPwd !== "")){
+                axios.put(`/monCompte/edit/${id}`, datasend)
                 .then((resolve) => {
                     console.log(resolve.data)
                     if(resolve.data === "Updated"){
@@ -82,7 +112,7 @@ function Settings() {
             else if(file !== "" && file !== null){
                 const formdata = new FormData()
                 formdata.append('profile', file)
-                axios.put("http://localhost:5001/upload/profile/" + id, formdata)
+                axios.put("/upload/profile/" + id, formdata)
                 .then((res) => {
                     if(res.data === "Inserted" || res.data === "Inserted and Uploaded"){
                         //setMsg("L'annonce est enregistré avec Success")

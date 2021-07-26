@@ -7,7 +7,6 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import axios from 'axios'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
-import GuestVerify from '../../utils/guestVerify'
 
 axios.interceptors.request.use(
     config => {
@@ -40,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ListeReclamation(props) {
-    const history = useHistory()
+    const History = useHistory()
     const classes = useStyles()
     const [reclamations, setreclamation] = useState([])
     const [search, setSearch] = useState('')
@@ -62,7 +61,7 @@ function ListeReclamation(props) {
 
     const deleteReclamation = (RefReclamation) => {
         if(RefReclamation !== ""){
-            axios.delete("http://localhost:5001/reclamations/delete/" + RefReclamation)
+            axios.delete("/reclamations/delete/" + RefReclamation)
             .then((resolve) => {
                 if(resolve.data  === "No Réclamation"){
                     toast.error("La Suppression est échouée car la réclamation est INTROUVABLE !")
@@ -81,9 +80,29 @@ function ListeReclamation(props) {
 
 
     useEffect(() => {
-        GuestVerify()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                History.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                History.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                History.push('/')
+            }
+        })
+        .catch(() => {})
+
         if(search !== ""){
-            axios.get("http://localhost:5001/reclamations/cops/all/" + id + "/" + search)
+            axios.get("/reclamations/cops/all/" + id + "/" + search)
             .then((response) => {
                 if(response.data === "No Réclamation"){
                     setMsg("No Réclamation")
@@ -103,7 +122,7 @@ function ListeReclamation(props) {
             })
         }
         else{
-            axios.get("http://localhost:5001/reclamations/cops/all/" + id)
+            axios.get("/reclamations/cops/all/" + id)
             .then((response) => {
                 if(response.data === "No Réclamation"){
                     setMsg("No Réclamation")
@@ -121,11 +140,11 @@ function ListeReclamation(props) {
             .catch(() => {})
         }
         setDeleted('')
-    }, [search, id, deleted])
+    }, [search, id, deleted, History])
 
 
     const handleUpdateRecla = (refReclamation) => {
-        history.push('/réclamation/edit/' + refReclamation)
+        History.push('/réclamation/edit/' + refReclamation)
     }
 
     const handleDownload = (contenu) => {
@@ -212,7 +231,7 @@ function ListeReclamation(props) {
             }
             {
                 msg === "No Réclamation" &&
-                <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Réclamation pour cette Recherche "{search}" </Alert></div>
+                <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Réclamation pour cette Recherche "{search}"</strong></Alert></div>
             }<br/><br/><br/><br/><br/>
         </div>
     )

@@ -1,10 +1,10 @@
 import React, {useState} from 'react'
-import {TextField} from '@material-ui/core'
+import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText,} from '@material-ui/core'
 import {makeStyles} from '@material-ui/core/styles'
-import { useEffect } from 'react';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import GuestVerify from '../../utils/guestVerify';
+import { useEffect } from 'react'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { useHistory } from 'react-router'
 
 axios.interceptors.request.use(
     config => {
@@ -36,7 +36,9 @@ const useStyles = makeStyles((theme) => ({
 
 
 function Settings(props) {
+    const History = useHistory()
     const classes = useStyles()
+    const id = localStorage.getItem('id')
     const [compte, setCompte] = useState('')
     //const [msg, setMsg] = useState('')
     const [nom, setNom] = useState('')
@@ -44,12 +46,41 @@ function Settings(props) {
     const [tele, setTele] = useState('')
     const [pwd, setPwd] = useState('')
     const [newPwd, setNewPwd] = useState('')
-    const id = localStorage.getItem('id')
+    const [file, setFile] = useState('')
+    const [open, setOpen] =useState(false)
+    
+    const handleClose = () => {
+        setOpen(false);
+    };
+    const handleClickOpen = () => {
+        setOpen(true)
+    }
+
 
     useEffect(() => {
-        GuestVerify()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                History.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                History.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                History.push('/')
+            }
+        })
+        .catch(() => {})
+
         if(id !== ""){
-            axios.get(`http://localhost:5001/users/user/${id}`)
+            axios.get(`/users/user/${id}`)
             .then((response) => {
                 if(response.data[0]){
                     setCompte(response.data[0])
@@ -64,16 +95,18 @@ function Settings(props) {
             localStorage.clear()
             props.history.push('/Acceuil')
         }
-    }, [id, props.history])
+    }, [id, props.history, History])
 
     const updateMonCompte = () => {
         if(id !== ""){
+            const formdata = new FormData()
+            formdata.append('profile', file)
             const datasend = { nom : nom, prenom : prenom, tele : tele, pwd : pwd, newPwd : newPwd }
-            if(nom === "" && prenom === "" && tele === "" && pwd === "" && newPwd === ""){   
+            if(nom === "" && prenom === "" && tele === "" && pwd === "" && newPwd === "" && file === ""){   
                 toast.success("Votre Compte est Enregistré avec Succès")
             }    
-            else if(nom !== "" && prenom !== "" && tele !== "" || pwd !== "" && newPwd !== ""){
-                axios.put(`http://localhost:5001/monCompte/edit/${id}`, datasend)
+            else if((nom !== "" && prenom !== "" && tele !== "" )|| (pwd !== "" && newPwd !== "")){
+                axios.put(`/monCompte/edit/${id}`, datasend)
                 .then((resolve) => {
                     console.log(resolve.data)
                     if(resolve.data === "Updated"){
@@ -85,7 +118,33 @@ function Settings(props) {
                 })
                 .catch((err) => {console.log(err)})
             }
+            else if(file !== "" && file !== null){
+                axios.put("/upload/profile/" + id, formdata)
+                .then((res) => {
+                    if(res.data === "Inserted" || res.data === "Inserted and Uploaded"){
+                        //setMsg("L'annonce est enregistré avec Success")
+                        toast.success('Votre Annonce est Enregistrée avec Succès')
+                    }
+                    else if(res.data.messageErr === "Bad One"){
+                        //setMsg("Really Bad")
+                        toast.warn("l'Annonce est échoué ! Réssayez-vous une autre fois..")
+                    }
+                    else if(res.data.affectedRows !== 0){
+                        toast.success("Votre Annonce est Enregistrée avec Succès")
+                    }
+                })
+                .catch((err) => console.log(err))
+            }
+            else if(nom !== "" && prenom !== "" && tele !== "" && pwd !== "" && newPwd !== "" && file !== ""){
+                axios.put("")
+                .then(() => axios.put("/upload/profile/" + id, formdata))
+                .then((res) => {
+
+                })
+                .catch(() => {})
+            }
         }
+        setOpen(false)
     }
 
     
@@ -123,16 +182,28 @@ function Settings(props) {
                             <label style={{fontSize : "15px"}}>Sélectionner Votre Avatare : </label>
                         </div>
                         <div className="col-md-6">
-                            <input type="file" accept=".png" className="form-control" />
+                            <input type="file" className="form-control" onChange={e => setFile(e.target.files[0])} />
                         </div>
                     </div><br /><br/>
                     <div className="row">
                         <div className="">
-                            <input type="submit" value="Enregistrer" onClick={updateMonCompte} className="form-control btn btn-primary" />
+                            <input type="submit" value="Enregistrer" onClick={handleClickOpen} className="form-control btn btn-primary" />
                         </div>
                     </div>
                 </div>
             </div><br/><br/><br/><br/>
+            <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de mettre à jour mon Compte ?"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Est ce que vous etes sure de mettre ces modifications !
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">Cancel</Button>
+                    <Button onClick={updateMonCompte} color="secondary" autoFocus>Oui, Je Confirme !</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios';
 import { InputLabel, Button, MenuItem, Select, FormControl, TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import { toast } from 'react-toastify';
-import Util from '../../utils/util';
 
 
 
@@ -37,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 function AddDepense(props) {
+    const History = useHistory()
     const classes = useStyles();
     const [selectedDate, setSelectedDate] = useState('');
     const [typeDep, setTypeDep] = useState('')
@@ -51,6 +51,7 @@ function AddDepense(props) {
     const [addCat, setAddCat] = useState('')
     const [added, setAdded] = useState('')
 
+    if(msg){}
 
     const handleClose = () => {
         setOpen(false)
@@ -61,8 +62,38 @@ function AddDepense(props) {
 
 
     useEffect(() => {
-        Util()
-        axios.get("http://localhost:5001/depenses/categorie/all")
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
+        axios.get("/depenses/categorie/all")
         .then((resolve) => {
             setCategorie(resolve.data)
             setMC('Cool')
@@ -71,13 +102,13 @@ function AddDepense(props) {
             setCategorie(err)
             setMC('')
         })
-    }, [added])
+    }, [added, History])
 
 
     const AddCategorie = () => {
         if(addCat !== ""){
             const datasend = {cat : addCat}
-            axios.post("http://localhost:5001/depenses/categorie/new", datasend)
+            axios.post("/depenses/categorie/new", datasend)
             .then((resolve) => {
                 if(resolve.data.duplicate === "cette categorie déjà existe"){
                     toast.error("Cette Catégorie Déjà Existe")
@@ -98,52 +129,57 @@ function AddDepense(props) {
 
     const EnregistrerDepense = () => {
         if(id !== null && id !== undefined){
-            if(typeDep !== "" && montant !== "" && fact !== "" && detail !== ""){
-                if(selectedDate !== ''){
-                    const datasend = {id : id, typeDepense : typeDep, date : selectedDate, montant : montant, fact : fact, detail : detail}
-                    axios.post("http://localhost:5001/depenses/new", datasend)
-                    .then((resolve) => {
-                        if(resolve.data.message === "Inserted"){
-                            setMsg("La dépense est enregistré avec Success")
-                            props.history.push('/dépenses')
-                            toast.success("La Dépense est Enregistrée avec Succès")
-                        }
-                        else if(resolve.data.messageErr === "bad"){
-                            setMsg("Really Bad")
-                            toast.error("La Dépense est échouée ! Réssayez-vous une autre fois.")
-                        }
-                        else if(resolve.data.err === "NomCategorie is Null"){
-                            toast.warn("Merci de Séléctionner Une Catégorie !")
-                        }
-                    })
-                    .catch((err) => {
-
-                    })
-                }
-                else{
-                    const datasend = {id : id, typeDepense : typeDep, montant : montant, fact : fact, detail : detail}
-                    axios.post("http://localhost:5001/depenses/new", datasend)
-                    .then((resolve) => {
-                        if(resolve.data.message === "Inserted"){
-                            setMsg("La dépense est enregistré avec Success")
-                            props.history.push('/dépenses')
-                            toast.success("La Dépense est Enregistrée avec Succès")
-                        }
-                        else if(resolve.data.messageErr === "bad"){
-                            setMsg("Really Bad")
-                            toast.warn("Aucune Dépense pour l'instant !")
-                        }
-                        else if(resolve.data.err === "NomCategorie is Null"){
-                            toast.warn("Merci de Séléctionner Une Catégorie !")
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err)
-                    })
-                }
+            if(typeDep === "" || !typeDep){
+                toast.warn("Sélectionner une Dépense")
             }
             else{
-                toast.warn("Les Champs qui ont (*) Sont Obligatoires")
+                if(typeDep !== "" && montant !== "" && fact !== "" && detail !== ""){
+                    if(selectedDate !== ''){
+                        const datasend = {id : id, typeDepense : typeDep, date : selectedDate, montant : montant, fact : fact, detail : detail}
+                        axios.post("/depenses/new", datasend)
+                        .then((resolve) => {
+                            if(resolve.data.message === "Inserted"){
+                                setMsg("La dépense est enregistré avec Success")
+                                props.history.push('/dépenses')
+                                toast.success("La Dépense est Enregistrée avec Succès")
+                            }
+                            else if(resolve.data.messageErr === "bad"){
+                                setMsg("Really Bad")
+                                toast.error("La Dépense est échouée ! Réssayez-vous une autre fois.")
+                            }
+                            else if(resolve.data.err === "NomCategorie is Null"){
+                                toast.warn("Merci de Séléctionner Une Catégorie !")
+                            }
+                        })
+                        .catch((err) => {
+    
+                        })
+                    }
+                    else{
+                        const datasend = {id : id, typeDepense : typeDep, montant : montant, fact : fact, detail : detail}
+                        axios.post("/depenses/new", datasend)
+                        .then((resolve) => {
+                            if(resolve.data.message === "Inserted"){
+                                setMsg("La dépense est enregistré avec Success")
+                                props.history.push('/dépenses')
+                                toast.success("La Dépense est Enregistrée avec Succès")
+                            }
+                            else if(resolve.data.messageErr === "bad"){
+                                setMsg("Really Bad")
+                                toast.warn("Aucune Dépense pour l'instant !")
+                            }
+                            else if(resolve.data.err === "NomCategorie is Null"){
+                                toast.warn("Merci de Séléctionner Une Catégorie !")
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                        })
+                    }
+                }
+                else{
+                    toast.warn("Les Champs qui ont (*) Sont Obligatoires")
+                }
             }
         }
         else{
@@ -179,7 +215,7 @@ function AddDepense(props) {
                     </div><br/>
                     <div className="row">
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Montant du Dépense" className={classes.root} onChange={e => setMontant(e.target.value)} />
+                            <TextField type="number" InputLabelProps={{ shrink: true,}} id="standard-basic" label="Montant du Dépense" className={classes.root} onChange={e => setMontant(e.target.value)} />
                         </div>
                         <div className="col-md-6">
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="N° Facture ou Bon" className={classes.root} onChange={e => setFact(e.target.value)} />

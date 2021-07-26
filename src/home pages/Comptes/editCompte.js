@@ -1,10 +1,9 @@
 import axios from 'axios'
 import React, {useEffect, useState} from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import {TextField, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@material-ui/core';
 import { toast } from 'react-toastify';
-import Util from '../../utils/util';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -30,7 +29,17 @@ const useStyles = makeStyles((theme) => ({
 
 
 function EditCompte(props) {
+    const History = useHistory()
+    const classes = useStyles()
+    const [user, setUser] = useState({})
+    const [nom, setNom] = useState('')
+    const [prenom, setPrenom] = useState('')
+    const [tele, setTele] = useState('')
+    const [msg, setMsg] = useState('')
     const [open, setOpen] = useState(false);
+
+    if(msg){}
+
 
     const handleClose = () => {
         setOpen(false);
@@ -39,19 +48,42 @@ function EditCompte(props) {
         setOpen(true) 
     };
   
-    const classes = useStyles()
-    const [user, setUser] = useState({})
-    const [nom, setNom] = useState('')
-    const [prenom, setPrenom] = useState('')
-    const [tele, setTele] = useState('')
-    const [msg, setMsg] = useState('')
     
     const id = props.match.params.id
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
 
         if(id !== ""){
-            axios.get(`http://localhost:5001/users/user/${id}`)
+            axios.get(`/users/user/${id}`)
             .then(res => 
             {
                 if(res.data.msgErr === "Not Found"){
@@ -62,9 +94,9 @@ function EditCompte(props) {
                     setUser(res.data[0])
                 }
             })
-            .catch(() => console.log("Cannot Read Data"))
+            .catch(() => {})
         }
-    }, [id])
+    }, [id, History])
 
 
     const UpdateAccount = (e) => {
@@ -72,9 +104,8 @@ function EditCompte(props) {
             const dataUpdated = {nom : nom, prenom : prenom, tele : tele }
             console.log("news : ", dataUpdated)
             if(id !== ""){
-                axios.put(`http://localhost:5001/users/edit/${id}`, dataUpdated)
+                axios.put(`/users/edit/${id}`, dataUpdated)
                 .then((response) => {
-                    //console.log(response)
                     if(response.data.message === "Updated Successfully"){
                         setMsg(response.data.message)
                         //console.log(msg)
@@ -100,7 +131,7 @@ function EditCompte(props) {
     const reset = (Num, Nom, Prenom) => {
         if(Nom !== "" && Prenom !== ""){
             const datasend = {nom : Nom, prenom : Prenom}
-            axios.put(`http://localhost:5001/users/reset/password/${Num}`, datasend)
+            axios.put(`/users/reset/password/${Num}`, datasend)
             .then((resolve) => {
                 if(resolve.data === "Updated"){
                     toast.success("Le Mot de Passe est Réintialisé avec Succès")

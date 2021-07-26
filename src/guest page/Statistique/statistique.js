@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { TextField, Slide, Paper } from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles'
+import { Button, Slide, Paper } from '@material-ui/core'
 import axios from 'axios'
-import GuestVerify from '../../utils/guestVerify';
+import { Link, useHistory } from 'react-router-dom'
 
 axios.interceptors.request.use(
     config => {
@@ -15,40 +14,8 @@ axios.interceptors.request.use(
 )
 
 
-const useStyles = makeStyles((theme) => ({
-    container: {
-      display: 'flex',
-      flexWrap: 'wrap',
-    },
-    textField: {
-      marginLeft: theme.spacing(1),
-      marginRight: theme.spacing(1),
-      marginTop : theme.spacing(1),
-      textAlign : 'center',
-      width: "70%",
-    },
-    root : {
-        '& > *': {
-            margin: theme.spacing(1),
-            width: 320,
-        },
-    },
-    formControl: {
-        margin: theme.spacing(1),
-        width: 320,
-    },
-    paper : {
-        position: 'relative',
-        paddingTop : '0',
-        marginTop : '0',
-    },
-  }));
-
-
 function Statistique() {
-    const classes = useStyles()
-    const [depart, setDepart] = useState(null)
-    const [fin, setFin] = useState(null)
+    const History = useHistory()
     const [NbrDepense, setNbrDepense] = useState('')
     const [MontantDepense, setMontantDepense] = useState('')
     const [NbrUsers, setNbrUsers] = useState('')
@@ -58,12 +25,41 @@ function Statistique() {
     const [MontantCoti, setMontantCoti] = useState('')
     const [NbrAnnonce, setNbrAnnonce] = useState('')
     const [NbrRecla, setNbrRecla] = useState('')
+    const [NbrCotiCurrent, setNbrCotiCurrent] = useState('')
+    const [mntCotiCurrent, setMntCotiCurrent] = useState('')
+    const [NbrReclaCurrent, setNbrReclaCurrent] = useState('')
+    const [NbrAnnCurrent, setNbrAnnCurrent] = useState('')
+    const [NbrDepCurrent, setNbrDepCurrent] = useState('')
+    const [mntDepCurrent, setMntDepCurrent] = useState('')
+    const [mois, setMois] = useState('')
+    const [year, setYear] = useState('')
 
 
     useEffect(() => {
-        GuestVerify()
-        axios.get("http://localhost:5001/statistiques/data")
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                History.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                History.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                History.push('/')
+            }
+        })
+        .catch(() => {})
+
+        axios.get("/statistiques/data")
         .then((response) => {
+            console.log(response.data)
             setNbrDepense(response.data[0][0].NbrDepense)
             setMontantDepense(response.data[0][0].montant)
             setNbrUsers(response.data[1][0].NbrUsers)
@@ -73,69 +69,75 @@ function Statistique() {
             setMontantCoti(response.data[4][0].montantPayed)
             setNbrAnnonce(response.data[5][0].NbrAnonce)
             setNbrRecla(response.data[6][0].NbrReclam)
+            setNbrCotiCurrent(response.data[7][0].NbrPaiementCurrent)
+            setMntCotiCurrent(response.data[7][0].montantPayedCurrent)
+            setNbrReclaCurrent(response.data[8][0].NbrReclamCurrent)
+            setNbrAnnCurrent(response.data[9][0].NbrAnonceCurrent)
+            setNbrDepCurrent(response.data[10][0].NbrDepenseCurrent)
+            setMntDepCurrent(response.data[10][0].montantCurrent)
+            setMois(response.data[11][0].mois)
+            setYear(response.data[11][0].year)
         })
         .catch(() => {})
-    }, [])
-
-    if(depart !== fin){
-
-    }
+    }, [History])
 
     return (
         <Slide direction="up" in={useEffect} mountOnEnter unmountOnExit timeout={1000}>
-            <Paper elevation={4} className={classes.paper}>
+            <Paper>
                 <div className="container ">
-                    <div style={{top : "120px", paddingTop : "50px"}}>
-                        <h1 style={{marginLeft : "200px"}}>Les Statistiques </h1><br/><br/><br/>
-                    </div>
-                        <div className="row">
-                            <div className="col-md-6"><TextField InputLabelProps={{ shrink: true,}} id="date" label="Du" type="date" className={classes.textField} onChange={e => setDepart(e.target.value)} /></div>
-                            <div className="col-md-6"><TextField InputLabelProps={{ shrink: true,}} id="date" label="Au" type="date" className={classes.textField} onChange={e => setFin(e.target.value)} /></div>
+                    <div style={{paddingTop : "55px"}}>
+                        <h1 style={{marginLeft : "90px"}}>Les Statistiques </h1><br/>
+                        <div className="col-md-6" style={{marginLeft : "70%"}}>
+                            <Button variant="contained" color="primary" style={{width : "300px", textTransform : "capitalize", fontSize : "16px", color : "white"}} component={Link} to="/relevé-financièr">Demander Relevé Financièr</Button>
                         </div><br/><br/><br/><br/>
+                    </div>
                     <div className="container">
                         <div className="row">
                             <div className="col-md-6">
-                                <div className="card w-75 text-black bg-primary mb-3" style={{height : "300px", borderRadius : "25px"}}>
+                                <div className="card w-100 text-black bg-primary mb-3" style={{height : "300px", borderRadius : "25px"}}>
                                     <div className=" row">
                                         <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-people-fill m-5" style={{width : "700px"}} ></i></h1> </div>
-                                        <h2 className="" style={{paddingLeft : "45px"}} > {NbrUsers} Utilisateurs ( {admi} Administrateurs et {copro} Copropriétaires) </h2>
+                                        <h3 className="" style={{paddingLeft : "45px"}} > {NbrUsers} Utilisateurs ( {admi} Administrateurs et {copro} Copropriétaires ) </h3>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-md-6">
-                                <div className="card w-75 text-black bg-secondary mb-3" style={{height : "300px", borderRadius : "25px"}}>
+                                <div className="card w-100 text-black bg-secondary mb-3" style={{height : "300px", borderRadius : "25px"}}>
                                     <div className="row">
                                         <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-wallet2 m-5" style={{width : "700px"}}></i></h1></div>
-                                        <h2 style={{paddingLeft : "45px"}}> Nombre des Dépenses : {NbrDepense} </h2>
-                                        <h3 style={{paddingLeft : "45px"}}> Montant TTC <strong style={{color : "white"}}>{MontantDepense}</strong>  MAD</h3><br /><br/><br/>
-                                    </div>    
-                                </div>
-                            </div>
-                        </div>
-                    </div><br/><br/><br/>
-                    <div className="container">
-                        <div className="row">
-                            <div className="col-md-6">
-                                <div className="card w-75 text-black bg-primary mb-3" style={{height : "300px", borderRadius : "25px"}}>
-                                    <div className=" row">
-                                        <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-clipboard-check m-5" style={{width : "700px"}} ></i></h1> </div>
-                                        <h3 className="" style={{paddingLeft : "45px"}} > Nombre des Annonces : {NbrAnnonce} </h3>
-                                        <h3 className="" style={{paddingLeft : "45px"}} > Nombre des Réclamations : {NbrRecla} </h3>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-md-6">
-                                <div className="card w-75 text-black bg-secondary mb-3" style={{height : "300px", borderRadius : "25px"}}>
-                                    <div className="row">
-                                        <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-wallet m-5" style={{width : "700px"}}></i></h1></div>
-                                        <h2 style={{paddingLeft : "45px"}}> Nombre des Cotisations : {NbrCoti} </h2>
-                                        <h3 style={{paddingLeft : "45px"}}> Les Retenus <strong style={{color : "white"}}>{MontantCoti} </strong>MAD</h3><br /><br/><br/>
+                                        <h5 style={{paddingLeft : "45px"}}> Nombre des Dépenses : {NbrDepense}, Montant TTC <strong style={{color : "white"}}>{MontantDepense}</strong>  MAD.</h5>
+                                        <h6 style={{paddingLeft : "270px", color : "red", fontSize : "20px"}} ><strong>{mois} / {year}</strong></h6>
+                                        <h5 style={{paddingLeft : "45px"}}> Nombre des Dépenses Courante : {NbrDepCurrent}, Montant TTC <strong style={{color : "white"}}>{mntDepCurrent}</strong>  MAD.</h5>
                                     </div>    
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div><br/><br/><br/><br/><br/><br/>
+                    <div className="container" style={{paddingTop : "10px"}} >
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="card w-100 text-black bg-primary mb-3" style={{height : "300px", borderRadius : "25px"}}>
+                                    <div className=" row">
+                                        <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-clipboard-check m-5" style={{width : "700px"}} ></i></h1> </div>
+                                        <h5 className="" style={{paddingLeft : "45px"}} > Nombre des Annonces : {NbrAnnonce}, Nombre des Réclamations : {NbrRecla}. </h5>
+                                        <h6 style={{paddingLeft : "270px", color : "red", fontSize : "20px"}} ><strong>{mois} / {year}</strong></h6>
+                                        <h5 className="" style={{paddingLeft : "45px"}} > Nombre des Annonces Courante : {NbrAnnCurrent}, Nombre des Réclamations Courante : {NbrReclaCurrent}. </h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="card w-100 text-black bg-secondary mb-3" style={{height : "300px", borderRadius : "25px"}}>
+                                    <div className="row">
+                                        <div className="card-img mt-3"><h1 style={{fontSize : "100px"}}><i className="bi bi-wallet m-5" style={{width : "700px"}}></i></h1></div>
+                                        <h5 style={{paddingLeft : "45px"}}> Nombre des Cotisations : {NbrCoti}, Les Retenus <strong style={{color : "white"}}>{MontantCoti} </strong>MAD.</h5>
+                                        <h6 style={{paddingLeft : "270px", color : "red", fontSize : "20px"}} ><strong>{mois} / {year}</strong></h6>
+                                        <h5 style={{paddingLeft : "45px"}}> Nombre des Cotisations Courante : {NbrCotiCurrent}, Les Retenus <strong style={{color : "white"}}>{mntCotiCurrent} </strong>MAD.</h5>
+                                    </div>    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><br/><br/><br/>
             </Paper>
         </Slide>
     )

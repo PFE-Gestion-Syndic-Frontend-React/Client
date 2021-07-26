@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
-import { makeStyles } from '@material-ui/core/styles';
-import { TextField} from '@material-ui/core';
-import { toast } from 'react-toastify';
-import Util from '../../utils/util';
+import { makeStyles } from '@material-ui/core/styles'
+import { TextField} from '@material-ui/core'
+import { toast } from 'react-toastify'
 
 
 
@@ -42,22 +41,53 @@ function AddAnnonce(props) {
     const History = useHistory()
     const classes = useStyles();
     const id = localStorage.getItem('id')
-    const token = localStorage.getItem('id')
 
     const [sujet, setSujet] = useState('')
     const [descripAnnonce, setDescrip] = useState('')
     const [msg, setMsg] = useState('')
     const [file, setFile] = useState('')
 
-    useEffect(() =>{
-        Util()
-    })
+    if(msg){}
+    
+    useEffect(()=>{
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+    }, [History])
+
     const annoncer = () => {
         if(id !== "" && sujet !== "" && descripAnnonce !== ""){
             if(file !== "" && file !== null){
                 const formdata = new FormData()
                 formdata.append('anonce', file)
-                axios.post("http://localhost:5001/upload/annonce/" + id + "/" + sujet + "/" + descripAnnonce, formdata)
+                axios.post("/upload/annonce/" + id + "/" + sujet + "/" + descripAnnonce, formdata)
                 .then((res) => {
                     if(res.data === "Inserted" || res.data === "Inserted and Uploaded"){
                         setMsg("L'annonce est enregistré avec Success")
@@ -77,7 +107,7 @@ function AddAnnonce(props) {
             }
             else{
                 const datasend = { sujet : sujet, descripAnnonce : descripAnnonce}
-                axios.post("http://localhost:5001/annonces/new/" + id, datasend)
+                axios.post("/annonces/new/" + id, datasend)
                 .then((resolve) => {
                     if(resolve.data === "Inserted"){
                         setMsg("L'annonce est enregistré avec Success")

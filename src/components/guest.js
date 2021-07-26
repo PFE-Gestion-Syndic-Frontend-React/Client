@@ -11,13 +11,14 @@ import ListeReclamation from '../guest page/Réclamations/listeReclamation'
 import MesReclamations from '../guest page/Réclamations/mesReclamations'
 import Reclamations from '../guest page/Réclamations/reclamations'
 import Statistique from '../guest page/Statistique/statistique'
+import ReleveFinancier from '../guest page/Statistique/releveFinancier'
 import Login from './login'
 import axios from 'axios'
 
 function Guest(props) {
     const history = useHistory()
     useEffect(() => {
-        axios.get("http://localhost:5001/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
         .then((resolve) => {
             if(resolve.data.role === "Copropriétaire"){
 
@@ -50,12 +51,12 @@ function Guest(props) {
                     <Switch>
                         <Route exact path="/" component={Login} />
                         <Route exact path="/Acceuil" component={Statistique} />
+                        <Route exact path="/relevé-financièr" component={ReleveFinancier} />
                         <Route exact path="/Annonces" component={ListerAnnonces} />
                         <Route exact path="/Dépenses" component={ListerDepenses} />
                         <Route exact path="/Settings" component={Settings} />
                         <Route exact path="/Cotisations" component={ListerMesPaiements} />
                         <Route exact path="/Réclamations" component={Reclamations} />
-
 
 
                         <Route exact path="/add-réclamation" component={AddReclamation} />

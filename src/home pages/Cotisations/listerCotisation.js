@@ -7,7 +7,6 @@ import axios from 'axios';
 import { useHistory } from 'react-router';
 import Alert from '@material-ui/lab/Alert';
 import { toast } from 'react-toastify'
-import Util from '../../utils/util';
 
 
 
@@ -58,10 +57,39 @@ function ListerCotisation() {
     }
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
 
         if(search !== ""){
-            axios.get("http://localhost:5001/cotisations/" + search)
+            const run = axios.get("/cotisations/" + search)
             .then((response) => {
                 if(response.data.msgErr === "No Token Set"){
                     localStorage.clear()
@@ -81,11 +109,13 @@ function ListerCotisation() {
                 }
             })
             .catch((err) => {})
+
+            return (() => clearInterval(run))
         }
         else{
-            axios.get("http://localhost:5001/cotisations/all")
+            const run1 = axios.get("/cotisations/all")
             .then((response) => {
-                if(response.data.msgErr === "No Token Set"){
+                if(response.data.msgErr === "No Token"){
                     localStorage.clear()
                     History.push('/')
                 }
@@ -98,9 +128,10 @@ function ListerCotisation() {
                     setMsg("No Cotisation")
                 }
             })
-            .catch((err) => {})
+            .catch(() => {})
+            setDeleted('')
+            return (() => clearInterval(run1))
         }
-        setDeleted('')
     },[search, deleted, msg, paied, History])
 
     const updateCotisation = (RefCotisation) => {
@@ -108,7 +139,7 @@ function ListerCotisation() {
     }
 
     const deleteCotisation = () => {
-        axios.delete("http://localhost:5001/cotisations/delete/" + paied)
+        axios.delete("/cotisations/delete/" + paied)
         .then((response) => {
             if(response.data  === "No Cotisation"){
                 toast.error("La Suppression est échouée car la Cotisation est INTROUVABLE !")
@@ -147,15 +178,16 @@ function ListerCotisation() {
                                             <div>
                                                 <Accordion className="mb-5 card">
                                                     <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                                                        <Typography className={classes.heading}> <strong style={{fontSize : "20px"}}> Cotisation du <span style={{color : "blue"}}>{c.NomCompte} {c.PrenomCompte}</span>  </strong>  </Typography>
+                                                        <Typography className={classes.heading}> <strong style={{fontSize : "20px"}}><span style={{color : "blue"}}>{c.NomCompte} {c.PrenomCompte}</span><span style={{}}> Le : {c.datePaiement.replace("T23:00:00.000Z", "")}</span></strong></Typography>
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <Typography spacing={3}>
                                                             <Card className={classes.root} elevation={1}>
                                                                 <CardHeader action={ <div> <IconButton onClick={ updateCotisation.bind(this, c.RefPaiement) }  ><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton><IconButton onClick={ handleOpen.bind(this, c.RefPaiement) }><DeleteOutlined style={{color : "red", fontSize : "30px"}} /> </IconButton> </div> } 
-                                                                            subheader={`Référence :  ${c.RefPaiement}`} />
+                                                                            subheader={`Référence du Paiement :  ${c.RefPaiement}`} />
                                                                 <CardContent>
                                                                     <Typography variant="body1" color="textPrimary">
+                                                                        <div className="text-muted">Libellé du Logement : <strong>{c.RefLogement}</strong> </div>
                                                                         <div className="row" >
                                                                             <div className="col-md-6"> Méthode de Paiement : {c.MethodePaiement} </div>
                                                                             <div className="col-md-6"> Montant à Payer : <strong style={{color : "blue"}}> {c.Montant} (en MAD) X {c.NbrMois} Mois  </strong></div><br/>
@@ -202,9 +234,9 @@ function ListerCotisation() {
                 }
                 {
                     search !== "" ?
-                    <div>{ msg === "No Cotisation" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Cotisation Pour Cette Recherche "{search}"</Alert></div> }</div>
+                    <div>{ msg === "No Cotisation" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Cotisation Pour Cette Recherche "{search}"</strong></Alert></div> }</div>
                     :
-                    <div>{ msg === "No Cotisation" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Cotisation Pour l'Instant</Alert></div> }</div>
+                    <div>{ msg === "No Cotisation" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Cotisation Pour l'Instant</strong></Alert></div> }</div>
                 }
             </div><br/><br/><br/><br/>
         </div>

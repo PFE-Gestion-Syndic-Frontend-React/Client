@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
 import { InputLabel, makeStyles, TextField, FormControl, Select, MenuItem } from '@material-ui/core';
 import { toast } from 'react-toastify';
-import Util from '../../utils/util';
-
 
 
 
@@ -34,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 function AddLogement(props) {
+    const History = useHistory()
     const classes = useStyles()
     const [log, setLog] = useState('')
     const [ty, setTy] =useState('')
@@ -42,10 +41,41 @@ function AddLogement(props) {
     const [msg, setMsg] = useState('')
     const [adr, setadr] = useState('')
 
+    if(msg){}
 
     useEffect(() => {
-        Util()
-        axios.get("http://localhost:5001/logements/Coproprietaire/byEmail")
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
+        axios.get("/logements/Coproprietaire/byEmail")
         .then((response) => {
             console.log(response)
             if(response.data.length > 0){
@@ -63,7 +93,7 @@ function AddLogement(props) {
         .catch(() => {
             console.log("err")
         })
-    }, [])
+    }, [History])
 
 
     const loger = () => {
@@ -72,7 +102,7 @@ function AddLogement(props) {
             if(log === "imm" && ty !== ""){
                 const refLog = log + " " + ty + " " + adr
                 const type = ty
-                axios.post("http://localhost:5001/logements/new", {refLog : refLog, type : type, user : coproprietaire})
+                axios.post("/logements/new", {refLog : refLog, type : type, user : coproprietaire})
                     .then((resolve) => {
                         if(resolve.data.message === "Inserted"){
                             setMsg("Le Compte est enregistré avec Success")
@@ -94,7 +124,7 @@ function AddLogement(props) {
             else{
                 const refLog = log + " " + adr
                 const type = log
-                axios.post("http://localhost:5001/logements/new", {refLog : refLog, type : type, user : coproprietaire})
+                axios.post("/logements/new", {refLog : refLog, type : type, user : coproprietaire})
                     .then((resolve) => {
                         if(resolve.data.message === "Inserted"){
                             setMsg("Le Compte est enregistré avec Success")

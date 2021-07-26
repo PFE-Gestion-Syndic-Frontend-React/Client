@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { Paper, Grow, TextField, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions} from '@material-ui/core'
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { makeStyles } from '@material-ui/core/styles';
-import axios from 'axios';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import { makeStyles } from '@material-ui/core/styles'
+import axios from 'axios'
 import Alert from '@material-ui/lab/Alert'
-import GuestVerify from '../../utils/guestVerify';
+import { useHistory } from 'react-router'
 
 axios.interceptors.request.use(
     config => {
@@ -48,6 +48,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ListerMesPaiements() {
+    const History = useHistory()
     const classes = useStyles()
     const [msg, setMsg] = useState('')
     const [cotisations, setCotisation] = useState([])
@@ -56,12 +57,31 @@ function ListerMesPaiements() {
 
 
     useEffect(() => {
-        GuestVerify()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                History.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                History.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                History.push('/')
+            }
+        })
+        .catch(() => {})
+
         if(id !== undefined && id !== ""){
             if(search !== ""){
-                axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}/${search}`)
+                axios.get(`/cotisations/mesCotisations/${id}/${search}`)
                 .then((response) => {
-                    console.log(response.data)
                     if(response.data === "No Token at all" || response.data === "Invalid Token"){
                         localStorage.clear()
                         History.push('/')
@@ -82,7 +102,7 @@ function ListerMesPaiements() {
                 .catch((err) => { console.log(err) })
             }
             else{
-                axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}`)
+                axios.get(`/cotisations/mesCotisations/${id}`)
                 .then((response) => {
                     if(response.data === "No Token at all" || response.data === "Invalid Token"){
                         localStorage.clear()
@@ -107,7 +127,7 @@ function ListerMesPaiements() {
         else{
             console.log("HEHO ANY ID !")
         }
-    },[search, id])
+    },[search, id, History])
 
 
 
@@ -120,9 +140,9 @@ function ListerMesPaiements() {
                         <div>
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Cotisations..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
-                    </div><br/><br/>
-                </div>
-            </div>
+                    </div><br/>
+                </div><br/>
+            </div><br/>
             <div className="container col-md-8 col-md-offset-2">
                 {
                     msg === "" &&
@@ -141,25 +161,26 @@ function ListerMesPaiements() {
                                                         <Card className={classes.root} elevation={1}>
                                                             <CardContent>
                                                                 <Typography variant="body1" color="textPrimary">
+                                                                    <div className="row text-muted"><strong>Logement :  {c.RefLogement} </strong></div>
                                                                     <div className="row" >
                                                                         <div className="col-md-6"> Méthode de Paiement : {c.MethodePaiement} </div>
-                                                                        <div className="col-md-6"> Montant à Payer : <strong style={{color : "blue"}}> {c.Montant} (en MAD) X {c.NbrMois} Mois  </strong></div><br/>
+                                                                        <div className="col-md-6"> Montant à Payer : <strong style={{color : "blue"}}> {c.Montant} (en MAD) X {c.NbrMois} Mois</strong></div><br/>
                                                                     </div>
                                                                     {
                                                                         c.MethodePaiement === "Chèque" && 
                                                                         <div className="row">
-                                                                            <div className="col-md-6">Numéro du Chèque : <strong>{c.NumeroCheque}</strong>  </div>
+                                                                            <div className="col-md-6">Numéro du Chèque : <strong>{c.NumeroCheque}</strong></div>
                                                                             <div className="col-md-6">Banque : <strong>{c.Banque}</strong>  </div><br/>
                                                                         </div>
                                                                     }
                                                                     <div className="row">
-                                                                        <div className="col-md-6">Du : <strong>{c.Du && c.Du.replace("T23:00:00.000Z", "")} </strong>  </div>
-                                                                        <div className="col-md-6">Au : <strong>{c.Au && c.Au.replace("T23:00:00.000Z", "")}</strong>  </div>
+                                                                        <div className="col-md-6">Du : <strong>{c.Du && c.Du.replace("T23:00:00.000Z", "")}</strong></div>
+                                                                        <div className="col-md-6">Au : <strong>{c.Au && c.Au.replace("T23:00:00.000Z", "")}</strong></div>
                                                                     </div>
                                                                 </Typography>
                                                             </CardContent>
                                                             <CardActions>
-                                                                <Typography variant="body2" color="textSecondary" component="p"> Date Paiement : {c.datePaiement && c.datePaiement.replace("T23:00:00.000Z", "")} </Typography>
+                                                                <Typography variant="body2" color="textSecondary" component="p"> Date Paiement : {c.datePaiement && c.datePaiement.replace("T23:00:00.000Z", "")}</Typography>
                                                             </CardActions>
                                                         </Card>
                                                     </Typography>

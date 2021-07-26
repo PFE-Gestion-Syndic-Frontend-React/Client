@@ -4,7 +4,6 @@ import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, TextField } from '@material-ui/core';
 import { toast } from 'react-toastify';
-import Util from '../../utils/util';
 
 
 
@@ -37,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function EditAnnonce(props) {
+    const History = useHistory()
     const classes = useStyles()
     const [msg, setMsg] = useState('')
     const [annonce, setAnnonce] = useState({})
@@ -46,6 +46,8 @@ function EditAnnonce(props) {
     const [open, setOpen] = useState(false)
     const refAnnonce = props.match.params.refAnnonce
 
+    if(msg){}
+
     const handleOpen = () => {
         setOpen(true)
     }
@@ -54,10 +56,39 @@ function EditAnnonce(props) {
     }
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
 
         if(refAnnonce !== ""){
-            axios.get(`http://localhost:5001/annonces/annonce/${refAnnonce}`)
+            const run = axios.get(`/annonces/annonce/${refAnnonce}`)
             .then(res => 
             {
                 if(res.data.msgErr === "Not Found"){
@@ -68,16 +99,18 @@ function EditAnnonce(props) {
                     setAnnonce(res.data[0])
                 }
             })
-            .catch(() => console.log("Cannot Read Data"))
+            .catch(() => {})
+
+            return (() => clearInterval(run))
         }
-    }, [refAnnonce])
+    }, [refAnnonce, History])
 
 
     const update = () => {
         const refAnnonce = props.match.params.refAnnonce
         if(sujet !== "" && descrip !== "" && statut !== ""){
             const datasend = {sujet : sujet, descrip : descrip, statut : statut}
-            axios.put(`http://localhost:5001/annonces/edit/${refAnnonce}`, datasend)
+            axios.put(`/annonces/edit/${refAnnonce}`, datasend)
             .then((resolve) => {
                 if(resolve.data.message === "Updated Successfully"){
                     setMsg("Updated Successfully")

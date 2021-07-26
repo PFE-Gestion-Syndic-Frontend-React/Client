@@ -1,11 +1,10 @@
 import React, {useState, useEffect} from 'react'
 import axios from 'axios'
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles'
 import { Typography, Avatar, Accordion, AccordionSummary, AccordionDetails, Card, CardHeader, CardContent, CardActions } from '@material-ui/core'
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import Alert from '@material-ui/lab/Alert';
-import Util from '../../utils/util';
-
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import Alert from '@material-ui/lab/Alert'
+import { useHistory } from 'react-router'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -37,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
   
 
 function InfoLogement(props) {
+    const History = useHistory()
     const classes = useStyles()
     const RefLogement = props.match.params.refLogement
     const [compte, setCompte] = useState([])
@@ -52,9 +52,38 @@ function InfoLogement(props) {
 
 
     useEffect( () => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
 
-        axios.get(`http://localhost:5001/logements/coproprietaire/${RefLogement}`)
+        const run = axios.get(`/logements/coproprietaire/${RefLogement}`)
         .then((resolve) => {
             if(resolve.data === "No Logement"){
                 setCompte([])
@@ -70,7 +99,7 @@ function InfoLogement(props) {
         .catch(() => {})
 
         if(id !== ""){
-            axios.get(`http://localhost:5001/cotisations/mesCotisations/${id}`)
+            const run1 = axios.get(`/cotisations/mesCotisations/${id}`)
             .then((response) => {
                 if(response.data === "No Token at all" || response.data === "Invalid Token"){
                     localStorage.clear()
@@ -90,9 +119,11 @@ function InfoLogement(props) {
                 }
             })
             .catch(() => {})
+
+            return (() => clearInterval(run1))
         }
 
-        axios.get(`http://localhost:5001/reclamations/logement/${RefLogement}`)
+        const run2 = axios.get(`/reclamations/logement/${RefLogement}`)
         .then((res) => {
             if(res.data === "No Réclamation"){
                 setReclamation([])
@@ -109,7 +140,13 @@ function InfoLogement(props) {
         })
         .catch(() => {})
 
-    }, [id, RefLogement, compte.NumCompte])
+        return (() => {
+            clearInterval(run)
+            clearInterval(run2)
+        })
+    }, [id, RefLogement, compte.NumCompte, History])
+
+
 
     return (
         <div style={{ paddingTop : "5%"}}>
@@ -121,7 +158,7 @@ function InfoLogement(props) {
                         <div>
                             <Card className={classes.root} style={{marginTop : "7px", marginBottom : "7px"}} onChange={() => setId(compte.NumCompte)}>
                                 <div className="col-md-12">
-                                    <CardHeader title={" Nom et Prénom : " + compte.NomCompte + " " + compte.PrenomCompte + " "  } />
+                                    <CardHeader title={" Nom et Prénom : " + compte.NomCompte + " " + compte.PrenomCompte + " " } />
                                 </div>
                                 <CardContent>
                                     <div className="row">
@@ -189,7 +226,7 @@ function InfoLogement(props) {
                             </div>
                         }
                     </div>
-                    <div>
+                    <div><br/><br/>
                         {
                             cot === "No Cotisation" && 
                             <div className="col-md-6" style={{marginLeft : "25%"}}><Alert style={{textAlign : "center"}} severity="warning"><strong style={{fontSize : "18px"}}>Le Copropriétaire n'a Aucune Cotisation !</strong></Alert></div>
@@ -244,13 +281,13 @@ function InfoLogement(props) {
                                 </CardContent>
                             </Card><br/><br/><br/>
                         </div>
-                    }
+                    }<br/><br/>
                     {
                         rec === "No Réclamation" && 
                         <div className="col-md-6" style={{marginLeft : "25%"}}><Alert style={{textAlign : "center"}} severity="info"><strong style={{fontSize : "18px"}}>Le Copropriétaire n'a Aucune Réclamation </strong></Alert></div>
                     }
                 </div>
-            }<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+            }<br/><br/><br/><br/><br/><br/><br/><br/>
         </div>
     )
 }

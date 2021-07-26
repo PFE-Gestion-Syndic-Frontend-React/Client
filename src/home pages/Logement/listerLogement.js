@@ -4,7 +4,6 @@ import axios from 'axios'
 import { Paper, Grow, makeStyles, IconButton, TextField} from '@material-ui/core'
 import { UpdateOutlined, InfoOutlined }from '@material-ui/icons';
 import Alert from '@material-ui/lab/Alert'
-import Util from '../../utils/util';
 
 
 
@@ -28,15 +27,46 @@ const useStyle = makeStyles((theme) => ({
 
 
 function ListerLogement() {
+    const History = useHistory()
     const classes = useStyle()
     const [search, setSearch] = useState('')
     const [logement, setLogement] = useState([])
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
         if(search !== ""){
-            axios.get("http://localhost:5001/logements/" + search)
+            const run = axios.get("/logements/" + search)
             .then((response) => {
                 if(response.data === "No Logement"){
                     setLogement([])
@@ -52,9 +82,11 @@ function ListerLogement() {
                 }
             })
             .catch(() => {})
+
+            return (() => clearInterval(run))
         }
         else{ 
-            axios.get("http://localhost:5001/logements/all")
+            const run1 = axios.get("/logements/all")
             .then((response) => {
                 if(response.data === "No Logement"){
                     setLogement([])
@@ -70,20 +102,21 @@ function ListerLogement() {
                 }
             })
             .catch(() => {})
+
+            return (() => clearInterval(run1))
         }
-    }, [search])
+    }, [search, History])
 
 
-    const history = useHistory()
     const handleUpdateLog = (RefLog) => {
         return(
-            history.push('/logement/edit/' + RefLog)
+            History.push('/logement/edit/' + RefLog)
         )
     }
 
     const handleInfo = (RefLog) => {
         return (
-            history.push('/logement/info/' + RefLog)
+            History.push('/logement/info/' + RefLog)
         )
     }
     
@@ -139,9 +172,9 @@ function ListerLogement() {
                     }
                     {
                         search !== "" ?
-                        <div>{ msg === "No Logements" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucun Logement Pour Cette Recherche "{search}"</Alert></div>}</div>
+                        <div>{ msg === "No Logements" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucun Logement Pour Cette Recherche "{search}"</strong></Alert></div>}</div>
                         :
-                        <div>{ msg === "No Logements" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucun Logement Pour l'Instant</Alert></div>}</div>
+                        <div>{ msg === "No Logements" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucun Logement Pour l'Instant</strong></Alert></div>}</div>
                     }
                 </div><br/><br/>
             </div><br /><br/>

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
-import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import { toast } from 'react-toastify';
-import GuestVerify from '../../utils/guestVerify';
+import { makeStyles } from '@material-ui/core/styles'
+import TextField from '@material-ui/core/TextField'
+import { toast } from 'react-toastify'
 
 
 
@@ -31,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function AddReclamation(props) {
+    const History = useHistory()
     const classes = useStyles();
     const id = localStorage.getItem('id')
     const [objet, setObjet] = useState('')
@@ -40,10 +40,32 @@ function AddReclamation(props) {
     const [log, setLog] = useState('')
     const [file, setFile] = useState('')
 
+    if(msg){}
+
     useEffect(() => {
-        GuestVerify()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                History.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                History.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                History.push('/')
+            }
+        })
+        .catch(() => {})
+
         if(id !== '' && id !== undefined && id !== null){
-            axios.get(`http://localhost:5001/logements/copro/NumCompte/${id}`)
+            axios.get(`/logements/copro/NumCompte/${id}`)
             .then((resolve) => {
                 if(resolve.data === "Id Invalid"){
                     localStorage.clear()
@@ -60,7 +82,7 @@ function AddReclamation(props) {
             localStorage.clear()
             props.history.push('/acceuil')
         }
-    }, [id, props.history])
+    }, [id, props.history, History])
 
 
     const reclamer = () => {
@@ -68,7 +90,7 @@ function AddReclamation(props) {
             if(file !== "" && file !== null){
                 const formdata = new FormData()
                 formdata.append('reclam', file)
-                axios.post("http://localhost:5001/upload/reclamation/" + log + "/" + objet + "/" + message + "/" + pour , formdata)
+                axios.post("/upload/reclamation/" + log + "/" + objet + "/" + message + "/" + pour , formdata)
                 .then((res) => {
                     if(res.data === "Inserted" || res.data === "Inserted and Uploaded"){
                         setMsg("Votre Réclamation est enregistré avec Success")
@@ -89,7 +111,7 @@ function AddReclamation(props) {
             else{
                 
                 const datasend = {log : log, objet : objet, message : message, pour : pour}
-                axios.post("http://localhost:5001/reclamations/new", datasend)
+                axios.post("/reclamations/new", datasend)
                 .then((resolve) => {
                     if(resolve.data === "Inserted"){
                         setMsg("Votre Réclamation est enregistré avec Success")

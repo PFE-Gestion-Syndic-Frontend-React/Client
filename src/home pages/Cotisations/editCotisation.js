@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { FormControl, InputLabel, Select, MenuItem, Typography, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText} from '@material-ui/core'
 import axios from 'axios'
 import {makeStyles} from '@material-ui/core/styles'
 import { toast } from 'react-toastify'
-import Util from '../../utils/util'
 
 
 
@@ -30,6 +29,7 @@ const useStyle = makeStyles((theme) => ({
 
 
 function EditCotisation(props) {
+    const History = useHistory()
     const classes = useStyle()
     const RefPaiement = props.match.params.RefPaiement
     const [open, setOpen] = useState(false)
@@ -49,9 +49,38 @@ function EditCotisation(props) {
     }
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
 
-        axios.get("http://localhost:5001/cotisations/getData/" + RefPaiement)
+        axios.get("/cotisations/getData/" + RefPaiement)
         .then((resolve) => {
             if(resolve.data === "err"){
                 console.log("Err")
@@ -62,7 +91,7 @@ function EditCotisation(props) {
             setMsg('data')
         })
         .catch()
-    }, [RefPaiement])
+    }, [RefPaiement, History])
 
     const handleChange = e => {
         setmethode(e.target.value)
@@ -77,7 +106,7 @@ function EditCotisation(props) {
         if(mois !== "" ){
             if(methode === "Espèce"){
                 const datasend = {mois : mois, montant : mois * 200, methode : methode}
-                axios.put(`http://localhost:5001/cotisations/edit/${RefPaiement}`, datasend)
+                axios.put(`/cotisations/edit/${RefPaiement}`, datasend)
                 .then((resolve) => {
                     if(resolve.data.affectedRows !== 0){
                         toast.success("La Cotisation est Modifiée avec Succès")
@@ -93,7 +122,7 @@ function EditCotisation(props) {
             else{
                 if(bnq !== "" && cheque !== ""){
                     const datasend = {mois : mois, montant : mois * 200, methode : methode, cheque : cheque, bnq : bnq}
-                    axios.put(`http://localhost:5001/cotisations/edit/${RefPaiement}`, datasend)
+                    axios.put(`/cotisations/edit/${RefPaiement}`, datasend)
                     .then((resolve) => {
                         if(resolve.data.affectedRows !== 0){
                             toast.success("La Cotisation est Modifiée avec Succès")

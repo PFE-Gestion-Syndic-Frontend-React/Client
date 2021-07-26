@@ -35,7 +35,11 @@ import LesImpayes from '../home pages/Cotisations/lesImpayes'
 function Home(props) {
     const History = useHistory()
     useEffect(() => {
-        axios.get("http://localhost:5001/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        if(!localStorage.getItem('token')){
+            History.push('/')
+            window.location.reload()
+        }
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
         .then((resolve) => {
             if(resolve){
                 if(resolve.data.role === "Administrateur"){
@@ -44,16 +48,19 @@ function Home(props) {
                 else if(resolve.data.role !== "Administrateur"){
                     localStorage.clear()
                     History.push('/')
+                    window.location.reload()
                 }
                 else if(resolve.data.msg === "Incorrect token !"){
                     console.log("Incorrect Token")
                     localStorage.clear()
                     History.push('/')
+                    window.location.reload()
                 }// added
             }
             else{
                 localStorage.clear()
                 History.push('/')
+                window.location.reload()
             }
         })
         .catch(() => {})

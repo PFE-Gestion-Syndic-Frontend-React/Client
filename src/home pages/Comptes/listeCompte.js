@@ -5,7 +5,6 @@ import { Paper, Grow, makeStyles, TextField, IconButton, Button, Dialog, DialogC
 import { DeleteOutlined, UpdateOutlined }from '@material-ui/icons';
 import { toast } from 'react-toastify';
 import Alert from '@material-ui/lab/Alert'
-import Util from '../../utils/util';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -21,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ListeCompte(props) {
-    const history = useHistory()
+    const History = useHistory()
     const classes = useStyles()
     /*if(!localStorage.getItem("token")){
         props.history.push('/')
@@ -44,10 +43,39 @@ function ListeCompte(props) {
     };
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
 
         if(search !== ""){
-            axios.get("http://localhost:5001/users/" + search)
+            const run = axios.get("/users/" + search)
             .then((response) => {
                 if(response.data.length > 0){
                     setCompte(response.data)
@@ -60,9 +88,11 @@ function ListeCompte(props) {
                 
             })
             .catch(() => {})
+
+            return (() => clearInterval(run))
         }
         else{ 
-            axios.get("http://localhost:5001/users/all")
+            const run1 = axios.get("/users/all")
             .then((response) => {
                 if(response.data.length > 0){
                     setCompte(response.data)
@@ -74,13 +104,15 @@ function ListeCompte(props) {
                 }
             })
             .catch(() => {}) 
+
+            return (() => clearInterval(run1))
         }
-    }, [search, deleted, msg, history])
+    }, [search, deleted, msg, History])
     
 
     const deleteCompte = (NumCompte) => {
         const id = NumCompte
-        axios.delete("http://localhost:5001/users/delete/" + id)
+        axios.delete("/users/delete/" + id)
         .then((response) => {
             if(response.data === "Ce Compte est Liée à un Logement !"){
                 toast.warn("Ce Compte est Liée à un Logement !!")
@@ -100,13 +132,11 @@ function ListeCompte(props) {
 
 
     const updateCompte = (id) => {
-        history.push('/compte/edit/' + id)
+        History.push('/compte/edit/' + id)
     }
 
-
-
     return (
-        <div className="" style={{top : "120px"}}><br/>
+        <div>
             <h1 style={{marginLeft : "200px"}}>Lister Les Comptes</h1>
             <div className="container col-md-8 col-md-offset-2"><br/><br/>
                 <div className="container col-md-10 col-md-offset-1">
@@ -156,9 +186,9 @@ function ListeCompte(props) {
                 }
                 {
                     search !== "" ?
-                    <div>{ msg === "No Users" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error" >Aucun Compte Pour Cette Recherche "{search}" </Alert></div>}</div>
+                    <div>{ msg === "No Users" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error" ><strong style={{fontSize : "18px"}}>Aucun Compte Pour Cette Recherche "{search}" </strong></Alert></div>}</div>
                     :
-                    <div>{ msg === "No Users" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error" >Aucun Compte Pour l'Instant </Alert></div>}</div>
+                    <div>{ msg === "No Users" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error" ><strong style={{fontSize : "18px"}}>Aucun Compte Pour l'Instant </strong></Alert></div>}</div>
                 }
                 
             </div><br/><br/><br/><br/>

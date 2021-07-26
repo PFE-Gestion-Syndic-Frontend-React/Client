@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles'
 import { Paper, Grow, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { DeleteOutlined, UpdateOutlined, CloudDownloadOutlined }from '@material-ui/icons';
-import { useHistory } from 'react-router';
-import { toast } from 'react-toastify';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import { DeleteOutlined, UpdateOutlined, CloudDownloadOutlined }from '@material-ui/icons'
+import { useHistory } from 'react-router'
+import { toast } from 'react-toastify'
 import Alert from '@material-ui/lab/Alert'
-import Util from '../../utils/util';
 
 
 
@@ -90,9 +89,39 @@ function ListerAnnonces(props) {
 
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
         if(search !== ""){
-            axios.get("http://localhost:5001/annonces/" + search)
+            const run = axios.get("/annonces/" + search)
             .then((response) => {
                 if(response.data.msgErr === "No Token Set"){
                     localStorage.clear()
@@ -114,9 +143,10 @@ function ListerAnnonces(props) {
             .catch(() => {
 
             })
+            return(() => { clearInterval(run)})
         }
         else{
-            axios.get("http://localhost:5001/annonces/all")
+            const run1 = axios.get("/annonces/all")
             .then((response) => {
                 if(response.data.msgErr === "No Token Set"){
                     localStorage.clear()
@@ -136,11 +166,13 @@ function ListerAnnonces(props) {
                 }
             })
             .catch(() => {})
+
+            return(() => { clearInterval(run1)})
         }
-    }, [search, deleted, msg])
+    }, [search, deleted, msg, History])
 
     const deleteAnnonce = () => {
-        axios.delete(`http://localhost:5001/annonces/delete/${ref}`)
+        axios.delete(`/annonces/delete/${ref}`)
         .then((response) => {
             if(response){
                 if(response.data === "Deleted ALL"){
@@ -246,9 +278,9 @@ function ListerAnnonces(props) {
                 }
                 {
                     search !== "" ?
-                    <div>{ msg === "No Annonce" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Annonce Pour Cette Recherche "{search}" </Alert></div>}</div>
+                    <div>{ msg === "No Annonce" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Annonce Pour Cette Recherche "{search}" </strong></Alert></div>}</div>
                     :
-                    <div>{ msg === "No Annonce" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Annonce Pour l'Instant </Alert></div>}</div>
+                    <div>{ msg === "No Annonce" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Annonce Pour l'Instant </strong></Alert></div>}</div>
                 }
             </div><br/><br/><br/><br/><br/><br/>
         </div>

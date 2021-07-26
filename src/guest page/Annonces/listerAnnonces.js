@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles'
 import { Paper, Grow, TextField, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions } from '@material-ui/core'
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { CloudDownloadOutlined }from '@material-ui/icons';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import { CloudDownloadOutlined }from '@material-ui/icons'
 import { Alert }from '@material-ui/lab'
-import GuestVerify from '../../utils/guestVerify';
+import { useHistory } from 'react-router'
 
 axios.interceptors.request.use(
     config => {
@@ -54,16 +54,37 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ListerAnnonces() {
+    const History = useHistory()
     const classes = useStyles()
     const [annonces, setAnnonce] = useState([])
     const [search, setSearch] = useState('')
     const [msg, setMsg] = useState('')
 
     useEffect(() => {
-        GuestVerify()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                History.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                History.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                History.push('/')
+            }
+        })
+        .catch(() => {})
+
         if(search !== ""){
             console.log(search)
-            axios.get("http://localhost:5001/annonces/all/statut/true/" + search)
+            axios.get("/annonces/all/statut/true/" + search)
             .then((response) => {
                 if(response.data.msgErr === "No Token Set"){
                     localStorage.clear()
@@ -87,7 +108,7 @@ function ListerAnnonces() {
             })
         }
         else{
-            axios.get("http://localhost:5001/annonces/all/statut/true")
+            axios.get("/annonces/all/statut/true")
             .then((response) => {
                 if(response.data.msgErr === "No Token Set"){
                     localStorage.clear()
@@ -111,7 +132,7 @@ function ListerAnnonces() {
                 
             })
         }
-    }, [search])
+    }, [search, History])
 
 
     const handleDownload = (fileName) => {
@@ -178,9 +199,9 @@ function ListerAnnonces() {
                 }
                 {
                     search !== "" ? 
-                    <div className="col-md-6" style={{marginLeft : "24%"}}>{msg === "No Annonce" && <div><Alert severity="error">Aucune Annonce Pour Cette Recherche "{search}"</Alert></div>}</div> 
+                    <div className="col-md-6" style={{marginLeft : "24%"}}>{msg === "No Annonce" && <div><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Annonce Pour Cette Recherche "{search}"</strong></Alert></div>}</div> 
                     :
-                    <div className="col-md-6" style={{marginLeft : "24%"}}>{msg === "No Annonce" && <div><Alert severity="error">Aucune Annonce Pour l'Instant</Alert></div>}</div> 
+                    <div className="col-md-6" style={{marginLeft : "24%"}}>{msg === "No Annonce" && <div><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Annonce Pour l'Instant</strong></Alert></div>}</div> 
                 }
             </div>
         </div>

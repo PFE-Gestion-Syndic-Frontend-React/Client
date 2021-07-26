@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Select, MenuItem, FormControl, InputLabel, Typography, Card, CardHeader, CardContent } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import Util from '../../utils/util'
 
 
 
@@ -17,6 +16,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function EditLogement(props) {
+    const History = useHistory()
     const classes = useStyles()
     const [copro, setCopro] = useState([])
     const refLogement = props.match.params.refLogement
@@ -38,11 +38,42 @@ function EditLogement(props) {
         }
     };
 
+    if(msg){}
     
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
         if(refLogement !== ""){
-            axios.get("http://localhost:5001/logements/coproprietaire/" + refLogement)
+            axios.get("/logements/coproprietaire/" + refLogement)
             .then((resolve) => {
                 if(resolve.data.length > 0){
                     setCopro(resolve.data[0])
@@ -54,7 +85,7 @@ function EditLogement(props) {
             setOpen(false)
         }
    
-        axios.get("http://localhost:5001/logements/Coproprietaire/byEmail")
+        axios.get("/logements/Coproprietaire/byEmail")
         .then((response) => {
             if(response.data.length > 0){
                 setCompte(response.data)
@@ -68,15 +99,13 @@ function EditLogement(props) {
                 toast.warn("Invalid Copropriétaire")
             }
         })
-        .catch(() => {
-            console.log("err")
-        })
-    }, [refLogement])
+        .catch(() => {})
+    }, [refLogement, History])
 
 
     const updateLog = () => {
         if(num !== "" && refLogement !== ""){
-            axios.put("http://localhost:5001/logements/edit/" + refLogement, {num : num})
+            axios.put("/logements/edit/" + refLogement, {num : num})
             .then((resolve) => {
                 if(resolve.data.message === "Inserted"){
                     props.history.push('/logement')

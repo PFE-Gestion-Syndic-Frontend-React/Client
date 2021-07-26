@@ -7,7 +7,6 @@ import { makeStyles } from '@material-ui/styles'
 import { useHistory } from 'react-router'
 import {toast} from 'react-toastify'
 import Alert from '@material-ui/lab/Alert'
-import Util from '../../utils/util'
 
 
 
@@ -33,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function ListerDepense(props) {
+    const History = useHistory()
     const classes = useStyles()
     const [search, setSearch] = useState('')
     const [depense, setDepense] = useState([]) 
@@ -48,9 +48,39 @@ function ListerDepense(props) {
     }
 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
         if(search !== ""){
-            axios.get("http://localhost:5001/depenses/" + search)
+            const run = axios.get("/depenses/" + search)
             .then((response) => {
                 if(response.data.msgErr === "No Token Set"){
                     localStorage.clear()
@@ -70,9 +100,11 @@ function ListerDepense(props) {
                 }
             })
             .catch(() => {})
+
+            return(() => clearInterval(run))
         }
         else{
-            axios.get("http://localhost:5001/depenses/all")
+            const run1 = axios.get("/depenses/all")
             .then((response) => {
                 if(response.data){
                     if(response.data === "No Dépense"){
@@ -90,11 +122,13 @@ function ListerDepense(props) {
                 }
             })
             .catch(() => {})
+
+            return (() => clearInterval(run1))
         }
-    }, [search, msg, deleted])
+    }, [search, msg, deleted, History])
 
     const deleteDepense = (RefDepense) => {
-        axios.delete(`http://localhost:5001/depenses/delete/${RefDepense}`)
+        axios.delete(`/depenses/delete/${RefDepense}`)
         .then((resolve) => {
             toast.info("La Dépense a été Supprimée avec Succès")
         })
@@ -107,16 +141,15 @@ function ListerDepense(props) {
         setOpen(false)
     }
 
-    const history = useHistory()
     const updateDepense = (RefDepense) => {
         return(
-            history.push(`/dépense/edit/${RefDepense}`)
+            History.push(`/dépense/edit/${RefDepense}`)
         )
     }
 
 
     return (
-        <div style={{top : "120px"}}><br/>
+        <div style={{paddingTop : "1px"}}>
             <h1 style={{marginLeft : "200px"}}>Lister Les Dépenses</h1>
             <div className="container col-md-8 col-md-offset-2"><br/><br/>
                 <div className="container col-md-10 col-md-offset-1">
@@ -153,7 +186,7 @@ function ListerDepense(props) {
                                                                         <Typography variant="body1" color="textPrimary">Montant : <strong style={{color : "blue"}}>{d.MontantDepense} (en Dhs)</strong></Typography>
                                                                     </div>
                                                                 </div><br/>
-                                                                <Typography > Facture : {"d.facture"} </Typography>
+                                                                <Typography > Facture : {d.facture} </Typography>
                                                             </CardContent>
                                                             <div className="row">
                                                                 <div className="col-md-6">
@@ -189,9 +222,9 @@ function ListerDepense(props) {
             }
             {
                 search !== "" ?
-                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Dépense Pour Cette Recherche "{search}"</Alert></div> }</div>
+                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Dépense Pour Cette Recherche "{search}"</strong></Alert></div> }</div>
                 :
-                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Dépense Pour l'Instant</Alert></div> }</div>
+                <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Dépense Pour l'Instant</strong></Alert></div> }</div>
             }
             
         </div>

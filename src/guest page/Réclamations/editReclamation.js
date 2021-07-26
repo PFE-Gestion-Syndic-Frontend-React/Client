@@ -1,10 +1,9 @@
 import React, {useState, useEffect} from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, TextField } from '@material-ui/core';
-import { toast } from 'react-toastify';
-import GuestVerify from '../../utils/guestVerify';
+import { toast } from 'react-toastify'
 
 axios.interceptors.request.use(
     config => {
@@ -47,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function EditReclamation(props) {
+    const History = useHistory()
     const classes = useStyles()
     const [msg, setMsg] = useState('')
     const [reclamation, setReclamation] = useState({})
@@ -56,6 +56,8 @@ function EditReclamation(props) {
     const [open, setOpen] = useState(false)
     const [file, setFile] = useState('')
     const refReclamation = props.match.params.num
+
+    if(msg){}
 
     const handleOpen = () => {
         setOpen(true)
@@ -67,9 +69,29 @@ function EditReclamation(props) {
 
 
     useEffect(() => {
-        GuestVerify()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                History.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                History.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                History.push('/')
+            }   
+        })
+        .catch(() => {})
+
         if(refReclamation !== "" || refReclamation !== undefined){
-            axios.get(`http://localhost:5001/reclamations/reclamation/${refReclamation}`)
+            axios.get(`/reclamations/reclamation/${refReclamation}`)
             .then(res => 
             {
                 if(res.data.msgErr === "Not Found"){
@@ -81,7 +103,7 @@ function EditReclamation(props) {
             })
             .catch(() => console.log("Cannot Read Data"))
         }
-    }, [refReclamation])
+    }, [refReclamation, History])
 
 
     const update = () => {
@@ -91,7 +113,7 @@ function EditReclamation(props) {
             }
             else{
                 const datasend = {objet : objt,message : mesage, pour : por}
-                axios.put(`http://localhost:5001/reclamations/maReclamation/edit/${refReclamation}`, datasend)
+                axios.put(`/reclamations/maReclamation/edit/${refReclamation}`, datasend)
                 .then((resolve) => {
                     console.log(resolve.data)
                     if(resolve.data.affectedRows !== 0){

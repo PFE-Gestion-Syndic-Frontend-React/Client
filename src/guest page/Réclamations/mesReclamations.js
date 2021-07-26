@@ -7,7 +7,6 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import axios from 'axios'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
-import GuestVerify from '../../utils/guestVerify'
 
 axios.interceptors.request.use(
     config => {
@@ -36,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 function MesReclamations() {
-    const history = useHistory()
+    const History = useHistory()
     const classes = useStyles()
     const [reclamations, setreclamation] = useState([])
     const [search, setSearch] = useState('')
@@ -58,7 +57,7 @@ function MesReclamations() {
 
     const deleteReclamation = (RefReclamation) => {
         if(RefReclamation !== ""){
-            axios.delete("http://localhost:5001/reclamations/delete/" + RefReclamation)
+            axios.delete("/reclamations/delete/" + RefReclamation)
             .then((resolve) => {
                 if(resolve.data  === "No Réclamation"){
                     toast.error("La Suppression est échouée car la réclamation est INTROUVABLE !")
@@ -75,9 +74,29 @@ function MesReclamations() {
     }
 
     useEffect(() => {
-        GuestVerify()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve.data.role === "Copropriétaire"){
+
+            }
+            else if(resolve.data.role !== "Copropriétaire"){
+                localStorage.clear()
+                History.push('/')
+            }
+            else if(resolve.data.msg === "Incorrect token !"){
+                console.log("Incorrect Token")
+                localStorage.clear()
+                History.push('/')
+            }
+            else{ //added
+                localStorage.clear()
+                History.push('/')
+            }
+        })
+        .catch(() => {})
+
         if(search !== ""){
-            axios.get("http://localhost:5001/reclamations/mesReclamations/all/" + id + "/" + search)
+            axios.get("/reclamations/mesReclamations/all/" + id + "/" + search)
             .then((response) => {
                 if(response.data === "No Réclamation"){
                     setMsg("No Réclamation")
@@ -97,7 +116,7 @@ function MesReclamations() {
             })
         }
         else{
-            axios.get("http://localhost:5001/reclamations/mesReclamations/all/" + id)
+            axios.get("/reclamations/mesReclamations/all/" + id)
                 .then((response) => {
                     if(response.data === "No Réclamation"){
                         setreclamation([])
@@ -115,11 +134,11 @@ function MesReclamations() {
                 .catch(() => setMsg("No Réclamation"))
         }
         setDeleted('')
-    }, [search, id, deleted])
+    }, [search, id, deleted, History])
 
 
     const handleUpdateRecla = (refReclamation) => {
-        history.push('/réclamation/edit/' + refReclamation)
+        History.push('/réclamation/edit/' + refReclamation)
     }
 
 
@@ -205,13 +224,13 @@ function MesReclamations() {
                 <div>
                 {
                     msg === "No Réclamation" &&
-                    <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Aucune Réclamation pour cette Recherche "{search}" </Alert></div>
+                    <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Réclamation pour cette Recherche "{search}"</strong></Alert></div>
                 }
                 </div>  : 
                 <div>
                 {
                     msg === "No Réclamation" &&
-                    <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error">Vous n'avez Aucune Réclamation Pour l'Instant </Alert></div>
+                    <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Vous n'avez Aucune Réclamation Pour l'Instant</strong></Alert></div>
                 }
                 </div>
             }

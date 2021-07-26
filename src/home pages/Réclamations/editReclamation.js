@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useHistory} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import { FormControl, Select, MenuItem, FormHelperText, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions} from '@material-ui/core';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import Util from '../../utils/util';
-
+import { toast } from 'react-toastify'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -45,11 +43,15 @@ const useStyles = makeStyles((theme) => ({
 
 
 function EditReclamation(props) {
+    const History = useHistory()
     const classes = useStyles()
     const [etat, setEtat] = useState('')
     const [reclamation, setReclamation] = useState({})
     const [msg, setMsg] = useState('')
     const [open, setOpen] = useState(false);
+
+    if(msg){}
+
     const handleClickOpen = () => {
         if(etat !== ""){
             setOpen(true) 
@@ -65,9 +67,39 @@ function EditReclamation(props) {
 
     const refReclamation = props.match.params.refReclamation 
     useEffect(() => {
-        Util()
+        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+        .then((resolve) => {
+            if(resolve){
+                if(resolve.data.role === "Administrateur"){
+                    console.log("Yes Authenticated")
+                }
+                else if(resolve.data.role !== "Administrateur"){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+                else if(resolve.data.auth === false){
+                    localStorage.clear()
+                    History.push('/')
+                    window.location.reload()
+                }
+            }
+            else{
+                localStorage.clear()
+                History.push('/')
+                window.location.reload()
+            }
+        })
+        .catch(() => {})
+
         if(refReclamation !== ""){
-            axios.get(`http://localhost:5001/reclamations/reclamation/${refReclamation}`)
+            axios.get(`/reclamations/reclamation/${refReclamation}`)
             .then(res => 
             {
                 if(res.data.msgErr === "Not Found"){
@@ -79,14 +111,14 @@ function EditReclamation(props) {
             })
             .catch(() => console.log("Cannot Read Data"))
         }
-    }, [refReclamation])
+    }, [refReclamation, History])
 
 
     const update = () => {
         const refReclamation = props.match.params.refReclamation
         if(etat !== null){
             const datasend = {etat : etat}
-            axios.put(`http://localhost:5001/reclamations/edit/${refReclamation}`, datasend)
+            axios.put(`/reclamations/edit/${refReclamation}`, datasend)
             .then((resolve) => {
                 if(resolve.data.message === "Updated Successfully"){
                     setMsg("Updated Successfully")
