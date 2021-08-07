@@ -111,7 +111,7 @@ function ListeCompte(props) {
     
 
     const deleteCompte = (NumCompte) => {
-        const id = NumCompte
+        const id = NumCompte 
         axios.delete("/users/delete/" + id)
         .then((response) => {
             if(response.data === "Ce Compte est Liée à un Logement !"){

@@ -39,6 +39,7 @@ function AddLogement(props) {
     const [num, setNum] = useState('')
     const [compte, setCompte] = useState([])
     const [msg, setMsg] = useState('')
+    const [lib, setLib] = useState('')
     const [adr, setadr] = useState('')
 
     if(msg){}
@@ -100,7 +101,7 @@ function AddLogement(props) {
         const coproprietaire = num
         if(adr !== "" && coproprietaire !== ""){
             if(log === "imm" && ty !== ""){
-                const refLog = log + " " + ty + " " + adr
+                const refLog = log + " " + lib + " " + ty + " " + adr
                 const type = ty
                 axios.post("/logements/new", {refLog : refLog, type : type, user : coproprietaire})
                     .then((resolve) => {
@@ -170,10 +171,15 @@ function AddLogement(props) {
                     </div><br/>
                     {
                         log === "imm" && 
-                        <div className="row container">
-                            <div className="col-md-4"><label style={{fontSize : "15px"}}>Type : </label></div>
-                            <div className="col-md-4"><input type="radio" name="role" value="app"  onChange={e => setTy(e.target.value)} />  Appartement</div>
-                            <div className="col-md-4"><input type="radio" name="role" value="st"  onChange={e => setTy(e.target.value)} />  Studio</div>
+                        <div>
+                            <div className="row container">
+                                <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Libellé d'immeuble" required className={classes.textField} onChange={e => setLib(e.target.value)} />
+                            </div><br/> 
+                            <div className="row container">
+                                <div className="col-md-4"><label style={{fontSize : "15px"}}>Type : </label></div>
+                                <div className="col-md-4"><input type="radio" name="role" value="app"  onChange={e => setTy(e.target.value)} />  Appartement</div>
+                                <div className="col-md-4"><input type="radio" name="role" value="st"  onChange={e => setTy(e.target.value)} />  Studio</div>
+                            </div>
                         </div>
                     }
                     <div className="row">

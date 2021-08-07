@@ -3,7 +3,7 @@ import {Link, useHistory} from 'react-router-dom'
 import { InputLabel, MenuItem, Select, FormControl, TextField, makeStyles } from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-
+import { Alert } from '@material-ui/lab'
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -47,6 +47,7 @@ function AddCotisation(props) {
     const [bnq, setBnq] = useState('')
     const [cheque, setCheque] = useState('')
     const [msg, setMsg] = useState('')
+    const [lastPaied, setLastPaied] = useState('')
     const id = localStorage.getItem('id')
 
     if(msg){}
@@ -62,7 +63,7 @@ function AddCotisation(props) {
             //console.log(paied)
             const montant = mois * cotMontanat
             if(methode === "Chèque" && bnq !== "" && cheque !== ""){
-                const datasend = {id : id, paied : paied, log :log, mois : mois, montant : montant, methode : methode, cheque : cheque, bnq : bnq}
+                const datasend = {id : id, paied : paied, log : log, mois : mois, montant : montant, methode : methode, cheque : cheque, bnq : bnq}
                 axios.post("/cotisations/new/cheque", datasend)
                 .then((resolve) => {
                     if(resolve.data.message === "Inserted"){
@@ -84,13 +85,8 @@ function AddCotisation(props) {
                         toast.success("La Cotisation est enregistrée avec Succès")
                     }
                 })
-                .catch((err) => {
-                    //console.log("failed espece")
-                })
+                .catch((err) => {})
             }
-        }
-        else{
-            //console.log("No Log")
         }
     }
     useEffect(() => {
@@ -126,21 +122,37 @@ function AddCotisation(props) {
         .catch(() => {})
 
 
-        axios.get("/users/logement/cop")
-            .then((resolve) => {
-                if(resolve.data.length > 0){
-                    setAccounts(resolve.data)
-                    setMsg("data")
+        const run = axios.get("/users/logement/cop")
+        .then((resolve) => {
+            if(resolve.data.length > 0){
+                setAccounts(resolve.data)
+                setMsg("data")
+            }
+            else{
+                setAccounts()
+                setMsg("")
+            }
+        })
+        .catch((err) => {})
+
+        if(log !== ""){
+            const run1 = axios.get("/cotisations/getLastPaiement/" + log)
+            .then((res) =>{
+                console.log(res.data)
+                if(res.data.length === 0){
+                    setLastPaied("No Cots")
                 }
                 else{
-                    setAccounts()
-                    setMsg("")
+                    setLastPaied(res.data[0])
+                    console.log(res.data[0])
                 }
             })
-            .catch((err) => {
-                //console.log(err)
-            })
-    }, [History])
+            .catch(()=>{})
+
+            return (() => clearInterval(run1))
+        }
+        return(() => clearInterval(run))
+    }, [History, log])
 
 
     return (
@@ -206,7 +218,42 @@ function AddCotisation(props) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div><br/><br/>
+            {
+                log !== "" &&
+                <div>
+                    {
+                        lastPaied === "No Cots" && 
+                        <Alert severity="warning"><strong>Ce Copropriétaire n'a Aucune Cotisation !</strong></Alert>
+                    }
+                    {
+                        lastPaied !== "No Cots" &&
+                        <Alert severity="info">
+                            <div className="row"><h6 className="center"><strong style={{marginLeft : "70px"}}>La Fiche Du Dernier Paiement ({log})</strong></h6></div>
+                            <div className="row">
+                                <div className="col-md-7">La Référence du Paiement : <strong>{lastPaied.RefPaiement}</strong></div>
+                                <div className="col-md-5">Date Paiement : <strong>{lastPaied.datePaiement && lastPaied.datePaiement.replace("T23:00:00.000Z", "")}</strong></div>
+                            </div>
+                            <div className="row">
+                                <div className="col-md-7">Méthode du Paiement : <strong>{lastPaied.MethodePaiement}</strong></div>
+                                <div className="col-md-5">Montant : <strong>{lastPaied.Montant} X ({lastPaied.NbrMois} mois) MAD </strong></div>
+                            </div>
+                            <div className="row">
+                                <div className="col-md-7">Du : <strong>{lastPaied.DU && lastPaied.DU.replace("T23:00:00.000Z", "")}</strong></div>
+                                <div className="col-md-5">Au : <strong>{lastPaied.AU && lastPaied.AU.replace("T23:00:00.000Z", "")}</strong></div>
+                            </div><br/>
+                            {
+                                lastPaied.difs > 0 &&
+                                <div className="row"><div className="col-md-12"><h3 style={{color : "red", textAlign : "center"}}>Le Montant à Payer : {lastPaied.difs * 200} MAD </h3></div></div>}
+                            {
+                                lastPaied.difs <= 0 &&
+                                <div className="row"><h3 style={{color : "green", textAlign : "center"}}>Son Situation financièr est OK.</h3></div>
+                            }
+                        </Alert>
+                    }
+                </div>
+            }
+            <br/><br/><br/><br/><br/>
         </div>
     )
 }

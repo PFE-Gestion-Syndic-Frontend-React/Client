@@ -39,11 +39,13 @@ function ListerDepense(props) {
     const [msg, setMsg] = useState('')
     const [deleted, setDeleted] = useState('')
     const [open, setOpen] = useState(false)
+    const [refDep, setRefDep] = useState('')
 
     const handleClose = () => {
         setOpen(false)
     }
-    const handleOpen = () => {
+    const handleOpen = (Dep) => {
+        setRefDep(Dep)
         setOpen(true)
     }
 
@@ -125,19 +127,24 @@ function ListerDepense(props) {
 
             return (() => clearInterval(run1))
         }
+        
     }, [search, msg, deleted, History])
 
     const deleteDepense = (RefDepense) => {
-        axios.delete(`/depenses/delete/${RefDepense}`)
-        .then((resolve) => {
-            toast.info("La Dépense a été Supprimée avec Succès")
-        })
-        .catch(() => {
-            
-        })
-        toast.info("La Dépense a été Supprimée avec Succès")
-        setMsg("")
-        setDeleted("ok")
+        if(RefDepense !== "" && RefDepense !== undefined){
+            axios.delete(`/depenses/delete/${RefDepense}`)
+            .then((resolve) => {
+                if(resolve.data === "Deleted"){
+                    toast.info("La Dépense a été Supprimée avec Succès")
+                }
+                else if(resolve.data === "No Resolving"){
+                    toast.warning("La Suppression est échoué")
+                }
+            })
+            .catch(() => {})
+            setMsg("")
+            setDeleted("ok")
+        }
         setOpen(false)
     }
 
@@ -176,7 +183,7 @@ function ListerDepense(props) {
                                                 <AccordionDetails>
                                                     <Typography spacing={3}>
                                                         <Card className={ classes.root}>
-                                                            <CardHeader action={ <div> <IconButton onClick={ updateDepense.bind(this, d.RefDepense)} ><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton><IconButton onClick={handleOpen}><DeleteOutlined style={{color : "red", fontSize : "30px"}} /></IconButton></div> } />
+                                                            <CardHeader action={ <div> <IconButton onClick={ updateDepense.bind(this, d.RefDepense)} ><UpdateOutlined style={{color : "green", fontSize : "30px"}} /></IconButton><IconButton onClick={handleOpen.bind(this, d.RefDepense)}><DeleteOutlined style={{color : "red", fontSize : "30px"}} /></IconButton></div> } />
                                                             <CardContent>
                                                                 <div className="row">
                                                                     <div className="col-md-6">
@@ -190,34 +197,34 @@ function ListerDepense(props) {
                                                             </CardContent>
                                                             <div className="row">
                                                                 <div className="col-md-6">
-                                                                    <CardActions><Typography variant="body2" color="textSecondary"> Déclarer par : {d.NomCompte} {d.PrenomCompte} </Typography></CardActions>
+                                                                    <CardActions><Typography variant="body2" color="textSecondary" style={{marginLeft : "7px"}}>Déclarer par : {d.NomCompte} {d.PrenomCompte} </Typography></CardActions>
                                                                 </div>
                                                                 <div className="col-md-6">
-                                                                    <CardActions><Typography variant="body2" color="textSecondary">  Date mise à jour : {d.dateDepense && d.dateDepense.replace("T23:00:00.000Z", "")} </Typography></CardActions>
+                                                                    <CardActions><Typography variant="body2" color="textSecondary">Date mise à jour : {d.dateDepense && d.dateDepense.replace("T23:00:00.000Z", "")} </Typography></CardActions>
                                                                 </div>
                                                             </div>
                                                         </Card>
                                                     </Typography>
                                                 </AccordionDetails>
                                             </Accordion>
-                                            <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-                                                <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de la suppression d'une Dépense ?"}</DialogTitle>
-                                                <DialogContent>
-                                                    <DialogContentText id="alert-dialog-description">
-                                                        Confirmez-vous la SUPPRESSION du cette Dépense ?
-                                                    </DialogContentText>
-                                                </DialogContent>
-                                                <DialogActions>
-                                                    <Button onClick={handleClose} color="primary">Cancel</Button>
-                                                    <Button onClick={deleteDepense.bind(this, d.RefDepense)}  color="secondary" autoFocus>Oui, Je Confirme !</Button>
-                                                </DialogActions>
-                                            </Dialog>
                                         </div>
                                     </Paper>
                                 </Grow>
                             )
                         })
                     }
+                    <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                        <DialogTitle id="alert-dialog-title" color="secondary">{"Confirmation de la suppression d'une Dépense ?"}</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="alert-dialog-description">
+                                Confirmez-vous la SUPPRESSION du cette Dépense ?
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleClose} color="primary">Cancel</Button>
+                            <Button onClick={deleteDepense.bind(this, refDep)}  color="secondary" autoFocus>Oui, Je Confirme !</Button>
+                        </DialogActions>
+                    </Dialog>
                 </div>
             }
             {

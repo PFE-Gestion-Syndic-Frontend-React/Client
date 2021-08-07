@@ -96,14 +96,14 @@ function ReleveFinancier() {
                                         d[3].map((date, index) => {
                                             return(
                                                 <Grow key={index} in={useEffect} timeout={1000}>
-                                                    <Paper >
+                                                    <Paper>
                                                         <Accordion className="mb-3 card">
                                                             <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
                                                                 <Typography className={classes.heading}> <h5 style={{textAlign : "center", color : "blue"}}>Situation Financièr du {date.month} / {date.year} </h5> </Typography>
                                                             </AccordionSummary>
                                                             <AccordionDetails>
                                                                 <Card className="card container col-md-12">
-                                                                    <CardHeader action= { <IconButton onClick={ handlePrint.bind(this, date.month, date.year) }><PrintOutlined style={{color : "blue", fontSize : "30px"}} /></IconButton>} />
+                                                                    <CardHeader action= { <IconButton onClick={ handlePrint.bind(this, date.month, date.year) } id="contenu"><PrintOutlined style={{color : "blue", fontSize : "30px"}} /></IconButton>} />
                                                                     <CardContent>
                                                                         {
                                                                             d[0].map((c, index) => {

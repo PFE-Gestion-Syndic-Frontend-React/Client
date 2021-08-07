@@ -99,8 +99,9 @@ function InfoLogement(props) {
         .catch(() => {})
 
         if(id !== ""){
-            const run1 = axios.get(`/cotisations/mesCotisations/${id}`)
+            const run1 = axios.get(`/cotisations/mesCotisations/${RefLogement}/${id}`)
             .then((response) => {
+                console.log(response.data);
                 if(response.data === "No Token at all" || response.data === "Invalid Token"){
                     localStorage.clear()
                     History.push('/')

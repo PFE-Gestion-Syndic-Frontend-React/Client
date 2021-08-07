@@ -19,6 +19,8 @@
     "dayjs": "^1.10.5",
     "file-saver": "^2.0.5",
     "font-awesome": "^4.7.0",
+    "html2canvas": "^1.1.4",
+    "jspdf": "^2.3.1",
     "react": "^17.0.2",
     "react-bootstrap": "^1.6.1",
     "react-dayjs": "^0.3.2",
@@ -28,16 +30,17 @@
     "react-scripts": "4.0.3",
     "react-toastify": "^7.0.4",
     "reactstrap": "^8.9.0",
+    "serve": "^12.0.0",
     "styled-components": "^5.3.0",
     "web-vitals": "^1.1.2"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
     "test": "react-scripts test",
+    "build" : "react-scripts build",
     "eject": "react-scripts eject"
   },
-  "proxy" : "http://localhost:5001",
+  "proxy": "http://localhost:5001",
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -45,11 +48,6 @@
     ]
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",

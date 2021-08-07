@@ -108,6 +108,10 @@ function ListerReclamation() {
                     if(response.data.length > 0){
                         setreclamation(response.data)
                     }
+                    else{
+                        setreclamation([])
+                        console.log("No Réclamation")
+                    }
                 })
                 .catch(() => console.log("No Reclamation"))
         }
@@ -121,9 +125,6 @@ function ListerReclamation() {
     }
 
 
-    const handleDownload = (contenu) => {
-
-    }
 
     return (
         <div>
@@ -167,7 +168,6 @@ function ListerReclamation() {
                                                                 r.contenu !== null && 
                                                                 <div className="overflow">
                                                                     <img className="scaleImg" src={"reclamation support/" + r.contenu} alt={""} style={{width : "200px", height : "200px"}} />
-                                                                    <div style={{marginLeft : "60px"}} onClick={handleDownload.bind(this, r.contenu)} ><IconButton aria-label="Download" aria-labelledby="Download" ><CloudDownloadOutlined style={{width : "50px", height : "50px"}} /> </IconButton></div>
                                                                 </div>
                                                             }
                                                         </CardContent><br/>

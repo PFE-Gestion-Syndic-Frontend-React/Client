@@ -8,6 +8,7 @@ import 'font-awesome/css/font-awesome.min.css'
 import 'react-toastify/dist/ReactToastify.css'
 import { toast } from 'react-toastify';
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import NewPassword from './components/newPassword';
 
 
 
@@ -21,6 +22,7 @@ function App() {
             <Route exact path="/reset-password" component={Resetpassword} />
             <Route exact path="/home" render={() => <Home />}  />
             <Route exact path="/acceuil" component={Guest} />
+            <Route exact path="/newPassword/:email/:tele:/:id" component={NewPassword} />
           </Switch>
         </Router>
       </div>

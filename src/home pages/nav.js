@@ -123,9 +123,8 @@ function Nav(props) {
                             <Tab label="Logement" component={Link} to="/logement" onClick={()=> setLoad("logement")} style={{width : "170px"}} />
                             <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} style={{width : "200px"}} >{photo && <Avatar alt="" src={`profile img/${photo}`} style={{width : "30px", height : "30px"}} />} &nbsp;&nbsp;&nbsp; <strong> { Name && Name } { Prenom && Prenom} </strong></Button>
                             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose} style={{paddingTop : "0", paddingRight : "0"}} >
-                                <MenuItem onClick={handleClose}>Profile</MenuItem>
                                 <MenuItem onClick={handleClose} component={Link} to="/settings"> Mon Compte</MenuItem>
-                                <MenuItem onClick={logout} >Logout</MenuItem>
+                                <MenuItem onClick={logout}>Logout</MenuItem>
                             </Menu>
                         </Tabs>
                     </AppBar>

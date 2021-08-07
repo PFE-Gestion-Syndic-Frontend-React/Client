@@ -174,7 +174,7 @@ function Settings(props) {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Ancien Mot de Passe" className={classes.root} type="password" onChange={e => setPwd(e.target.value)} />
                         </div>
                         <div className="col-md-6">
-                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Votre Ancien Mot de Passe" className={classes.root} type="password" maxLength="20" onChange={e => setNewPwd(e.target.value)} />
+                            <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Le Nouveau Mot de Passe" className={classes.root} type="password" maxLength="20" onChange={e => setNewPwd(e.target.value)} />
                         </div>
                     </div><br />
                     <div className="row">

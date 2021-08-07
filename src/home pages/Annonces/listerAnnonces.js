@@ -3,7 +3,7 @@ import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles'
 import { Paper, Grow, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import { DeleteOutlined, UpdateOutlined, CloudDownloadOutlined }from '@material-ui/icons'
+import { DeleteOutlined, UpdateOutlined }from '@material-ui/icons'
 import { useHistory } from 'react-router'
 import { toast } from 'react-toastify'
 import Alert from '@material-ui/lab/Alert'
@@ -200,10 +200,6 @@ function ListerAnnonces(props) {
     }
 
 
-    const handleDownload = (file) => {
-
-    }
-
     return (
         <div style={{top : "120px"}}>
             <h1 style={{marginLeft : "200px"}}>Lister Les Annonces</h1>
@@ -243,7 +239,6 @@ function ListerAnnonces(props) {
                                                                     a.contenuDocument !== null &&
                                                                     <Typography className="overflow">
                                                                         <img className="scaleImg" src={`annonce doc/${a.contenuDocument}`} alt="" style={{width : "200px", height : "200px"}} />
-                                                                        <div style={{marginLeft : "60px"}} onClick={handleDownload.bind(this, a.contenuDocument)} ><IconButton aria-label="Download" aria-labelledby="Download" ><CloudDownloadOutlined style={{width : "50px", height : "50px"}} /></IconButton></div>
                                                                     </Typography>
                                                                 }
                                                             </CardContent>

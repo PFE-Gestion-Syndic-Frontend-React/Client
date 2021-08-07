@@ -112,9 +112,8 @@ function NavGuest() {
                         <Tab style={{width : "250px"}} label="Cotisation" component={Link} to="/Cotisations" onClick={()=> setLoad("Cotisation")} />
                         <Tab style={{width : "250px"}} label="Annonce" component={Link} to="/Annonces" onClick={()=> setLoad("Annonce")} />
                         <Tab style={{width : "250px"}} label="Réclamation" component={Link} to="/Réclamations" onClick={()=> setLoad("Réclamation")} />
-                        <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} style={{width : "270px"}}>{photo && <Avatar alt="" src={`public/profile img/${photo}`} style={{width : "30px", height : "30px"}} />} &nbsp;&nbsp;&nbsp; <strong> { Name && Name } { Prenom && Prenom} </strong></Button>
+                        <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} style={{width : "270px"}}>{photo && <Avatar alt="" src={`profile img/${photo}`} style={{width : "30px", height : "30px"}} />} &nbsp;&nbsp;&nbsp; <strong> { Name && Name } { Prenom && Prenom} </strong></Button>
                         <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose} >
-                            <MenuItem onClick={handleClose}>Profile</MenuItem>
                             <MenuItem onClick={handleClose} component={Link} to="/Settings"> Mon Compte</MenuItem>
                             <MenuItem onClick={logout} >Logout</MenuItem>
                         </Menu>

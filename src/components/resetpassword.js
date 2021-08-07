@@ -1,10 +1,10 @@
 import React, {useState} from 'react'
-//import axios from 'axios'
 import { Link } from 'react-router-dom'
 import {TextField, Avatar, CssBaseline, Button, Container, Grid} from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { toast } from 'react-toastify'
-
+import axios from 'axios'
+import { Alert } from '@material-ui/lab'
 
 const useStyles = makeStyles((theme) => ({
     alert :{
@@ -43,11 +43,28 @@ function Resetpassword() {
     const classes = useStyles()
     const [email, setEmail] = useState('')
     const [tele, setTele] = useState('')
-
+    const [msg, setMsg] = useState('')
     
     const resetPassword = () => {
         if(email === "" || tele === ""){
             toast.warn("Les Champs qui ont (*) sont Obligatoires")
+            setMsg("")
+        }
+        else if(email !== "" && tele !== ""){
+            axios.get(`/resetpwd/${email}/${tele}`)
+            .then((res) => {
+                if(res.data === "Verify Your Email"){
+                    setMsg('Verify')
+                    toast.success("Merci de Vérifier Votre Courrier !")
+                }
+                else if(res.data === "Unfounded User"){
+                    setMsg('Not Found')
+                }
+            })
+            .catch(() => {})
+        }
+        else{
+            setMsg("")
         }
     }
 
@@ -55,7 +72,18 @@ function Resetpassword() {
         <div style={{paddingTop : "6%"}}>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
-                <Avatar src={'G.S.C.png'} alt="" style={{width : "150px", height : "150px", marginLeft : "30%"}} />
+                <Avatar src={'G.S.C.png'} alt="" style={{width : "150px", height : "150px", marginLeft : "30%"}} /><br/><br/>
+                {
+                    msg === "Verify" &&
+                    <div><Alert severity="success" style={{textAlign : "center"}}>Merci de vérifier votre Courrier</Alert></div>
+                }
+                {
+                    msg === "Not Found" && 
+                    <div><Alert severity="error" style={{textAlign : "center"}}>Utilisateur Introuvable</Alert></div>
+                }
+                {
+                    msg === "" && <div></div>
+                }
                 <div className={classes.paper}>
                     <div className={classes.root} noValidate>
                         <TextField InputLabelProps={{ shrink: true,}} margin="normal" required fullWidth id="standard-basic" label="Email Address" name="email" autoComplete="email" autoFocus onChange={(e) => setEmail(e.target.value)} />

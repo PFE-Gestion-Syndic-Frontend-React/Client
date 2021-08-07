@@ -130,7 +130,7 @@ function AddDepense(props) {
     const EnregistrerDepense = () => {
         if(id !== null && id !== undefined){
             if(typeDep === "" || !typeDep){
-                toast.warn("Sélectionner une Dépense")
+                toast.warn("Merci de Sélectionner une Catégorie")
             }
             else{
                 if(typeDep !== "" && montant !== "" && fact !== "" && detail !== ""){

@@ -104,6 +104,7 @@ function ListerMesPaiements() {
             else{
                 axios.get(`/cotisations/mesCotisations/${id}`)
                 .then((response) => {
+                    console.log(response.data)
                     if(response.data === "No Token at all" || response.data === "Invalid Token"){
                         localStorage.clear()
                         History.push('/')
@@ -179,9 +180,14 @@ function ListerMesPaiements() {
                                                                     </div>
                                                                 </Typography>
                                                             </CardContent>
-                                                            <CardActions>
-                                                                <Typography variant="body2" color="textSecondary" component="p"> Date Paiement : {c.datePaiement && c.datePaiement.replace("T23:00:00.000Z", "")}</Typography>
-                                                            </CardActions>
+                                                            <div className="row">
+                                                                <div className="col-md-6">
+                                                                    <CardActions><Typography variant="body2" color="textSecondary" style={{marginLeft : "7px"}}>Déclarer Par : {c.NomCompte} {c.PrenomCompte}</Typography></CardActions>
+                                                                </div>
+                                                                <div className="col-md-6">
+                                                                    <CardActions><Typography variant="body2" color="textSecondary">Date Paiement : {c.datePaiement && c.datePaiement.replace("T23:00:00.000Z", "")}</Typography></CardActions>
+                                                                </div>
+                                                            </div>
                                                         </Card>
                                                     </Typography>
                                                 </AccordionDetails>

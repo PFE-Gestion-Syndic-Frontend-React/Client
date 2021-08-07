@@ -155,7 +155,7 @@ function ListerDepenses() {
                                                         </CardContent>
                                                         <div className="row">
                                                             <div className="col-md-6">
-                                                                <CardActions><Typography variant="body2" color="textSecondary"> Déclarer par : {d.NomCompte} {d.PrenomCompte} </Typography></CardActions>
+                                                                <CardActions><Typography variant="body2" color="textSecondary" style={{marginLeft : "7px"}}> Déclarer par : {d.NomCompte} {d.PrenomCompte} </Typography></CardActions>
                                                             </div>
                                                             <div className="col-md-6">
                                                                 <CardActions><Typography variant="body2" color="textSecondary">  Date mise à jour : {d.dateDepense && d.dateDepense.replace("T23:00:00.000Z", "")} </Typography></CardActions>
