@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Slide, Paper } from '@material-ui/core'
-import axios from 'axios'
+import { Button, Slide, Paper, Badge, Tooltip } from '@material-ui/core'
 import { Link, useHistory } from 'react-router-dom'
+import axios from 'axios'
+import { AccountCircle, NotificationsActiveOutlined, Assignment, AccountBalanceWallet, CreditCardOutlined } from '@material-ui/icons'
+import Marquee from "react-fast-marquee"
+
 
 axios.interceptors.request.use(
     config => {
@@ -86,29 +89,35 @@ function Statistique() {
                 <Paper>
                     <div className="container ">
                         <div style={{paddingTop : "55px"}}>
-                            <h1 style={{marginLeft : "90px"}}>Les Statistiques </h1><br/>
+                            <h1 style={{marginLeft : "90px"}}>Les Statistiques  </h1><br/>
                             <div className="col-md-6" style={{marginLeft : "70%"}}>
                                 <Button variant="contained" color="primary" style={{width : "300px", textTransform : "capitalize", fontSize : "16px", color : "white"}} component={Link} to="/relevé-financièr">Demander Relevé Financièr</Button>
                             </div><br/><br/><br/><br/>
                         </div>
+                        <div className="row" style={{textAlign : "center"}} ><Marquee speed="150" style={{color : "blue"}}><h3>Le Solde Actuel est {MontantCoti - MontantDepense} MAD</h3></Marquee></div><br/><br/>
                         <div className="container">
                             <div className="row">
                                 <div className="col-md-5">
                                     <div className="card w-100 text-black bg-primary mb-3" style={{height : "280px", borderRadius : "25px"}}>
-                                        <div className=" row">
-                                            <div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><i className="bi bi-people-fill m-5" style={{width : "400px"}} ></i></h1> </div>
-                                            <h5 className="" style={{paddingLeft : "45px"}} > <strong style={{color : "silver"}}>{NbrUsers}</strong>  Utilisateurs ( <strong style={{color : "silver"}} >{admi}</strong> Administrateurs et <strong style={{color : "silver"}}>{copro}</strong>  Copropriétaires ) </h5>
+                                        <div className=" row mt-4">
+                                            <div className="card-img mt-3"><h1 style={{fontSize : "50px", paddingLeft : "45px"}}><Tooltip title="Utilisateurs"><Badge badgeContent={NbrUsers} color="secondary"><AccountCircle style={{fontSize : "50px"}} /></Badge></Tooltip></h1></div>
+                                            <h5 className="" style={{paddingLeft : "45px"}}>( <strong style={{color : "silver"}} > {admi} </strong> Administrateurs et <strong style={{color : "silver"}}>{copro}</strong>  Copropriétaires ) </h5>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-md-5">
                                     <div className="card w-100 text-black bg-secondary mb-3" style={{height : "280px", borderRadius : "25px"}}>
-                                        <div className="row">
-                                            <div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><i className="bi bi-wallet2 m-5" style={{width : "700px"}}></i></h1></div>
+                                        <div className="row mt-4">
                                             <h6 style={{textAlign : "center", color : "black", fontSize : "20px"}} ><strong>Statistique Globale</strong></h6>
-                                            <h5 style={{paddingLeft : "45px"}}> Nombre des Dépenses : <strong style={{color : "silver"}}>{NbrDepense}</strong>, Montant TTC <strong style={{color : "silver"}}>{MontantDepense}</strong>  MAD.</h5>
+                                            <div className="row">
+                                                <div className="col-md-6" style={{textAlign : "right"}}><div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><Tooltip title="Dépenses"><Badge badgeContent={NbrDepense} color="secondary"><CreditCardOutlined style={{fontSize : "50px"}} /></Badge></Tooltip></h1></div></div>
+                                                <div className="col-md-6" style={{textAlign : "left"}}><div className="mt-5"><h4 style={{fontSize : "20px"}}><strong style={{color : "silver"}}>{MontantDepense} MAD</strong></h4></div></div>
+                                            </div>
                                             <h6 style={{textAlign : "center", color : "black", fontSize : "20px"}} ><strong>Statistique du {mois} / {year}</strong></h6>
-                                            <h5 style={{paddingLeft : "45px"}}> Nombre des Dépenses Courante : <strong style={{color : "silver"}}>{NbrDepCurrent}</strong>, Montant TTC <strong style={{color : "silver"}}>{mntDepCurrent}</strong>  MAD.</h5>
+                                            <div className="row">
+                                                <div className="col-md-6" style={{textAlign : "right"}}><div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><Tooltip title="Dépenses"><Badge badgeContent={NbrDepCurrent} color="secondary"><CreditCardOutlined style={{fontSize : "50px"}} /></Badge></Tooltip></h1></div></div>
+                                                <div className="col-md-6" style={{textAlign : "left"}}><div className="mt-5"><h4 style={{fontSize : "20px"}}><strong style={{color : "silver"}}>{mntDepCurrent} MAD</strong></h4></div></div>
+                                            </div>
                                         </div>    
                                     </div>
                                 </div>
@@ -118,23 +127,33 @@ function Statistique() {
                             <div className="row">
                                 <div className="col-md-5">
                                     <div className="card w-100 text-black bg-primary mb-3" style={{height : "280px", borderRadius : "25px"}}>
-                                        <div className=" row">
-                                            <div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><i className="bi bi-clipboard-check m-5" style={{width : "700px"}} ></i></h1> </div>
+                                        <div className=" row mt-4">
                                             <h6 style={{textAlign : "center", color : "black", fontSize : "20px"}} ><strong>Statistique Globale</strong></h6>
-                                            <h5 className="" style={{paddingLeft : "45px"}} > Nombre des Annonces : <strong style={{color : "silver"}}>{NbrAnnonce}</strong> , Nombre des Réclamations : <strong style={{color : "silver"}}>{NbrRecla}</strong>. </h5>
+                                            <div className="row">
+                                                <div className="col-md-6" style={{textAlign : "right"}}><div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><Tooltip title="Réclamations"><Badge badgeContent={NbrRecla} color="secondary"><Assignment style={{fontSize : "50px"}} /></Badge></Tooltip></h1> </div></div>
+                                                <div className="col-md-6" style={{textAlign : "left"}}><div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><Tooltip title="Annonces"><Badge badgeContent={NbrAnnonce} color="secondary"><NotificationsActiveOutlined style={{fontSize : "50px"}} /></Badge></Tooltip></h1></div></div>
+                                            </div>
                                             <h6 style={{textAlign : "center", color : "black", fontSize : "20px"}} ><strong>Statistique du {mois} / {year}</strong></h6>
-                                            <h5 className="" style={{paddingLeft : "45px"}} > Nombre des Annonces Courante : <strong style={{color : "silver"}}>{NbrAnnCurrent}</strong>, Nombre des Réclamations Courante : <strong style={{color : "silver"}}>{NbrReclaCurrent}</strong>. </h5>
+                                            <div className="row">
+                                                <div className="col-md-6" style={{textAlign : "right"}}><div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><Tooltip title="Réclamations"><Badge badgeContent={NbrReclaCurrent} color="secondary"><Assignment style={{fontSize : "50px"}} /></Badge></Tooltip></h1> </div></div>
+                                                <div className="col-md-6" style={{textAlign : "left"}}><div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><Tooltip title="Annonces"><Badge badgeContent={NbrAnnCurrent} color="secondary"><NotificationsActiveOutlined style={{fontSize : "50px"}} /></Badge></Tooltip></h1></div></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-md-5">
                                     <div className="card w-100 text-black bg-secondary mb-3" style={{height : "280px", borderRadius : "25px"}}>
-                                        <div className="row">
-                                            <div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><i className="bi bi-wallet m-5" style={{width : "700px"}}></i></h1></div>
+                                        <div className="row mt-4">
                                             <h6 style={{textAlign : "center", color : "black", fontSize : "20px"}} ><strong>Statistique Globale</strong></h6>
-                                            <h5 style={{paddingLeft : "45px"}}> Nombre des Cotisations : <strong style={{color : "silver"}}>{NbrCoti}</strong>, Les Retenus <strong style={{color : "silver"}}>{MontantCoti} </strong>MAD.</h5>
-                                            <h6 style={{textAlign : "center", color : "black", fontSize : "20px"}} ><strong>Statiqtique du {mois} / {year}</strong></h6>
-                                            <h5 style={{paddingLeft : "45px"}}> Nombre des Cotisations Courante : <strong style={{color : "silver"}}>{NbrCotiCurrent}</strong>, Les Retenus <strong style={{color : "silver"}}>{mntCotiCurrent} </strong>MAD.</h5>
+                                            <div className="row">
+                                                <div className="col-md-6" style={{textAlign : "right"}}><div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><Tooltip title="Cotisations"><Badge badgeContent={NbrCoti} color="secondary"><AccountBalanceWallet style={{fontSize : "50px"}} /></Badge></Tooltip></h1></div></div>
+                                                <div className="col-md-6" style={{textAlign : "left"}}><div className="mt-5"><h4 style={{fontSize : "20px"}}><strong style={{color : "silver"}}>{MontantCoti} MAD</strong></h4></div></div>
+                                            </div>
+                                            <h6 style={{textAlign : "center", color : "black", fontSize : "20px"}} ><strong>Statistique du {mois} / {year}</strong></h6>
+                                            <div className="row">
+                                                <div className="col-md-6" style={{textAlign : "right"}}><div className="card-img mt-3"><h1 style={{fontSize : "50px"}}><Tooltip title="Cotisations"><Badge badgeContent={NbrCotiCurrent} color="secondary"><AccountBalanceWallet style={{fontSize : "50px"}} /></Badge></Tooltip></h1></div></div>
+                                                <div className="col-md-6" style={{textAlign : "left"}}><div className="mt-5"><h4 style={{fontSize : "20px"}}><strong style={{color : "silver"}}>{mntCotiCurrent} MAD</strong></h4></div></div>
+                                            </div>
                                         </div>    
                                     </div>
                                 </div>

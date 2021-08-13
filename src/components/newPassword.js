@@ -45,7 +45,10 @@ function NewPassword(props) {
     const tele = props.match.params.tele
     const id = props.match.params.id
 
-    console.log(email, " - ", tele, " - ", id)
+    if(pwd && confPwd && email && tele && id){
+
+    }
+    
     const newPassword = () => {
 
     }

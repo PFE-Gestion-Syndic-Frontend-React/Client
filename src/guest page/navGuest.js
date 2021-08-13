@@ -107,7 +107,7 @@ function NavGuest() {
             <Paper square className={classes.root}>
                 <AppBar className="" style={{width : "100%"}} color="default">
                     <Tabs value={value} onChange={handleChange}  indicatorColor="primary" textColor="primary">
-                        <Button style={{width : "250px"}} label="GSC" component={Link} to="/Acceuil" onClick={()=> setLoad("GSC")} ><Avatar src={'G.S.C.png'} alt="" style={{width : "40px", height : "40px"}} /></Button>
+                        <Button style={{width : "250px"}} label="GSC" component={Link} to="/Accueil" onClick={()=> setLoad("GSC")} ><Avatar src={'G.S.C.png'} alt="" style={{width : "40px", height : "40px"}} /></Button>
                         <Tab style={{width : "250px"}} label="Dépense" component={Link} to="/Dépenses" onClick={()=> setLoad("Dépense")} />
                         <Tab style={{width : "250px"}} label="Cotisation" component={Link} to="/Cotisations" onClick={()=> setLoad("Cotisation")} />
                         <Tab style={{width : "250px"}} label="Annonce" component={Link} to="/Annonces" onClick={()=> setLoad("Annonce")} />

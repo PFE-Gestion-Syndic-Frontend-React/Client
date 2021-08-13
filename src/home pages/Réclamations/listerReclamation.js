@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-import { Paper, Grow, TextField, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
+import { Paper, Grow, TextField, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { UpdateOutlined, CloudDownloadOutlined }from '@material-ui/icons';
+import { UpdateOutlined }from '@material-ui/icons';
 import { useHistory } from 'react-router';
 import axios from 'axios';
 import Alert from '@material-ui/lab/Alert'
@@ -45,6 +45,7 @@ function ListerReclamation() {
     const [reclamations, setreclamation] = useState([])
     const [search, setSearch] = useState('')
     const [msg, setMsg] = useState('')
+    const [periode, setPeriode] = useState(0)
 
     useEffect(() => {
         axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
@@ -78,15 +79,51 @@ function ListerReclamation() {
         })
         .catch(() => {})
 
-        if(search !== ""){
-            axios.get("/reclamations/" + search)
+        if(periode === 0){
+            if(search !== ""){
+                axios.get("/reclamations/" + search)
+                .then((response) => {
+                    if(response.data.msggg === "No Réclamation"){
+                        setMsg("No Réclamation")
+                        setreclamation("")
+                    }
+                    else if(response.data === "Failed to load Data"){
+                        setMsg("No Réclamation")
+                    }
+                    else if(response.data.length > 0){
+                        setreclamation(response.data)
+                        setMsg("")
+                    }
+                    else {
+                        setreclamation("")
+                        setMsg("No Réclamation")
+                    }
+                })
+                .catch(() => {})
+            }
+            else{
+                axios.get("/reclamations/all")
+                    .then((response) => {
+                        if(response.data.length > 0){
+                            setreclamation(response.data)
+                        }
+                        else{
+                            setreclamation([])
+                            console.log("No Réclamation")
+                        }
+                    })
+                    .catch(() => {})
+            }
+        }
+        else if(periode === 1 || periode === 3 || periode === 6){
+            const datasend = {perd : periode}
+            const run3 = axios.post("/reclamations/admin/periode", datasend)
             .then((response) => {
-                if(response.data.msggg === "No Réclamation"){
+                if(response.data.msgErr === "No Réclamation"){
                     setMsg("No Réclamation")
                     setreclamation("")
-                    //toast.warn("Aucune Réclamation pour cette Recherche !")
                 }
-                else if(response.data === "Failed to load Data"){
+                else if(response.data === "No Réclamations"){
                     setMsg("No Réclamation")
                 }
                 else if(response.data.length > 0){
@@ -98,24 +135,11 @@ function ListerReclamation() {
                     setMsg("No Réclamation")
                 }
             })
-            .catch(() => {
+            .catch(() => {})
 
-            })
+            return (() => clearInterval(run3))
         }
-        else{
-            axios.get("/reclamations/all")
-                .then((response) => {
-                    if(response.data.length > 0){
-                        setreclamation(response.data)
-                    }
-                    else{
-                        setreclamation([])
-                        console.log("No Réclamation")
-                    }
-                })
-                .catch(() => console.log("No Reclamation"))
-        }
-    }, [search, History])
+    }, [search, History, periode])
 
     
     const handleUpdateRecla = (refReclamation) => {
@@ -136,7 +160,22 @@ function ListerReclamation() {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Réclamations..." required className={classes.textField} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
-                </div><br/>
+                    <div className="row">
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4">
+                            <FormControl className={classes.formControl} style={{width : "100%"}}>
+                                <InputLabel InputLabelProps={{ shrink: true,}} id="demo-simple-select-label">Consulter Par Période</InputLabel>
+                                <Select style={{width : "100%"}} onChange={e => setPeriode(e.target.value)} displayEmpty className={classes.selectEmpty} defaultChecked={"Toutes Les Réclamations"} defaultValue={0}>  
+                                    <MenuItem value={0}>Toutes Les Réclamations</MenuItem>  
+                                    <MenuItem value={1}>Le Mois Courant</MenuItem>    
+                                    <MenuItem value={3}>Les 3 Mois Précidents</MenuItem>
+                                    <MenuItem value={6}>Les 6 Mois Précidents</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </div>
+                </div><br/><br/>
             </div>
             {
                 msg === "" && 

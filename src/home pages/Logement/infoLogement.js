@@ -212,9 +212,15 @@ function InfoLogement(props) {
                                                                             </div>
                                                                         </Typography>
                                                                     </CardContent>
-                                                                    <CardActions>
-                                                                        <Typography variant="body2" color="textSecondary"> Date Paiement : {c.datePaiement && c.datePaiement.replace("T23:00:00.000Z", "")} </Typography>
-                                                                    </CardActions>
+                                                                    <div className="row">
+                                                                        <div className="col-md-6">
+                                                                            <CardActions><Typography variant="body2" color="textSecondary"> Déclaré Par : {c.NomAdmin} {c.PrenomAdmin} </Typography></CardActions>
+                                                                        </div>
+                                                                        <div className="col-md-6">
+                                                                            <CardActions><Typography variant="body2" color="textSecondary"> Date Paiement : {c.datePaiement && c.datePaiement.replace("T23:00:00.000Z", "")} </Typography></CardActions>
+                                                                        </div>
+                                                                    </div>
+                                                                    
                                                                 </Card>
                                                             </div>
                                                         </AccordionDetails>

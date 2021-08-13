@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Grow, Paper, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton} from '@material-ui/core'
+import { Grow, Paper, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton, FormControl, InputLabel, Select, MenuItem} from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from '@material-ui/core/styles';
 import { DeleteOutlined, UpdateOutlined }from '@material-ui/icons';
@@ -47,6 +47,7 @@ function ListerCotisation() {
     const [open, setOpen] = useState(false)
     const [deleted, setDeleted] = useState('')
     const [paied, setPaied] = useState('')
+    const [periode, setPeriode] = useState(0)
 
     const handleOpen = (RefPaye) => {
         setOpen(true)
@@ -88,40 +89,55 @@ function ListerCotisation() {
         })
         .catch(() => {})
 
-        if(search !== ""){
-            const run = axios.get("/cotisations/" + search)
+        if(periode === 0){
+            if(search !== ""){
+                const run = axios.get("/cotisations/" + search)
+                .then((response) => {
+                    if(response.data === "No Paiements"){
+                        setCotisation([])
+                        setMsg("No Cotisation")
+                    }
+                    else if(response.data.length > 0){
+                        setCotisation(response.data)
+                        setMsg("")
+                    }
+                    else{
+                        setCotisation([])
+                        setMsg("No Cotisation")
+                    }
+                })
+                .catch((err) => {})
+    
+                return (() => clearInterval(run))
+            }
+            else{
+                const run1 = axios.get("/cotisations/all")
+                .then((response) => {
+                    if(response.data.length > 0){
+                        setCotisation(response.data[0])
+                        setMsg("")
+                    }
+                    else{
+                        setCotisation([])
+                        setMsg("No Cotisation")
+                    }
+                })
+                .catch(() => {})
+                setDeleted('')
+                return (() => clearInterval(run1))
+            }
+        }
+        else if(periode === 1 || periode === 3 || periode === 6){
+            const datasend = { perd : periode }
+            const run3 = axios.post("/cotisations/periode", datasend)
             .then((response) => {
-                if(response.data.msgErr === "No Token Set"){
-                    localStorage.clear()
-                    History.push('/')
-                }
-                else if(response.data === "No Paiements"){
-                    setCotisation([])
-                    setMsg("No Cotisation")
-                }
-                else if(response.data.length > 0){
+                if(response.data.length > 0){
                     setCotisation(response.data)
                     setMsg("")
                 }
-                else{
+                else if(response.data.msgErr === "No Paiements"){
                     setCotisation([])
                     setMsg("No Cotisation")
-                }
-            })
-            .catch((err) => {})
-
-            return (() => clearInterval(run))
-        }
-        else{
-            const run1 = axios.get("/cotisations/all")
-            .then((response) => {
-                if(response.data.msgErr === "No Token"){
-                    localStorage.clear()
-                    History.push('/')
-                }
-                if(response.data.length > 0){
-                    setCotisation(response.data[0])
-                    setMsg("")
                 }
                 else{
                     setCotisation([])
@@ -129,10 +145,10 @@ function ListerCotisation() {
                 }
             })
             .catch(() => {})
-            setDeleted('')
-            return (() => clearInterval(run1))
+
+            return (() => clearInterval(run3))
         }
-    },[search, deleted, msg, paied, History])
+    },[search, deleted, msg, paied, History, periode])
 
     const updateCotisation = (RefCotisation) => {
         History.push('/cotisation/edit/' + RefCotisation)
@@ -164,7 +180,22 @@ function ListerCotisation() {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Cotisations..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
-                </div><br/>
+                    <div className="row">
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4">
+                            <FormControl className={classes.formControl} style={{width : "100%"}}>
+                                <InputLabel InputLabelProps={{ shrink: true,}} id="demo-simple-select-label">Consulter Par Période</InputLabel>
+                                <Select style={{width : "100%"}} onChange={e => setPeriode(e.target.value)} displayEmpty className={classes.selectEmpty} defaultChecked={"Toutes Les Cotisations"} defaultValue={0}>  
+                                    <MenuItem value={0}>Toutes Les Cotisations</MenuItem>  
+                                    <MenuItem value={1}>Le Mois Courant</MenuItem>    
+                                    <MenuItem value={3}>Les 3 Mois Précidents</MenuItem>
+                                    <MenuItem value={6}>Les 6 Mois Précidents</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </div>
+                </div><br/><br/>
             </div>
             <div className="container col-md-8 col-md-offset-2">
                 {

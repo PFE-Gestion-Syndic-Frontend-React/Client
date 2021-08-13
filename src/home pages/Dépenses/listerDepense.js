@@ -1,6 +1,6 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { Paper, Grow, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardHeader, CardContent, CardActions, IconButton} from '@material-ui/core'
+import { Paper, Grow, TextField, Accordion, AccordionSummary, Typography, AccordionDetails, Button, IconButton, Card, CardContent, CardActions, CardHeader, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core'
 import { UpdateOutlined, DeleteOutlined } from '@material-ui/icons'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { makeStyles } from '@material-ui/styles'
@@ -40,6 +40,7 @@ function ListerDepense(props) {
     const [deleted, setDeleted] = useState('')
     const [open, setOpen] = useState(false)
     const [refDep, setRefDep] = useState('')
+    const [periode, setPeriode] = useState(0)
 
     const handleClose = () => {
         setOpen(false)
@@ -81,35 +82,15 @@ function ListerDepense(props) {
         })
         .catch(() => {})
 
-        if(search !== ""){
-            const run = axios.get("/depenses/" + search)
-            .then((response) => {
-                if(response.data.msgErr === "No Token Set"){
-                    localStorage.clear()
-                    History.push('/')
-                }
-                else if(response.data === "No Dépense"){
-                    setDepense([])
-                    setMsg("No Dépense")
-                }
-                else if(response.data.length > 0){
-                    setDepense(response.data)
-                    setMsg("data")
-                }
-                else{
-                    setDepense([])
-                    setMsg("No Dépense")
-                }
-            })
-            .catch(() => {})
-
-            return(() => clearInterval(run))
-        }
-        else{
-            const run1 = axios.get("/depenses/all")
-            .then((response) => {
-                if(response.data){
-                    if(response.data === "No Dépense"){
+        if(periode === 0){
+            if(search !== ""){
+                const run = axios.get("/depenses/" + search)
+                .then((response) => {
+                    if(response.data.msgErr === "No Token Set"){
+                        localStorage.clear()
+                        History.push('/')
+                    }
+                    else if(response.data === "No Dépense"){
                         setDepense([])
                         setMsg("No Dépense")
                     }
@@ -117,18 +98,65 @@ function ListerDepense(props) {
                         setDepense(response.data)
                         setMsg("data")
                     }
+                    else{
+                        setDepense([])
+                        setMsg("No Dépense")
+                    }
+                })
+                .catch(() => {})
+    
+                return(() => clearInterval(run))
+            }
+            else{
+                const run1 = axios.get("/depenses/all")
+                .then((response) => {
+                    if(response.data){
+                        if(response.data === "No Dépense"){
+                            setDepense([])
+                            setMsg("No Dépense")
+                        }
+                        else if(response.data.length > 0){
+                            setDepense(response.data)
+                            setMsg("data")
+                        }
+                        else {
+                            setDepense([])
+                            setMsg("No Dépense")
+                        }
+                    }
+                })
+                .catch(() => {})
+    
+                return (() => clearInterval(run1))
+            }
+        }
+        else if(periode === 1 || periode === 3 || periode === 6){
+            const datasend = {perd : periode}
+            const run3 = axios.post("depenses/periode", datasend)
+            .then((res)=>{
+                if(res.data){
+                    if(res.data === "No Dépense"){
+                        setDepense([])
+                        setMsg("No Dépense")
+                    }
+                    else if(res.data.length > 0){
+                        setDepense(res.data)
+                        setMsg("data")
+                    }
                     else {
                         setDepense([])
                         setMsg("No Dépense")
                     }
                 }
+                else{
+                    setMsg("No Dépense")
+                }
             })
-            .catch(() => {})
+            .catch((er) => {console.log(er)})
 
-            return (() => clearInterval(run1))
+            return (() => clearInterval(run3))
         }
-        
-    }, [search, msg, deleted, History])
+    }, [search, msg, deleted, History, periode])
 
     const deleteDepense = (RefDepense) => {
         if(RefDepense !== "" && RefDepense !== undefined){
@@ -165,6 +193,21 @@ function ListerDepense(props) {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Dépenses..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
+                    <div className="row">
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4">
+                            <FormControl className={classes.formControl} style={{width : "100%"}}>
+                                <InputLabel InputLabelProps={{ shrink: true,}} id="demo-simple-select-label">Consulter Par Période</InputLabel>
+                                <Select style={{width : "100%"}} onChange={e => setPeriode(e.target.value)} displayEmpty className={classes.selectEmpty} defaultChecked={"Toutes Les Dépenses"} defaultValue={0}>  
+                                    <MenuItem value={0}>Toutes Les Dépenses</MenuItem>  
+                                    <MenuItem value={1}>Le Mois Courant</MenuItem>    
+                                    <MenuItem value={3}>Les 3 Mois Précidents</MenuItem>
+                                    <MenuItem value={6}>Les 6 Mois Précidents</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </div>
                 </div><br/>
             </div>
             {

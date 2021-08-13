@@ -21,7 +21,7 @@ function App() {
             <Route exact path="/" component={Login} />
             <Route exact path="/reset-password" component={Resetpassword} />
             <Route exact path="/home" render={() => <Home />}  />
-            <Route exact path="/acceuil" component={Guest} />
+            <Route exact path="/accueil" component={Guest} />
             <Route exact path="/newPassword/:email/:tele:/:id" component={NewPassword} />
           </Switch>
         </Router>

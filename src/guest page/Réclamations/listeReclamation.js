@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Grow, Paper, Button, Dialog, DialogTitle, DialogContentText, DialogContent, DialogActions, Avatar, TextField, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
+import { Grow, Paper, Button, Dialog, DialogTitle, DialogContentText, DialogContent, DialogActions, TextField, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import Alert from '@material-ui/lab/Alert'
-import { DeleteOutlined, UpdateOutlined, CloudDownloadOutlined } from '@material-ui/icons'
+import { DeleteOutlined, UpdateOutlined } from '@material-ui/icons'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import axios from 'axios'
 import { useHistory } from 'react-router'
@@ -48,7 +48,7 @@ function ListeReclamation(props) {
     const [RefRecl, setRefRecl] = useState('')
     const [deleted, setDeleted] = useState('')
     const id = localStorage.getItem('id')
-
+    const [periode, setPeriode] = useState(0)
 
 
     const handleClickOpen = (RefReclamation) => {
@@ -101,8 +101,51 @@ function ListeReclamation(props) {
         })
         .catch(() => {})
 
-        if(search !== ""){
-            axios.get("/reclamations/cops/all/" + id + "/" + search)
+        if(periode === 0){
+            if(search !== ""){
+                const run1 = axios.get("/reclamations/cops/all/" + id + "/" + search)
+                .then((response) => {
+                    if(response.data === "No Réclamation"){
+                        setMsg("No Réclamation")
+                        setreclamation([])
+                    }
+                    else if(response.data.length > 0){
+                        setreclamation(response.data)
+                        setMsg("")
+                    }
+                    else {
+                        setreclamation([])
+                        setMsg("No Réclamation")
+                    }
+                })
+                .catch(() => {})
+
+                return (() => clearInterval(run1))
+            }
+            else{
+                const run2 = axios.get("/reclamations/cops/all/" + id)
+                .then((response) => {
+                    if(response.data === "No Réclamation"){
+                        setMsg("No Réclamation")
+                        setreclamation([])
+                    }
+                    else if(response.data.length > 0){
+                        setreclamation(response.data[0])
+                        setMsg("")
+                    }
+                    else{
+                        setreclamation([])
+                        setMsg("No Réclamation")
+                    }
+                })
+                .catch(() => {})
+
+                return (() => clearInterval(run2))
+            }
+        }
+        else if(periode === 1 || periode === 3 || periode === 6){
+            const datasend = {perd : periode}
+            const run3 = axios.post(`/reclamations/copro/all/periode/${id}`, datasend)
             .then((response) => {
                 if(response.data === "No Réclamation"){
                     setMsg("No Réclamation")
@@ -112,43 +155,20 @@ function ListeReclamation(props) {
                     setreclamation(response.data)
                     setMsg("")
                 }
-                else {
-                    setreclamation([])
-                    setMsg("No Réclamation")
-                }
-            })
-            .catch(() => {
-
-            })
-        }
-        else{
-            axios.get("/reclamations/cops/all/" + id)
-            .then((response) => {
-                if(response.data === "No Réclamation"){
-                    setMsg("No Réclamation")
-                    setreclamation([])
-                }
-                else if(response.data.length > 0){
-                    setreclamation(response.data[0])
-                    setMsg("")
-                }
                 else{
                     setreclamation([])
                     setMsg("No Réclamation")
                 }
             })
             .catch(() => {})
+            return (() => clearInterval(run3))
         }
         setDeleted('')
-    }, [search, id, deleted, History])
+    }, [search, id, deleted, History, periode])
 
 
     const handleUpdateRecla = (refReclamation) => {
         History.push('/réclamation/edit/' + refReclamation)
-    }
-
-    const handleDownload = (contenu) => {
-
     }
 
     return (
@@ -161,6 +181,21 @@ function ListeReclamation(props) {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Réclamations..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
+                    <div className="row">
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4">
+                            <FormControl className={classes.formControl} style={{width : "100%"}}>
+                                <InputLabel InputLabelProps={{ shrink: true,}} id="demo-simple-select-label">Consulter Par Période</InputLabel>
+                                <Select style={{width : "100%"}} onChange={e => setPeriode(e.target.value)} displayEmpty className={classes.selectEmpty} defaultChecked={"Toutes Les Réclamations"} defaultValue={"0"}>  
+                                    <MenuItem value={0}>Toutes Les Réclamations</MenuItem>  
+                                    <MenuItem value={1}>Le Mois Courant</MenuItem>    
+                                    <MenuItem value={3}>Les 3 Mois Précidents</MenuItem>
+                                    <MenuItem value={6}>Les 6 Mois Précidents</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </div>
                 </div>
             </div><br/><br/>
             {
@@ -193,8 +228,7 @@ function ListeReclamation(props) {
                                                             {
                                                                 r.contenu !== null && 
                                                                 <div className="overflow">
-                                                                    <Avatar className="scaleImg" src={"reclamation support/" + r.contenu} alt={""} style={{width : "200px", height : "200px"}} />
-                                                                    <div style={{marginLeft : "60px"}}><IconButton aria-label="Download" aria-labelledby="Download" onClick={handleDownload.bind(this, r.contenu)} ><CloudDownloadOutlined style={{width : "50px", height : "50px"}}/></IconButton></div>
+                                                                    <img className="scaleImg" src={"reclamation support/" + r.contenu} alt={""} style={{width : "200px", height : "200px"}} />
                                                                 </div>
                                                             }
                                                         </CardContent><br/>

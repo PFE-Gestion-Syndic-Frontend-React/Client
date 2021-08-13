@@ -50,7 +50,7 @@ function Guest(props) {
                 <div style={{paddingTop : "5%"}}>
                     <Switch>
                         <Route exact path="/" component={Login} />
-                        <Route exact path="/Acceuil" component={Statistique} />
+                        <Route exact path="/Accueil" component={Statistique} />
                         <Route exact path="/relevé-financièr" component={ReleveFinancier} />
                         <Route exact path="/Annonces" component={ListerAnnonces} />
                         <Route exact path="/Dépenses" component={ListerDepenses} />

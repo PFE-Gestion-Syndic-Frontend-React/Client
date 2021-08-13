@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles'
-import { Paper, Grow, TextField, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions } from '@material-ui/core'
+import { Paper, Grow, TextField, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import { CloudDownloadOutlined }from '@material-ui/icons'
 import { Alert }from '@material-ui/lab'
 import { useHistory } from 'react-router'
 
@@ -59,6 +58,7 @@ function ListerAnnonces() {
     const [annonces, setAnnonce] = useState([])
     const [search, setSearch] = useState('')
     const [msg, setMsg] = useState('')
+    const [periode, setPeriode] = useState(0)
 
     useEffect(() => {
         axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
@@ -82,62 +82,75 @@ function ListerAnnonces() {
         })
         .catch(() => {})
 
-        if(search !== ""){
-            console.log(search)
-            axios.get("/annonces/all/statut/true/" + search)
-            .then((response) => {
-                if(response.data.msgErr === "No Token Set"){
-                    localStorage.clear()
-                    History.push('/')
-                }
-                else if(response.data === 'No Annonce'){
+        if(periode === 0){
+            if(search !== ""){
+                console.log(search)
+                axios.get("/annonces/all/statut/true/" + search)
+                .then((response) => {
+                    if(response.data.msgErr === "No Token Set"){
+                        localStorage.clear()
+                        History.push('/')
+                    }
+                    else if(response.data === 'No Annonce'){
+                        setAnnonce([])
+                        setMsg('No Annonce')
+                    }
+                    else if(response.data.length > 0){
+                        setAnnonce(response.data)
+                        setMsg("")
+                    }
+                    else {
+                        setMsg("No Annonce")
+                        setAnnonce([])
+                    }
+                })
+                .catch(() => {})
+            }
+            else{
+                axios.get("/annonces/all/statut/true")
+                .then((response) => {
+                    if(response.data.msgErr === "No Token Set"){
+                        localStorage.clear()
+                        History.push('/')
+                    }
+                    else if(response.data === 'No Annonce'){
+                        setAnnonce([])
+                        setMsg('No Annonce')
+                    }
+                    else if(response.data.length > 0){
+                        setAnnonce(response.data)
+                        setMsg("")
+                    }
+                    else {
+                        setAnnonce([])
+                        setMsg('No Annonce')
+                    }
+                })
+                .catch(() => {})
+            }
+        }
+        else if(periode === 1 || periode === 3 || periode === 6){
+            const datasend = {perd : periode}
+            const run3 = axios.post("/annonces/coproprietaire/periode", datasend)
+            .then((res)=>{
+                if(res.data === 'No Annonce'){
                     setAnnonce([])
                     setMsg('No Annonce')
                 }
-                else if(response.data.length > 0){
-                    setAnnonce(response.data)
+                else if(res.data.length > 0){
+                    setAnnonce(res.data)
                     setMsg("")
                 }
                 else {
-                    setMsg("No Annonce")
-                    setAnnonce([])
-                }
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-        }
-        else{
-            axios.get("/annonces/all/statut/true")
-            .then((response) => {
-                if(response.data.msgErr === "No Token Set"){
-                    localStorage.clear()
-                    History.push('/')
-                }
-                else if(response.data === 'No Annonce'){
-                    setAnnonce([])
-                    setMsg('No Annonce')
-                }
-                else if(response.data.length > 0){
-                    setAnnonce(response.data)
-                    setMsg("")
-                }
-                else {
                     setAnnonce([])
                     setMsg('No Annonce')
                 }
             })
-            .catch(() => 
-            {
-                
-            })
+            .catch(() => {})
+
+            return (() => clearInterval(run3))
         }
-    }, [search, History])
-
-
-    const handleDownload = (fileName) => {
-        console.log(fileName)
-    }
+    }, [search, History, periode])
 
     return (
         <div style={{top : "120px"}}>
@@ -149,7 +162,22 @@ function ListerAnnonces() {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Annonces..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
-                </div>
+                    <div className="row">
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4">
+                            <FormControl className={classes.formControl} style={{width : "100%"}}>
+                                <InputLabel InputLabelProps={{ shrink: true,}} id="demo-simple-select-label">Consulter Par Période</InputLabel>
+                                <Select style={{width : "100%"}} onChange={e => setPeriode(e.target.value)} displayEmpty className={classes.selectEmpty} defaultChecked={"Toutes Les Annonces"} defaultValue={0}>  
+                                    <MenuItem value={0}>Toutes Les Annonces</MenuItem>  
+                                    <MenuItem value={1}>Le Mois Courant</MenuItem>    
+                                    <MenuItem value={3}>Les 3 Mois Précidents</MenuItem>
+                                    <MenuItem value={6}>Les 6 Mois Précidents</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </div>
+                </div><br/><br/>
             </div>
             <div>
                 {
@@ -176,7 +204,6 @@ function ListerAnnonces() {
                                                                     a.contenuDocument !== null &&
                                                                     <div className="overflow">
                                                                         <img className="scaleImg" src={`annonce doc/${a.contenuDocument}`} alt="" style={{width : "200px", height : "200px"}} />
-                                                                        <div style={{marginLeft : "60px"}} onClick={handleDownload.bind(this, a.contenuDocument)} ><IconButton aria-label="Download" aria-labelledby="Download" ><CloudDownloadOutlined style={{width : "50px", height : "50px"}} /> </IconButton></div>
                                                                     </div>
                                                                 }
                                                             </CardContent>
@@ -195,6 +222,7 @@ function ListerAnnonces() {
                                 )
                             })
                         }
+                        <br/><br/><br/>
                     </div>
                 }
                 {

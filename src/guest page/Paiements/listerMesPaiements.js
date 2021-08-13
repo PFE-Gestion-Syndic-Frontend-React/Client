@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Paper, Grow, TextField, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardContent, CardActions} from '@material-ui/core'
+import { Paper, Grow, TextField, Accordion, AccordionSummary, AccordionDetails, Button, IconButton, Typography, Card, CardContent, CardActions, DialogActions, Dialog, DialogContentText, DialogContent, DialogTitle, FormControl, InputLabel, Select, MenuItem} from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { makeStyles } from '@material-ui/core/styles'
 import axios from 'axios'
 import Alert from '@material-ui/lab/Alert'
 import { useHistory } from 'react-router'
+import { PrintOutlined }from '@material-ui/icons';
+import { saveAs} from 'file-saver'
 
 axios.interceptors.request.use(
     config => {
@@ -44,6 +46,13 @@ const useStyles = makeStyles((theme) => ({
     textfield : {
         width : "750px",
     },
+    formControl: {
+        margin: theme.spacing(1),
+        width: 400,
+    },
+    selectEmpty: {
+        marginTop: theme.spacing(2),
+    },
 }))
 
 
@@ -54,7 +63,34 @@ function ListerMesPaiements() {
     const [cotisations, setCotisation] = useState([])
     const [search, setSearch] = useState('')
     const id = localStorage.getItem('id')
+    const [logs, setLogs] = useState('')
+    const [open, setOpen] = useState(false)
+    const [selectedLog, setSelectedLog] = useState('')
+    const [cots, setCots] = useState('')
+    const [oneLog, setOneLog] = useState('')
+    const [cot, setCot] = useState('')
 
+    const handleOpen = () => {
+        setOpen(true)
+        axios.get(`/users/coproprietaire/logs/${id}`)
+        .then((res) => {
+            if(res.data === "No Log"){
+                setLogs("No Log")
+            }
+            else if(res.data.length === 1){
+                setLogs(res.data)
+                setOneLog(res.data[0].RefLogement)
+            }
+            else if(res.data.length > 1){
+                setLogs(res.data)
+            }
+        })
+        .catch(() => {})
+    }
+    const handleClose = () => {
+        setSelectedLog('')
+        setOpen(false)
+    }
 
     useEffect(() => {
         axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
@@ -104,7 +140,6 @@ function ListerMesPaiements() {
             else{
                 axios.get(`/cotisations/mesCotisations/${id}`)
                 .then((response) => {
-                    console.log(response.data)
                     if(response.data === "No Token at all" || response.data === "Invalid Token"){
                         localStorage.clear()
                         History.push('/')
@@ -128,12 +163,55 @@ function ListerMesPaiements() {
         else{
             console.log("HEHO ANY ID !")
         }
-    },[search, id, History])
 
 
+        if(selectedLog !== ""){
+            const runIt = axios.get(`/cotisations/mesCotisations/${selectedLog}/${id}`)
+            .then((res) => {
+                if(res.data === "No Cotisation"){
+                    setCots('No Cotisation')
+                }
+                else {
+                    setCots(res.data)
+                }
+            })
+            .catch(() => {})
+
+            return (() => clearInterval(runIt))
+        }
+        else if(oneLog !== ""){
+            const runItOne = axios.get(`/cotisations/mesCotisations/${oneLog}/${id}`)
+            .then((res) => {
+                if(res.data === "No Cotisation"){
+                    setCot('No Cotisation')
+                }
+                else {
+                    setCot(res.data)
+                }
+            })
+            .catch(() => {})
+
+            return (() => clearInterval(runItOne))
+        }
+    },[search, id, History, selectedLog, oneLog])
+
+    const handlePrint = (data) => {
+        const datasend = {data : data}
+        axios.post("/cotisations/maSituation/create-pdf", datasend)
+        .then(() => axios.get("/cotisations/maSituation/fetch-pdf", { responseType : "blob"}))
+        .then((resolve) => {
+            const blob  = new Blob([resolve.data], {type : 'application/pdf'})
+            saveAs(blob, `Ma Situation Financière.pdf`)
+        })
+        .catch(() => {})
+    }
 
     return (
         <div style={{top : "120px"}}>
+            {
+                logs !== "No Log" &&
+                <Button variant="text"  color="primary" style={{marginLeft : "1100px", width : "300px", textTransform : "capitalize", fontSize : "16px"}} onClick={handleOpen}><span><i className="bi bi-wallet" style={{paddingRight : "15px"}}></i></span>Ma situation Financière</Button>
+            }
             <h1 style={{marginLeft : "200px"}}>Lister Les Cotisations</h1>
             <div className="container col-md-8 col-md-offset-2"><br/>
                 <div className="container col-md-10 col-md-offset-1">
@@ -197,6 +275,7 @@ function ListerMesPaiements() {
                                 )
                             })
                         }
+                        <br/><br/><br/>
                     </div>
                 }
                 {
@@ -206,6 +285,131 @@ function ListerMesPaiements() {
                     <div>{msg === "No Cotisation" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Cotisation Pour Cette Recherche "{search}" </strong></Alert></div> }</div>
                 }
             </div>
+
+            <Dialog open={open} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" maxWidth="lg" fullWidth={true}>
+                <DialogTitle id="alert-dialog-title" style={{textAlign : "center", color : "blue", fontSize : "34px"}}>{"Situation Financière"}</DialogTitle>
+                <DialogContent><br/>
+                    {
+                        logs.length > 1 && 
+                        <div className="row">
+                            <div className="col-md-4"></div>
+                            <div className="col-md-4">
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel shrink id="demo-simple-select-placeholder-label-label">Libellé Logement</InputLabel>
+                                    <Select style={{width : "100%"}} className={classes.selectEmpty} id="Libellé Logement" label="Libellé Logement" onChange={e => setSelectedLog(e.target.value)}>
+                                        {
+                                            logs.map((l, i) => {
+                                                return(
+                                                    <MenuItem key={i}  value={`${l.RefLogement}`}> {l.RefLogement} </MenuItem>
+                                                )
+                                            })
+                                        }
+                                    </Select>
+                                </FormControl>
+                            </div>
+                            <div className="col-md-4"></div>
+                            <br/><br/><br/>
+                        </div>
+                    }
+                    <DialogContentText id="alert-dialog-description">
+                        {
+                            logs.length > 1 &&
+                            <div>
+                                {
+                                    selectedLog !== "" &&
+                                    <table className="table table-hover">
+                                        <thead className="thead-light">
+                                            <tr>
+                                                <th>Réf Cotisation</th>
+                                                <th>Nombre Mois</th>
+                                                <th>Montant Payer</th>
+                                                <th>Méthode Paiement</th>
+                                                <th>Du</th>
+                                                <th>Au</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                cots.length > 0 &&
+                                                cots.map((c, i) => {
+                                                    return(
+                                                        <tr key={i}>
+                                                            <td> {c.RefPaiement} </td>
+                                                            <td style={{textAlign : "center"}}> {c.NbrMois} </td>
+                                                            <td style={{textAlign : "center"}}> {c.Montant} </td>
+                                                            <td style={{textAlign : "center"}}> {c.MethodePaiement} </td>
+                                                            <td style={{textAlign : "left"}}> {c.Du && c.Du.replace("T23:00:00.000Z", "")} </td>
+                                                            <td style={{textAlign : "left"}}> {c.Au && c.Au.replace("T23:00:00.000Z", "")} </td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            } 
+                                        </tbody>
+                                    </table>
+                                }
+                            </div>
+                        }
+                        {
+                            logs.length === 1 && 
+                            <div>
+                                {
+                                    oneLog !== "" &&
+                                    <table className="table table-hover">
+                                        <thead className="thead-light">
+                                            <tr>
+                                                <th>Réf Cotisation</th>
+                                                <th>Nombre Mois</th>
+                                                <th>Montant Payer</th>
+                                                <th>Méthode Paiement</th>
+                                                <th>Du</th>
+                                                <th>Au</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                cot.length !== 0 &&
+                                                cot.map((c, i) => {
+                                                    return(
+                                                        <tr key={i}>
+                                                            <td> {c.RefPaiement} </td>
+                                                            <td style={{textAlign : "center"}}> {c.NbrMois} </td>
+                                                            <td style={{textAlign : "center"}}> {c.Montant} </td>
+                                                            <td style={{textAlign : "center"}}> {c.MethodePaiement} </td>
+                                                            <td style={{textAlign : "left"}}> {c.Du && c.Du.replace("T23:00:00.000Z", "")} </td>
+                                                            <td style={{textAlign : "left"}}> {c.Au && c.Au.replace("T23:00:00.000Z", "")} </td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            } 
+                                        </tbody>
+                                    </table>
+                                }
+                            </div>
+                        }
+                        {
+                            logs.length === 0 &&
+                            <div>
+                                <Alert severity="error">Vous n'avez aucun Logement ! Consulter l'Administration du Syndic</Alert>
+                            </div>
+                        }
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="secondary" style={{fontSize : "20px"}}>Cancel</Button>
+                    {
+                        logs.length === 1 &&
+                        <IconButton id="contenu" onClick={handlePrint.bind(this, cot)}><PrintOutlined style={{color : "blue", fontSize : "50px"}} /></IconButton>
+                    }
+                    {
+                        logs.length > 1 &&
+                        <IconButton id="contenu" onClick={handlePrint.bind(this, cots)}><PrintOutlined style={{color : "blue", fontSize : "50px"}} /></IconButton>
+                    }
+                    {
+                        logs.length === 0 &&
+                        <IconButton id="contenu"><PrintOutlined style={{color : "blue", fontSize : "50px"}} /></IconButton>
+                    }
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }

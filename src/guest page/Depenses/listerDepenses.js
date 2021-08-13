@@ -1,6 +1,6 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { Paper, Grow, TextField, Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardContent, CardActions } from '@material-ui/core'
+import { Paper, Grow, TextField, Accordion, AccordionSummary, Typography, AccordionDetails, Card, CardContent, CardActions, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { makeStyles } from '@material-ui/styles'
 import Alert from '@material-ui/lab/Alert'
@@ -32,6 +32,9 @@ const useStyles = makeStyles((theme) => ({
     textfield : {
         width : "750px",
     },
+    formControl : {
+        width : "100%",
+    },
 }))
 
 
@@ -41,78 +44,106 @@ function ListerDepenses() {
     const [depense, setDepense] = useState([]) 
     const [msg, setMsg] = useState('')
     const [search, setSearch] = useState('')
+    const [periode, setPeriode] = useState(0)
 
     useEffect(() => {
-        axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
-        .then((resolve) => {
-            if(resolve.data.role === "Copropriétaire"){
-
-            }
-            else if(resolve.data.role !== "Copropriétaire"){
-                localStorage.clear()
-                History.push('/')
-            }
-            else if(resolve.data.msg === "Incorrect token !"){
-                console.log("Incorrect Token")
-                localStorage.clear()
-                History.push('/')
-            }
-            else{ //added
-                localStorage.clear()
-                History.push('/')
-            }
-        })
-        .catch(() => {})
-
-        if(search !== ""){
-            axios.get("/depenses/" + search)
-            .then((response) => {
-                if(response.data.msgErr === "No Token Set"){
+            axios.get("/isAuth", {headers : {"authorization" : localStorage.getItem('token')}})
+            .then((resolve) => {
+                if(resolve.data.role === "Copropriétaire"){
+    
+                }
+                else if(resolve.data.role !== "Copropriétaire"){
                     localStorage.clear()
                     History.push('/')
                 }
-                else if(response.data === "No Dépense"){
-                    setDepense([])
-                    setMsg("No Dépense")
+                else if(resolve.data.msg === "Incorrect token !"){
+                    console.log("Incorrect Token")
+                    localStorage.clear()
+                    History.push('/')
                 }
-                else if(response.data.length > 0){
-                    setDepense(response.data)
-                    setMsg("data")
+                else{ //added
+                    localStorage.clear()
+                    History.push('/')
+                }
+            })
+            .catch(() => {})
+
+            if(periode === 0){
+                if(search !== ""){
+                    const run1 = axios.get("/depenses/" + search)
+                    .then((response) => {
+                        if(response.data.msgErr === "No Token Set"){
+                            localStorage.clear()
+                            History.push('/')
+                        }
+                        else if(response.data === "No Dépense"){
+                            setDepense([])
+                            setMsg("No Dépense")
+                        }
+                        else if(response.data.length > 0){
+                            setDepense(response.data)
+                            setMsg("data")
+                        }
+                        else{
+                            setDepense([])
+                            setMsg("No Dépense")
+                        }
+                    })
+                    .catch(() => {})
+                    return (()=> clearInterval(run1))
                 }
                 else{
-                    setDepense([])
-                    setMsg("No Dépense")
+                    const run2 = axios.get("/depenses/all")
+                    .then((response) => {
+                        if(response.data){
+                            if(response.data === "No Dépense"){
+                                setDepense([])
+                                setMsg("No Dépense")
+                            }
+                            else if(response.data.length > 0){
+                                setDepense(response.data)
+                                setMsg("data")
+                            }
+                            else {
+                                setDepense([])
+                                setMsg("No Dépense")
+                            }
+                        }
+                        else{
+                            setMsg("No Dépense")
+                        }
+                    })
+                    .catch((err) => {})
+                    return (() => clearInterval(run2))
                 }
-            })
-            .catch(() => {
-            })
-        }
-        else{
-            axios.get("/depenses/all")
-            .then((response) => {
-                if(response.data){
-                    if(response.data === "No Dépense"){
-                        setDepense([])
+            }
+            else if(periode === 1 || periode === 3 || periode === 6){
+                const datasend = {perd : periode}
+                const run3 = axios.post("depenses/periode", datasend)
+                .then((res)=>{
+                    if(res.data){
+                        if(res.data === "No Dépense"){
+                            setDepense([])
+                            setMsg("No Dépense")
+                        }
+                        else if(res.data.length > 0){
+                            setDepense(res.data)
+                            setMsg("data")
+                        }
+                        else {
+                            setDepense([])
+                            setMsg("No Dépense")
+                        }
+                    }
+                    else{
                         setMsg("No Dépense")
                     }
-                    else if(response.data.length > 0){
-                        setDepense(response.data)
-                        setMsg("data")
-                    }
-                    else {
-                        setDepense([])
-                        setMsg("No Dépense")
-                    }
-                }
-                else{
-                    setMsg("No Dépense")
-                }
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-        }
-    }, [search, History])
+                })
+                .catch(() => {})
+
+                return (() => clearInterval(run3))
+            }
+    }, [search, History, periode])
 
 
     return (
@@ -125,6 +156,21 @@ function ListerDepenses() {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Dépenses..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
+                    <div className="row">
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4">
+                            <FormControl className={classes.formControl} style={{width : "100%"}}>
+                                <InputLabel InputLabelProps={{ shrink: true,}} id="demo-simple-select-label">Consulter Par Période</InputLabel>
+                                <Select style={{width : "100%"}} onChange={e => setPeriode(e.target.value)} displayEmpty className={classes.selectEmpty} defaultChecked={"Toutes Les Dépenses"} defaultValue={0}>  
+                                    <MenuItem value={0}>Toutes Les Dépenses</MenuItem>  
+                                    <MenuItem value={1}>Le Mois Courant</MenuItem>    
+                                    <MenuItem value={3}>Les 3 Mois Précidents</MenuItem>
+                                    <MenuItem value={6}>Les 6 Mois Précidents</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </div>
                 </div><br/>
             </div><br/>
             {
@@ -178,6 +224,7 @@ function ListerDepenses() {
                 : 
                 <div>{ msg === "No Dépense" && <div className="col-md-6" style={{marginLeft : "25%"}}><Alert severity="error"><strong style={{fontSize : "18px"}}>Aucune Dépense Pour l'Instant </strong></Alert></div> }</div>
             }
+        <br/><br/><br/>
         </div>
     )
 }

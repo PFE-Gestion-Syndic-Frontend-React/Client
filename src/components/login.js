@@ -4,6 +4,7 @@ import axios from 'axios'
 import {TextField, Avatar, CssBaseline, Button, Container, Grid} from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { toast } from 'react-toastify'
+import Footer from './footer'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -64,7 +65,7 @@ function Login(props) {
                             toast.success('Logged in Successfully', {position : toast.POSITION.TOP_CENTER})
                         }
                         else if(resolve.data.data[0].Role === "Copropriétaire" && localStorage.getItem("token")){
-                            props.history.push('/Acceuil', {data : resolve.data.data[0]})
+                            props.history.push('/Accueil', {data : resolve.data.data[0]})
                             toast.success('Logged in Successfully', {position : toast.POSITION.TOP_CENTER})
                         }
                         else{
@@ -101,7 +102,10 @@ function Login(props) {
                         </Grid>
                     </div>
                 </div>
-            </Container>                    
+            </Container>  
+            <div>
+                <Footer />    
+            </div>                  
         </div>
     )
 }

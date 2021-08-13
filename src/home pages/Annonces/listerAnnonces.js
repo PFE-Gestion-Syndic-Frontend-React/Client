@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles'
-import { Paper, Grow, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton } from '@material-ui/core'
+import { Paper, Grow, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Accordion, AccordionSummary, AccordionDetails, Typography, Card, CardHeader, CardContent, CardActions, IconButton, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import { DeleteOutlined, UpdateOutlined }from '@material-ui/icons'
 import { useHistory } from 'react-router'
@@ -72,6 +72,7 @@ function ListerAnnonces(props) {
     const [open, setOpen] = useState(false)
     const [ref, setRef] = useState('')
     const [deleted, setDeleted] = useState('')
+    const [periode, setPeriode] = useState(0)
 
     const handleClose = () => {
         setOpen(false);
@@ -120,39 +121,54 @@ function ListerAnnonces(props) {
         })
         .catch(() => {})
 
-        if(search !== ""){
-            const run = axios.get("/annonces/" + search)
-            .then((response) => {
-                if(response.data.msgErr === "No Token Set"){
-                    localStorage.clear()
-                    History.push('/')
-                }
-                else if(response.data.msggg === "No Annonce"){
-                    setMsg("No Annonce")
-                    setAnnonce([])
-                }
-                else if(response.data.length > 0){
-                    setAnnonce(response.data)
-                    setMsg("")
-                }
-                else{
-                    setAnnonce([])
-                    setMsg("No Annonce")
-                }
-            })
-            .catch(() => {
-
-            })
-            return(() => { clearInterval(run)})
+        if(periode === 0){
+            if(search !== ""){
+                const run = axios.get("/annonces/" + search)
+                .then((response) => {
+                    if(response.data.msggg === "No Annonce"){
+                        setMsg("No Annonce")
+                        setAnnonce([])
+                    }
+                    else if(response.data.length > 0){
+                        setAnnonce(response.data)
+                        setMsg("")
+                    }
+                    else{
+                        setAnnonce([])
+                        setMsg("No Annonce")
+                    }
+                })
+                .catch(() => {
+    
+                })
+                return(() => { clearInterval(run)})
+            }
+            else{
+                const run1 = axios.get("/annonces/all")
+                .then((response) => {
+                    if(response.data === "Failed to load Data"){
+                        setAnnonce([])
+                        setMsg("No Annonce")
+                    }
+                    else if(response.data.length > 0){
+                        setAnnonce(response.data)
+                        setMsg('')
+                    }
+                    else{
+                        setAnnonce([])
+                        setMsg("No Annonce")
+                    }
+                })
+                .catch(() => {})
+    
+                return(() => { clearInterval(run1)})
+            }
         }
-        else{
-            const run1 = axios.get("/annonces/all")
+        else if(periode === 1 || periode === 3 || periode === 6){
+            const datasend = { perd : periode}
+            const run3 = axios.post("/annonces/admin/periode", datasend)
             .then((response) => {
-                if(response.data.msgErr === "No Token Set"){
-                    localStorage.clear()
-                    History.push('/')
-                }
-                else if(response.data === "Failed to load Data"){
+                if(response.data === "Failed to load Data"){
                     setAnnonce([])
                     setMsg("No Annonce")
                 }
@@ -167,9 +183,9 @@ function ListerAnnonces(props) {
             })
             .catch(() => {})
 
-            return(() => { clearInterval(run1)})
+            return (() => clearInterval(run3))
         }
-    }, [search, deleted, msg, History])
+    }, [search, deleted, msg, History, periode])
 
     const deleteAnnonce = () => {
         axios.delete(`/annonces/delete/${ref}`)
@@ -210,6 +226,21 @@ function ListerAnnonces(props) {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Chercher Les Annonces..." required className={classes.textfield} onChange={e => setSearch(e.target.value)} />
                         </div>
                     </div><br/><br/>
+                    <div className="row">
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4"></div>
+                        <div className="col-md-4">
+                            <FormControl className={classes.formControl} style={{width : "100%"}}>
+                                <InputLabel InputLabelProps={{ shrink: true,}} id="demo-simple-select-label">Consulter Par Période</InputLabel>
+                                <Select style={{width : "100%"}} onChange={e => setPeriode(e.target.value)} displayEmpty className={classes.selectEmpty} defaultChecked={"Toutes Les Annonces"} defaultValue={0}>  
+                                    <MenuItem value={0}>Toutes Les Annonces</MenuItem>  
+                                    <MenuItem value={1}>Le Mois Courant</MenuItem>    
+                                    <MenuItem value={3}>Les 3 Mois Précidents</MenuItem>
+                                    <MenuItem value={6}>Les 6 Mois Précidents</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </div>
                 </div><br/><br/>
             </div>
             <div>
@@ -224,7 +255,7 @@ function ListerAnnonces(props) {
                                         <Paper elevation={4} className={classes.paper}>
                                             <Accordion className="mb-5 card">
                                                 <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-                                                    <Typography className={classes.heading}> <h5 style={{color : "blue"}}><strong>{a.Sujet}</strong></h5>  </Typography>
+                                                    <h5 style={{color : "blue"}}><Typography className={classes.heading}> <strong>{a.Sujet}</strong></Typography></h5>
                                                 </AccordionSummary>
                                                 <AccordionDetails>
                                                     <Typography spacing={3}>
