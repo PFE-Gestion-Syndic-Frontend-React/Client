@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import {Link, useHistory} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Tab, Tabs, Paper, MenuItem, Menu, Button, Avatar } from '@material-ui/core';
+import { AppBar, Paper, MenuItem, Menu, Button, Avatar, IconButton, BottomNavigation, BottomNavigationAction } from '@material-ui/core';
 import axios from 'axios';
+import { Settings, ExitToAppOutlined, AccountCircle, NotificationsActiveOutlined, Assignment, AccountBalanceWallet, CreditCardOutlined, HomeOutlined } from '@material-ui/icons'
+// import MapsHomeWorkIcon from '@material-ui/icons/MapsHomeWork';
 
 axios.interceptors.request.use(
     config => {
@@ -113,20 +115,20 @@ function Nav(props) {
                 OK === true &&
                 <Paper square className={classes.root}>
                     <AppBar color="default">
-                        <Tabs value={value} onChange={handleChange} variant="scrollable" indicatorColor="primary" textColor="primary">
-                            <Button component={Link} to="/home" onClick={()=> setLoad("GSC")} style={{width : "220px"}}><Avatar src={'G.S.C.png'} alt="" style={{width : "40px", height : "40px"}} /></Button>
-                            <Tab label="Dépense" component={Link} to="/dépenses" onClick={()=> setLoad("Dépense")} style={{width : "175px"}} />
-                            <Tab label="Cotisation" component={Link} to="/cotisations" onClick={()=> setLoad("Cotisation")} style={{width : "180px"}} />
-                            <Tab label="Annonce" component={Link} to="/annonces" onClick={()=> setLoad("annonce")} style={{width : "180px"}} />
-                            <Tab label="Réclamation" component={Link} to="/réclamations" onClick={()=> setLoad("réclamation")} style={{width : "180px"}} />
-                            <Tab label="Comptes" component={Link} to="/comptes" onClick={()=> setLoad("compte")} style={{width : "170px"}} />
-                            <Tab label="Logement" component={Link} to="/logement" onClick={()=> setLoad("logement")} style={{width : "170px"}} />
-                            <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} style={{width : "200px"}} >{photo && <Avatar alt="" src={`profile img/${photo}`} style={{width : "30px", height : "30px"}} />} &nbsp;&nbsp;&nbsp; <strong> { Name && Name } { Prenom && Prenom} </strong></Button>
-                            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose} style={{paddingTop : "0", paddingRight : "0"}} >
-                                <MenuItem onClick={handleClose} component={Link} to="/settings"> Mon Compte</MenuItem>
-                                <MenuItem onClick={logout}>Logout</MenuItem>
+                        <BottomNavigation value={value} onChange={handleChange} showLabels>
+                            <Button label="G.S.C." component={Link} to="/home" onClick={()=> setLoad("GSC")} style={{width : "220px"}} icon={"G.S.C.png"}><Avatar src="G.S.C.png" style={{width : "35px", height : "35px"}} /></Button>
+                            <BottomNavigationAction label="Dépense" component={Link} to="/dépenses" onClick={()=> setLoad("Dépense")} style={{width : "175px"}} icon={<CreditCardOutlined />} />
+                            <BottomNavigationAction label="Cotisation" component={Link} to="/cotisations" onClick={()=> setLoad("Cotisation")} style={{width : "180px"}} icon={<AccountBalanceWallet/>} />
+                            <BottomNavigationAction label="Annonce" component={Link} to="/annonces" onClick={()=> setLoad("annonce")} style={{width : "180px"}} icon={<NotificationsActiveOutlined />} />
+                            <BottomNavigationAction label="Réclamation" component={Link} to="/réclamations" onClick={()=> setLoad("réclamation")} style={{width : "180px"}} icon={<Assignment/>} />
+                            <BottomNavigationAction label="Comptes" component={Link} to="/comptes" onClick={()=> setLoad("compte")} style={{width : "170px"}} icon={<AccountCircle/>} />
+                            <BottomNavigationAction label="Logement" component={Link} to="/logement" onClick={()=> setLoad("logement")} style={{width : "170px"}} icon={<HomeOutlined />} />
+                            <Button aria-controls="simple-menu" aria-haspopup="tree" onClick={handleClick} style={{width : "200px"}} >{photo && <Avatar alt="" src={`profile img/${photo}`} style={{width : "30px", height : "30px"}} />} &nbsp;&nbsp;&nbsp; <strong> { Name && Name } { Prenom && Prenom} </strong></Button>
+                            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose} >
+                                <MenuItem onClick={handleClose} component={Link} to="/settings"><IconButton><Settings style={{color : "blue", width : "25px", height : "25px"}} /></IconButton>  Mon Compte</MenuItem>
+                                <MenuItem onClick={logout}><IconButton><ExitToAppOutlined style={{color : "red", width : "25px", height : "25px"}} /></IconButton> Logout</MenuItem>
                             </Menu>
-                        </Tabs>
+                        </BottomNavigation>
                     </AppBar>
                 </Paper>  
             }
