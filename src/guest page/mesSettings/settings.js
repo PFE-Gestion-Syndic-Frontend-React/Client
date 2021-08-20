@@ -1,10 +1,11 @@
 import React, {useState} from 'react'
-import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText,} from '@material-ui/core'
+import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Input, IconButton} from '@material-ui/core'
 import {makeStyles} from '@material-ui/core/styles'
 import { useEffect } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useHistory } from 'react-router'
+import PhotoCamera from '@material-ui/icons/PhotoCamera'
 
 axios.interceptors.request.use(
     config => {
@@ -32,6 +33,9 @@ const useStyles = makeStyles((theme) => ({
             width: 320,
         },
     },
+    input : {
+        display : 'none'
+    }
   }));
 
 
@@ -182,7 +186,26 @@ function Settings(props) {
                             <label style={{fontSize : "15px"}}>Sélectionner Votre Avatare : </label>
                         </div>
                         <div className="col-md-6">
-                            <input type="file" className="form-control" onChange={e => setFile(e.target.files[0])} />
+                            <div className="row container" style={{alignItems : "center"}}>
+                                <div className="col-md-6" style={{textAlign : "right"}}>
+                                    <label htmlFor="contained-button-file">
+                                        <Input accept="image/*" id="contained-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                        <Button variant="contained" component="span">Upload</Button>
+                                    </label>
+                                </div>
+                                <div className="col-md-6" style={{textAlign : "left"}}>
+                                    <label htmlFor="icon-button-file">
+                                        <Input accept="image/*" id="icon-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                        <IconButton color="primary" aria-label="upload picture" component="span"><PhotoCamera /></IconButton>
+                                    </label>
+                                </div>
+                            </div>
+                            {
+                                file !== '' &&
+                                <div className="row container" style={{textAlign : "center"}}>
+                                    <label>{file.name} </label>
+                                </div>
+                            }<br/>
                         </div>
                     </div><br /><br/>
                     <div className="row">

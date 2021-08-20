@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles'
-import { TextField} from '@material-ui/core'
+import { TextField, Input, Button, IconButton} from '@material-ui/core'
+import PhotoCamera from '@material-ui/icons/PhotoCamera'
 import { toast } from 'react-toastify'
 
 
@@ -150,12 +151,26 @@ function AddAnnonce(props) {
                             <TextField InputLabelProps={{ shrink: true,}} id="standard-basic" label="Description de l'Annonce." className={classes.root} multiline={true} required onChange={e => setDescrip(e.target.value)} />
                         </div>
                     </div><br />
-                    <div className="row container">
-                        <div>
-                            <input type="file" onChange={e => setFile(e.target.files[0])} className="custom-file-input" id="customFile" />
-                            <label htmlFor="cutomFile" className="custom-file-label"></label>
+                    <div className="row container" style={{alignItems : "center"}}>
+                        <div className="col-md-6" style={{textAlign : "right"}}>
+                            <label htmlFor="contained-button-file">
+                                <Input accept="image/*" id="contained-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                <Button variant="contained" component="span">Upload</Button>
+                            </label>
                         </div>
-                    </div><br />
+                        <div className="col-md-6" style={{textAlign : "left"}}>
+                            <label htmlFor="icon-button-file">
+                                <Input accept="image/*" id="icon-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                <IconButton color="primary" aria-label="upload picture" component="span"><PhotoCamera /></IconButton>
+                            </label>
+                        </div>
+                    </div>
+                    {
+                        file !== '' &&
+                        <div className="row container" style={{textAlign : "center"}}>
+                            <label>{file.name} </label>
+                        </div>
+                    }<br/>
                 </div>
                 <div className="card-footer">
                     <div className="row">

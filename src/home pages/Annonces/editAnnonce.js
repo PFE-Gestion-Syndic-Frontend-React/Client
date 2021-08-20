@@ -2,7 +2,8 @@ import React, {useState, useEffect} from 'react'
 import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, TextField } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, TextField, Input, IconButton } from '@material-ui/core';
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import { toast } from 'react-toastify';
 
 
@@ -32,6 +33,9 @@ const useStyles = makeStyles((theme) => ({
             width: 320,
         },
     },
+    input : {
+        display : "none",
+    }
   }));
 
 
@@ -44,6 +48,7 @@ function EditAnnonce(props) {
     const [descrip, setDesc] = useState('')
     const [statut, setStatut] = useState('1')
     const [open, setOpen] = useState(false)
+    const [file, setFile] = useState('')
     const refAnnonce = props.match.params.refAnnonce
 
     if(msg){}
@@ -161,9 +166,26 @@ function EditAnnonce(props) {
                         statut === 0 &&
                         <div className="text-muted"><small>Invisible : Signifie que cette annonnce ne sera pas Visible par le Copropriétaire.</small><br/><br/></div>
                     }
-                    <div className="row container">
-                        <input type="file" className="form-control" />
-                    </div><br />
+                    <div className="row container" style={{alignItems : "center"}}>
+                        <div className="col-md-6" style={{textAlign : "right"}}>
+                            <label htmlFor="contained-button-file">
+                                <Input accept="image/*" id="contained-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                <Button variant="contained" component="span">Upload</Button>
+                            </label>
+                        </div>
+                        <div className="col-md-6" style={{textAlign : "left"}}>
+                            <label htmlFor="icon-button-file">
+                                <Input accept="image/*" id="icon-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                <IconButton color="primary" aria-label="upload picture" component="span"><PhotoCamera /></IconButton>
+                            </label>
+                        </div>
+                    </div>
+                    {
+                        file !== '' &&
+                        <div className="row container" style={{textAlign : "center"}}>
+                            <label>{file.name} </label>
+                        </div>
+                    }<br/>
                 </div>
                 <div className="card-footer">
                     <div className="row">

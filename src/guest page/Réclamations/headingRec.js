@@ -25,7 +25,6 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
-
 function HeadingRec() {
     const History = useHistory()
     const classes = useStyles()

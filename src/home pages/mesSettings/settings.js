@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText } from '@material-ui/core'
+import {TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Input, IconButton } from '@material-ui/core'
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useHistory } from 'react-router';
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -21,6 +22,9 @@ const useStyles = makeStyles((theme) => ({
             width: 320,
         },
     },
+    input : {
+        display : 'none',
+    }
   }));
 
 
@@ -102,6 +106,7 @@ function Settings() {
                     console.log(resolve.data)
                     if(resolve.data === "Updated"){
                         toast.success("Votre Compte est Enregistré avec Succès")
+                        History.push('/home')
                     }
                     else if(resolve.data === "Not Updated"){
                         toast.error("Votre Modification est Echouée")
@@ -115,18 +120,19 @@ function Settings() {
                 axios.put("/upload/profile/" + id, formdata)
                 .then((res) => {
                     if(res.data === "Inserted" || res.data === "Inserted and Uploaded"){
-                        //setMsg("L'annonce est enregistré avec Success")
-                        toast.success('Votre Annonce est Enregistrée avec Succès')
+                        History.push('/home')
                     }
                     else if(res.data.messageErr === "Bad One"){
                         //setMsg("Really Bad")
-                        toast.warn("l'Annonce est échoué ! Réssayez-vous une autre fois..")
+                        toast.warn("La mise à jour est échouée")
                     }
                     else if(res.data.affectedRows !== 0){
                         toast.success("Votre Annonce est Enregistrée avec Succès")
+                        History.push('/home')
                     }
                 })
                 .catch((err) => console.log(err))
+                History.push('/home')
             }
         }
         setOpen(false)
@@ -167,7 +173,26 @@ function Settings() {
                             <label style={{fontSize : "15px"}}>Sélectionner Votre Avatare : </label>
                         </div>
                         <div className="col-md-6">
-                            <input type="file" className="form-control" onChange={e => setFile(e.target.files[0])} />
+                            <div className="row container" style={{alignItems : "center"}}>
+                                <div className="col-md-6" style={{textAlign : "right"}}>
+                                    <label htmlFor="contained-button-file">
+                                        <Input accept="image/*" id="contained-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                        <Button variant="contained" component="span">Upload</Button>
+                                    </label>
+                                </div>
+                                <div className="col-md-6" style={{textAlign : "left"}}>
+                                    <label htmlFor="icon-button-file">
+                                        <Input accept="image/*" id="icon-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                        <IconButton color="primary" aria-label="upload picture" component="span"><PhotoCamera /></IconButton>
+                                    </label>
+                                </div>
+                            </div>
+                            {
+                                file !== '' &&
+                                <div className="row container" style={{textAlign : "center"}}>
+                                    <label>{file.name} </label>
+                                </div>
+                            }<br/>
                         </div>
                     </div><br /><br/>
                     <div className="row">

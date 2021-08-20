@@ -2,7 +2,8 @@ import React, {useState, useEffect} from 'react'
 import {Link, useHistory} from 'react-router-dom'
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, TextField } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, TextField, Input, IconButton } from '@material-ui/core';
+import PhotoCamera from '@material-ui/icons/PhotoCamera'
 import { toast } from 'react-toastify'
 
 axios.interceptors.request.use(
@@ -41,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
             width: 320,
         },
     },
+    input : {
+        display : 'none',
+    }
   }));
 
 
@@ -176,9 +180,26 @@ function EditReclamation(props) {
                         <div className="text-muted" style={{marginLeft : "17px"}}><small>Public signifie que Votre Réclamation sera accessible par les Copropriétaires et les Administrateurs.</small></div></div>
                     }
                     <br/>
-                    <div className="row container">
-                        <input type="file" className="form-control" onChange={e => setFile(e.target.files[0])} />
-                    </div><br />
+                    <div className="row container" style={{alignItems : "center"}}>
+                        <div className="col-md-6" style={{textAlign : "right"}}>
+                            <label htmlFor="contained-button-file">
+                                <Input accept="image/*" id="contained-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                <Button variant="contained" component="span">Upload</Button>
+                            </label>
+                        </div>
+                        <div className="col-md-6" style={{textAlign : "left"}}>
+                            <label htmlFor="icon-button-file">
+                                <Input accept="image/*" id="icon-button-file" type="file" className={classes.input} onChange={e => setFile(e.target.files[0])} />
+                                <IconButton color="primary" aria-label="upload picture" component="span"><PhotoCamera /></IconButton>
+                            </label>
+                        </div>
+                    </div>
+                    {
+                        file !== '' &&
+                        <div className="row container" style={{textAlign : "center"}}>
+                            <label>{file.name} </label>
+                        </div>
+                    }<br/>
                 </div>
                 <div className="card-footer">
                     <div className="row">

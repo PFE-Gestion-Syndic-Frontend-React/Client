@@ -139,7 +139,7 @@ function ListerLogement() {
                         msg === "data" && 
                         <Grow  in={useEffect} timeout={4000}>
                             <Paper className={classes.paper}>
-                                <table className="table">
+                                <table className="table table-hover">
                                     <thead>
                                         <tr className="thead-light">
                                             <th>Nom et Prénom du Copropriétaire</th>
